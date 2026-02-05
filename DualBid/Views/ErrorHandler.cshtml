@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Error del Sistema";
+    var errorModel = ViewBag.ErrorMessages as DualBid.Models.ErrorMiddlewareViewModel;
+}
+
+@if (errorModel != null)
+{
+    <div class="card mt-4">
+        <div class="card-header bg-danger text-white">
+            <h4>Se ha presentado un error </h4>
+        </div>
+
+        <div class="card-body">
+            <h5 class="text-secondary">
+                <strong>Event ID: </strong> @errorModel.IdEvent
+            </h5>
+
+            <hr />
+
+            @if (errorModel.ListMessages?.Count > 0)
+            {
+                <ul class="list-group">
+                    @foreach (var item in errorModel.ListMessages)
+                    {
+                        <li class="list-group-item"> @item</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">
+                    No hay mensajes disponibles para mostrar.
+                </p>
+            }
+
+            <hr />
+
+            <p><strong>Path: </strong> @errorModel.Path </p>
+        </div>
+    </div>
+}
+else
+{
+    <p class="text-warning"> No se encontraron detalles del error. </p>
+}
