@@ -90,14 +90,20 @@ builder.Services.AddControllersWithViews();
 //*** Repositories
 builder.Services.AddTransient<IRepositoryUser, ReposiroryUser>();
 
+builder.Services.AddTransient<IRepositoryCategory, RepositoryCategory>();
+
 //*** Services
 builder.Services.AddTransient<IserviceUser, ServiceUser>();
+
+builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>
 {
     /*** Profiles */
     config.AddProfile<UserProfile>();
+
+    config.AddProfile<CategoryProfile>();
 });
 
 // Configurar SQL Server DbContext
