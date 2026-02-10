@@ -8,7 +8,7 @@ namespace DualBid.Application.DTOs
 {
     public class CategoryDTO
     {
-        public int IdCategory {  get; set; }
+        public int Id {  get; set; }
         public String Description { get; set; } = string.Empty;
 
     }
