@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.DTOs
 {
-    public class UserDTO
+    public record UserDTO
     {
         public int IdUser { get; set; }
 
