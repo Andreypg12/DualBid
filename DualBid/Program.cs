@@ -11,6 +11,7 @@ using Serilog;
 //Sin este using no se puede usar Encoding.UTF8 en la configuración de Serilog para los archivos de log.
 using System.Text;
 using DualBid.Middleware;
+using DualBid.Infraestructure.Models;
 
 // =======================
 // Configurar Serilog 
@@ -90,14 +91,50 @@ builder.Services.AddControllersWithViews();
 //*** Repositories
 builder.Services.AddTransient<IRepositoryUser, ReposiroryUser>();
 
+builder.Services.AddTransient<IRepositoryCategory, RepositoryCategory>();
+
+builder.Services.AddTransient<IRepositoryRole, RepositoryRole>();
+
+builder.Services.AddTransient<IRepositoryAuctionState, RepositoryAuctionState>();
+
+builder.Services.AddTransient<IRepositoryUserStatus, RepositoryUserStatus>();
+
+builder.Services.AddTransient<IRepositoryAuction, RepositoryAuction>();
+
+builder.Services.AddTransient<IRepositoryBid, RepositoryBid>();
+
 //*** Services
 builder.Services.AddTransient<IserviceUser, ServiceUser>();
+
+builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
+
+builder.Services.AddTransient<IServiceRole, ServiceRole>();
+
+builder.Services.AddTransient<IServiceAuctionState, ServiceAuctionState>();
+
+builder.Services.AddTransient<IServiceUserStatus, ServiceUserStatus>();
+
+builder.Services.AddTransient<IServiceAuction, ServiceAuction>();
+
+builder.Services.AddTransient<IServiceBid, ServiceBid>();
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>
 {
     /*** Profiles */
     config.AddProfile<UserProfile>();
+
+    config.AddProfile<CategoryProfile>();
+
+    config.AddProfile<RoleProfile>();
+
+    config.AddProfile<AuctionStateProfile>();
+
+    config.AddProfile<UserStatusProfile>();
+
+    config.AddProfile<AuctionProfile>();
+
+    config.AddProfile<BidProfile>();
 });
 
 // Configurar SQL Server DbContext

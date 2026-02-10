@@ -14,6 +14,8 @@ public partial class DualBidContext : DbContext
 
     public virtual DbSet<Auction> Auction { get; set; }
 
+    public virtual DbSet<AuctionState> AuctionState { get; set; }
+
     public virtual DbSet<Bid> Bid { get; set; }
 
     public virtual DbSet<Category> Category { get; set; }
@@ -54,7 +56,7 @@ public partial class DualBidContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("minimun_increase");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
-            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.StateId).HasColumnName("state_id");
             entity.Property(e => e.WinningBidId).HasColumnName("winning_bid_id");
 
             entity.HasOne(d => d.Comic).WithMany(p => p.Auction)
@@ -67,9 +69,24 @@ public partial class DualBidContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Auction_User");
 
+            entity.HasOne(d => d.State).WithMany(p => p.Auction)
+                .HasForeignKey(d => d.StateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Auction_Auction_state");
+
             entity.HasOne(d => d.WinningBid).WithMany(p => p.Auction)
                 .HasForeignKey(d => d.WinningBidId)
                 .HasConstraintName("FK_Auction_Bid");
+        });
+
+        modelBuilder.Entity<AuctionState>(entity =>
+        {
+            entity.ToTable("Auction_state");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Description)
+                .HasMaxLength(50)
+                .HasColumnName("description");
         });
 
         modelBuilder.Entity<Bid>(entity =>

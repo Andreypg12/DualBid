@@ -21,7 +21,7 @@ public partial class Auction
 
     public decimal MinimunIncrease { get; set; }
 
-    public bool State { get; set; }
+    public int StateId { get; set; }
 
     public int? WinningBidId { get; set; }
 
@@ -30,6 +30,8 @@ public partial class Auction
     public virtual Comic Comic { get; set; } = null!;
 
     public virtual User CreatorUser { get; set; } = null!;
+
+    public virtual AuctionState State { get; set; } = null!;
 
     public virtual Bid? WinningBid { get; set; }
 }
