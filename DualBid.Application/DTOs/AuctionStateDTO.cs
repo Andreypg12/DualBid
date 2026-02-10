@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.DTOs
 {
-    public record CategoryDTO
+    public record AuctionStateDTO
     {
-        public int IdCategory {  get; set; }
-        public String Description { get; set; } = string.Empty;
-
+        public string id { get; init; }
+        public string description { get; init; }
     }
 }
