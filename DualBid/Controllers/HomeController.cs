@@ -1,23 +1,28 @@
 using System.Diagnostics;
 using System.Text.Json;
+using DualBid.Infraestructure.Data;
 using DualBid.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DualBid.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly DualBidContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+
+        public HomeController(ILogger<HomeController> logger, DualBidContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
 
         public IActionResult Privacy()
         {
@@ -29,6 +34,17 @@ namespace DualBid.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        //Carga las categorías para el menú de navegación. Se llama desde la vista _Layout.cshtml
+        public async Task<IActionResult> Index()
+        {
+            var categorias = await _context.Category
+                .OrderBy(c => c.Description)
+                .ToListAsync();
+
+            return View(categorias);
+        }
+
 
         // ============================================================ 
         //            MÉTODO MANEJO DE ERRORES 

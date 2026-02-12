@@ -1,25 +1,114 @@
 ﻿@{
     ViewData["Title"] = "Inicio";
 }
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-<section class="py-5 text-center bg-light rounded-3 mb-4 shadow-sm">
-    <div class="container">
-        <h1 class="display-5 fw-bold mb-3">
-            Bienvenido a la Librería Virtual
-        </h1>
 
-        <p class="lead text-muted mb-4">
-            Explora autores, libros y reportes con una interfaz clara y moderna.
-        </p>
+@* Carousel de comics y categorias  *@
+<section class="container my-5">
+    <h1 class="comic-title text-center mb-4">Categories & Featured</h1>
 
-        @if (ViewBag.Id != null)
-        {
-            <span class="badge text-bg-primary fs-6 px-3 py-2">
-                Identificador activo: @ViewBag.Id
-            </span>
-        }
+    <div class="circle-carousel position-relative">
+
+        <!-- Flecha izquierda -->
+        <button type="button" class="cc-arrow cc-prev" aria-label="Previous">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <!-- Pista (scroll horizontal) -->
+        <div class="cc-track" id="ccTrack">
+            <a class="cc-item" href="/Catalog">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Catalog</div>
+            </a>
+
+            <a class="cc-item" href="/Category">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Maintenance</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Orders">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Process</div>
+            </a>
+
+            <a class="cc-item" href="/Reports">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Reports</div>
+            </a>
+
+            <a class="cc-item" href="/Users">
+                <div class="cc-circle">
+                    <img src="/images/Logo_DualBid.png" alt="Catalog" />
+
+                </div>
+                <div class="cc-label">Security</div>
+            </a>
+        </div>
+
+        <!-- Flecha derecha -->
+        <button type="button" class="cc-arrow cc-next" aria-label="Next">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
+
+    <!-- Dots -->
+    <div class="cc-dots mt-3" id="ccDots"></div>
 </section>
+
+
 
 <!-- CAROUSEL -->
 <div id="carruselHome" class="carousel slide mb-5 shadow rounded overflow-hidden" data-bs-ride="carousel">
@@ -101,45 +190,62 @@
 </div>
 
 <!-- ACCESOS RÁPIDOS -->
-<section class="container mb-5">
-    <h2 class="h4 fw-bold mb-4 text-center">Accesos rápidos</h2>
+<section class=" row g-4 justify-content-center container mb-5">
+    <h1 class="comic-title text-center mb-5">
+        Why DualBid?
+    </h1>
 
     <div class="row g-4">
 
-        <!-- Autores -->
-        <div class="col-12 col-md-4">
+        <!-- Mas información -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Autor" asp-action="Index" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-people fs-1 mb-3 text-primary"></i>
-                        <h5 class="fw-semibold">Autores</h5>
-                        <p class="text-muted small">Gestiona y visualiza tus autores registrados.</p>
+                        <i class="bi bi-info-circle fs-1 mb-3 text-primary"></i>
+                        <h5 class="fw-semibold">About DualBid</h5>
+                        <p class="text-muted small">History of DualBid, its beginnings.</p>
                     </div>
                 </div>
             </a>
         </div>
 
-        <!-- Libros -->
-        <div class="col-12 col-md-4">
+        <!-- Autores -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a asp-controller="Autor" asp-action="Index" class="text-decoration-none text-dark">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-person-check fs-1 mb-3 text-danger"></i>
+                        <h5 class="fw-semibold">Authors</h5>
+                        <p class="text-muted small">Meet the creators of DualBid.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Reseñas de clientes -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Libro" asp-action="Index" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-book-half fs-1 mb-3 text-success"></i>
-                        <h5 class="fw-semibold">Libros</h5>
-                        <p class="text-muted small">Consulta el catálogo de libros disponible.</p>
+                        <i class="bi bi-star-fill fs-1 mb-3 text-warning"></i>
+                        <h5 class="fw-semibold">Customer reviews</h5>
+                        <p class="text-muted small">
+                            Recommendations and positive interactions from our customers..
+                        </p>
                     </div>
                 </div>
             </a>
         </div>
 
-        <!-- Reportes -->
-        <div class="col-12 col-md-4">
+        <!-- Protección de los clientes -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Reporte" asp-action="GraficoVentas" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-bar-chart-line fs-1 mb-3 text-danger"></i>
-                        <h5 class="fw-semibold">Reportes</h5>
-                        <p class="text-muted small">Visualiza estadísticas y reportes de ventas.</p>
+                        <i class="bi bi-shield-check fs-1 mb-3 text-success"></i>
+                        <h5 class="fw-semibold">Buyer protection</h5>
+                        <p class="text-muted small">We ensure that payments are secure and that sellers are verified.</p>
                     </div>
                 </div>
             </a>
@@ -150,14 +256,86 @@
 
 @section Scripts {
     <script>
-        const myCarouselElement = document.querySelector('#carruselHome')
-
+        // Bootstrap carousel grande (el tuyo)
+        const myCarouselElement = document.querySelector('#carruselHome');
         const carousel = new bootstrap.Carousel(myCarouselElement, {
             interval: 3500,
             pause: false,
             ride: 'carousel'
-        })
+        });
     </script>
+
+    <script>
+        // Circle carousel (flechas + dots)
+        (function () {
+            const track = document.getElementById('ccTrack');
+            const dotsWrap = document.getElementById('ccDots');
+            const prev = document.querySelector('.cc-prev');
+            const next = document.querySelector('.cc-next');
+
+            if (!track || !dotsWrap || !prev || !next) return;
+
+            const items = Array.from(track.querySelectorAll('.cc-item'));
+            if (items.length === 0) return;
+
+            function itemsPerView() {
+                const itemW = items[0].getBoundingClientRect().width;
+                const gap = parseFloat(getComputedStyle(track).gap) || 0;
+                return Math.max(1, Math.floor(track.clientWidth / (itemW + gap)));
+            }
+
+            function pageCount() {
+                return Math.ceil(items.length / itemsPerView());
+            }
+
+            function buildDots() {
+                dotsWrap.innerHTML = '';
+                const pages = pageCount();
+                for (let i = 0; i < pages; i++) {
+                    const b = document.createElement('button');
+                    b.className = 'cc-dot';
+                    b.type = 'button';
+                    b.setAttribute('aria-label', `Go to page ${i + 1}`);
+                    b.addEventListener('click', () => scrollToPage(i));
+                    dotsWrap.appendChild(b);
+                }
+                setActiveDot();
+            }
+
+            function currentPageIndex() {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                if (maxScroll <= 0) return 0;
+                return Math.round((track.scrollLeft / maxScroll) * (pageCount() - 1));
+            }
+
+            function setActiveDot() {
+                const idx = currentPageIndex();
+                const dots = Array.from(dotsWrap.querySelectorAll('.cc-dot'));
+                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            }
+
+            function scrollToPage(i) {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                const pages = pageCount();
+                const target = pages <= 1 ? 0 : (maxScroll * (i / (pages - 1)));
+                track.scrollTo({ left: target, behavior: 'smooth' });
+            }
+
+            function scrollByOnePage(dir) {
+                track.scrollBy({ left: dir * track.clientWidth, behavior: 'smooth' });
+            }
+
+            prev.addEventListener('click', () => scrollByOnePage(-1));
+            next.addEventListener('click', () => scrollByOnePage(1));
+            track.addEventListener('scroll', () => requestAnimationFrame(setActiveDot));
+            window.addEventListener('resize', buildDots);
+
+            buildDots();
+        })();
+    </script>
+}
+
+
 
     <style>
         .hover-card:hover {
@@ -165,5 +343,26 @@
             transition: all 0.25s ease;
             box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
         }
+
+
+        .comic-title {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 3.2rem;
+            color: #1e3c72;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+
+
+
+            .comic-title:hover {
+                transform: scale(1.08);
+            }
+
+
     </style>
+
+    
 }
