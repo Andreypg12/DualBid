@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DualBid.Infraestructure.Models;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +10,7 @@ namespace DualBid.Application.DTOs
 {
     public record UserDTO
     {
-        public int IdUser { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
 
@@ -18,9 +20,15 @@ namespace DualBid.Application.DTOs
 
         public string Password { get; set; } = string.Empty;
 
-        public DateTime Registration_date { get; set; }
+        public DateTime RegistrationDate { get; set; }
 
-        // public Role role { get; set; } = string.Empty;
-        // public State state { get; set; } = string.Empty;
+        [Display(Name = "Role")]
+        public RoleDTO Role { get; set; } = new();
+
+        [Display(Name = "State")]
+        public UserStateDTO State { get; set; } = new();
+
+        public string CompleteName => $"{Name} {LastNames}";
+
     }
 }

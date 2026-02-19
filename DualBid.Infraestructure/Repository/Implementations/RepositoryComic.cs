@@ -3,36 +3,36 @@ using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DualBid.Infraestructure.Repository.Implementations
 {
-    public class RepositoryUserStatus : IRepositoryUserStatus
+    public class RepositoryComic : IRepositoryComic
     {
+
         private readonly DualBidContext _context;
 
-        public RepositoryUserStatus(DualBidContext context)
+        public RepositoryComic(DualBidContext context)
         {
             _context = context;
         }
 
-        public async Task<UserStatus?> FindByIdAsync(int id)
+        public Task<Comic> FindByIdAsync(int id)
         {
-            return await _context.Set<UserStatus>()
-               .AsNoTracking()
-               .FirstOrDefaultAsync(u => u.Id == id);
+            throw new NotImplementedException();
         }
-        public async Task<ICollection<UserStatus>> ListAsync()
+
+        public async Task<ICollection<Comic>> ListAsync()
         {
-            //Select * from Autor 
-            var collection = await _context.Set<UserStatus>()
+            var collection = await _context.Set<Comic>()
+                .Include(x => x.Publisher)
+                .Include(x => x.StateConservation)
                 .AsNoTracking()
                 .ToListAsync();
+
             return collection;
         }
     }

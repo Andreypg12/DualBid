@@ -103,6 +103,13 @@ builder.Services.AddTransient<IRepositoryAuction, RepositoryAuction>();
 
 builder.Services.AddTransient<IRepositoryBid, RepositoryBid>();
 
+builder.Services.AddTransient<IRepositoryComic, RepositoryComic>();
+
+builder.Services.AddTransient<IRepositoryPublisher, RepositoryPublisher>();
+
+builder.Services.AddTransient<IRepositoryStateConservation, RepositoryStateConservation>();
+
+
 //*** Services
 builder.Services.AddTransient<IserviceUser, ServiceUser>();
 
@@ -117,6 +124,13 @@ builder.Services.AddTransient<IServiceUserStatus, ServiceUserStatus>();
 builder.Services.AddTransient<IServiceAuction, ServiceAuction>();
 
 builder.Services.AddTransient<IServiceBid, ServiceBid>();
+
+builder.Services.AddTransient<IServiceComic, ServiceComic>();
+
+builder.Services.AddTransient<IServicePublisher, ServicePublisher>();
+
+builder.Services.AddTransient<IServiceStateConservation, ServiceStateConservation>();
+
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>
@@ -135,6 +149,13 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<AuctionProfile>();
 
     config.AddProfile<BidProfile>();
+
+    config.AddProfile<ComicProfile>();
+
+    config.AddProfile<PublisherProfile>();
+
+    config.AddProfile<StateConservationProfile>();
+
 });
 
 // Configurar SQL Server DbContext

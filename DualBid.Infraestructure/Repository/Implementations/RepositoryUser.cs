@@ -19,15 +19,22 @@ namespace DualBid.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public Task<User> FindByIdAsync(int id)
+        public async Task<User> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _context.Set<User>()
+                .Where(l => l.Id == id)
+                .Include(x => x.Role)
+                .Include(x => x.State)
+                .FirstOrDefaultAsync();
+            return @object!;
         }
 
         public async Task<ICollection<User>> ListAsync()
         {
-            //Select * from Autor 
             var collection = await _context.Set<User>()
+                .Include(x => x.Role)
+                .Include(x => x.State)
+                .OrderBy(x => x.Id)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

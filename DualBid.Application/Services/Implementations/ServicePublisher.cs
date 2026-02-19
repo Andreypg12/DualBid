@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
 using System;
@@ -11,28 +12,28 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.Services.Implementations
 {
-    public class ServiceUserStatus : IServiceUserStatus
+    public class ServicePublisher : IServicePublisher
     {
-        private readonly IRepositoryUserStatus _repository;
+        private readonly IRepositoryPublisher _repository;
+
         private readonly IMapper _mapper;
 
-        public ServiceUserStatus(IRepositoryUserStatus repository, IMapper mapper)
+        public ServicePublisher(IRepositoryPublisher repositoryPublisher, IMapper mapper)
         {
-            _repository = repository;
+            _repository = repositoryPublisher;
             _mapper = mapper;
         }
 
-        public async Task<UserStateDTO?> FindByIdAsync(int id)
+        public async Task<PublisherDTO?> FindByIdAsync(int id)
         {
             var @object = await _repository.FindByIdAsync(id);
-            var objectMapped = _mapper.Map<UserStateDTO>(@object);
+            var objectMapped = _mapper.Map<PublisherDTO>(@object);
             return objectMapped;
         }
 
-        public async Task<ICollection<UserStateDTO>> ListAsync()
+        public Task<ICollection<PublisherDTO>> ListAsync()
         {
-            var list = await _repository.ListAsync();
-            return _mapper.Map<ICollection<UserStateDTO>>(list);
+            throw new NotImplementedException();
         }
     }
 }

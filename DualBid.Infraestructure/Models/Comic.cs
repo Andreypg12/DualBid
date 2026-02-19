@@ -29,8 +29,6 @@ public partial class Comic
 
     public virtual ICollection<Auction> Auction { get; set; } = new List<Auction>();
 
-    public virtual Condition Condition { get; set; } = null!;
-
     public virtual ICollection<ImgComic> ImgComic { get; set; } = new List<ImgComic>();
 
     public virtual Publisher Publisher { get; set; } = null!;

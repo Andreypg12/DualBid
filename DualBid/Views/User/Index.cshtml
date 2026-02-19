@@ -9,57 +9,61 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
+<table class="table table-hover align-middle shadow-sm">
+    <thead class="table-dark">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.IdUser)
+                <i class="bi bi-person-badge"></i> User
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
+            <th class="text-center">
+                <i class="bi bi-people"></i> Role
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastNames)
+            <th class="text-center">
+                <i class="bi bi-shield-check"></i> Status
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
+            <th class="text-center">
+                <i class="bi bi-gear"></i> Actions
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Password)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Registration_date)
-            </th>
-            <th></th>
         </tr>
     </thead>
+
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdUser)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastNames)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Registration_date)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <!-- Complete name -->
+                <td class="fw-semibold">
+                    <i class="bi bi-person-circle text-primary"></i>
+                    @item.CompleteName
+                </td>
+
+                <!-- Role -->
+                <td class="text-center">
+                    @await Html.PartialAsync("_RoleBadge", item.Role)
+                </td>
+
+                <!-- State -->
+                
+
+                <td class="text-center">
+                    @await Html.PartialAsync("_UserStatusBadge", item.State)
+                </td>
+
+                <!-- Actions -->
+                <td class="text-center">
+                    <a asp-controller="User"
+                       asp-action="Details"
+                       asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Details">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a class="btn btn-sm btn-outline-primary" title="Edit">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

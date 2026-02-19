@@ -22,11 +22,7 @@ public partial class DualBidContext : DbContext
 
     public virtual DbSet<Comic> Comic { get; set; }
 
-    public virtual DbSet<Condition> Condition { get; set; }
-
     public virtual DbSet<ImgComic> ImgComic { get; set; }
-
-    public virtual DbSet<ImgComic1> ImgComic1 { get; set; }
 
     public virtual DbSet<Publisher> Publisher { get; set; }
 
@@ -142,11 +138,6 @@ public partial class DualBidContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.YearPublication).HasColumnName("year_publication");
 
-            entity.HasOne(d => d.Condition).WithMany(p => p.Comic)
-                .HasForeignKey(d => d.ConditionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Comic_Condition");
-
             entity.HasOne(d => d.Publisher).WithMany(p => p.Comic)
                 .HasForeignKey(d => d.PublisherId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -182,16 +173,6 @@ public partial class DualBidContext : DbContext
                     });
         });
 
-        modelBuilder.Entity<Condition>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Condicion");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Description)
-                .HasMaxLength(50)
-                .HasColumnName("description");
-        });
-
         modelBuilder.Entity<ImgComic>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Imagen_comic");
@@ -206,17 +187,6 @@ public partial class DualBidContext : DbContext
                 .HasForeignKey(d => d.ComicId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Img_ comic_Comic");
-        });
-
-        modelBuilder.Entity<ImgComic1>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Imagen_ comic");
-
-            entity.ToTable("Img_comic");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ComicId).HasColumnName("comic_id");
-            entity.Property(e => e.Img).HasColumnName("img");
         });
 
         modelBuilder.Entity<Publisher>(entity =>
@@ -268,7 +238,9 @@ public partial class DualBidContext : DbContext
             entity.Property(e => e.Password)
                 .HasMaxLength(50)
                 .HasColumnName("password");
-            entity.Property(e => e.RegistrationDate).HasColumnName("registration_date");
+            entity.Property(e => e.RegistrationDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnName("registration_date");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.StateId).HasColumnName("state_id");
 
@@ -277,10 +249,10 @@ public partial class DualBidContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
 
-            entity.HasOne(d => d.RoleNavigation).WithMany(p => p.User)
-                .HasForeignKey(d => d.RoleId)
+            entity.HasOne(d => d.State).WithMany(p => p.User)
+                .HasForeignKey(d => d.StateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_User_User_Status");
+                .HasConstraintName("FK_User_User_Status1");
         });
 
         modelBuilder.Entity<UserStatus>(entity =>

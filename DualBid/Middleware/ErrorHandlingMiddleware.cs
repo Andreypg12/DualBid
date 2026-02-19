@@ -27,7 +27,7 @@ namespace DualBid.Middleware
             {
                 // 1) Información de contexto 
                 var routeWhereExceptionOccured = context.Request.Path.Value ?? "N/A";
-                var eventId = $"{Guid.NewGuid(): N}-{DateTime.Now: yyMMddHHmmss}";
+                var eventId = $"{Guid.NewGuid():N}-{DateTime.Now: yyMMddHHmmss}";
 
                 // 2) Construir respuesta para UI 
                 var result = new ErrorMiddlewareViewModel
