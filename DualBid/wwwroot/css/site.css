@@ -1,3 +1,19 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+
+
 html {
   font-size: 14px;
 }
@@ -53,6 +69,7 @@ body {
     background-color: #111;
     color: white;
     position: relative;
+    margin-top: auto;
 }
 
     .footer-custom::before {
@@ -68,7 +85,7 @@ body {
     }
 
 .footer-title {
-    color: color: #1e3c72;
+    color: #1e3c72;
     font-weight: bold;
     margin-bottom: 15px;
 }

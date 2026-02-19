@@ -18,5 +18,17 @@ namespace DualBid.Controllers
             var collection = await _serviceComic.ListAsync();
             return View(collection);
         }
+
+        //Esto es lo que hace la comunicacion entre una vista y la otra
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var comic = await _serviceComic.FindByIdAsync(id); 
+            if (comic == null) return NotFound();
+
+            return View(comic); 
+        }
     }
+
+
 }
