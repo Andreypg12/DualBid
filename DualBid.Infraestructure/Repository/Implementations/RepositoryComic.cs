@@ -20,9 +20,17 @@ namespace DualBid.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public Task<Comic> FindByIdAsync(int id)
+        public async Task<Comic> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            //Incluimos el publisher y el estado de conservación para que no nos de error al mostrar la vista de detalles
+
+            var @object = await _context.Set<Comic>().
+                                        Where(comic => comic.Id == id)
+                                        .Include(x => x.Publisher)
+                                        .Include(x => x.StateConservation)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync();
+            return @object!;
         }
 
         public async Task<ICollection<Comic>> ListAsync()

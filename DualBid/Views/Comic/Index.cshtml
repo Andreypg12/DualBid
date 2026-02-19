@@ -1,89 +1,125 @@
-﻿@model IEnumerable<DualBid.Application.DTOs.ComicDTO>
+﻿@model List<DualBid.Application.DTOs.ComicDTO>
 
 @{
     ViewData["Title"] = "Index";
+    var total = Model?.Count() ?? 0;
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EditionNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Isbn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreationDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.YearPublication)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Publisher)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StateConservation)
-            </th>
-            @*
-            <th>
-                @Html.DisplayNameFor(model => model.Seller)
-            </th>
-            *@
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+@* Esta Sección contiene información general  *@
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Comics</h1>
+        <p class="text-muted mb-0">Count of comics registered </p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge text-bg-secondary" title="Total of Comics.">@total </span>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New Comic
+        </a>
+    </div>
+
+</div>
+
+
+
+@* Contenedor General *@
+<div class="card shadow-sm">
+
+    <div class="card-header bg-body d-flex align-items-center justify-content-between  ">
+        <span class="fw-semibold">List of Comics</span>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model == null || !Model.Any())
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EditionNumber)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Isbn)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreationDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.YearPublication)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Publisher!.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StateConservation.Description)
-                </td>
-
-                @* <td>
-                    @Html.DisplayFor(modelItem => item.Seller.Email)
-                </td> *@
-
-
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+            @* Sin registros, En este caso Solo aparece un breve mensaje *@
+            <div class="p-4 text-center">
+                <div class="display-6 mb-2">
+                    <i class="bi bi-person-x"></i>
+                </div>
+                <h2 class="h5">There is not comics registered yet.</h2>
+                <p class="text-muted mb-3">Create the first Comic to start the catalog.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Create Comic
+                </a>
+            </div>
+            @* Sin registros *@
         }
-    </tbody>
-</table>
+        else
+        {
+            @* Listado cuando si hay comics creados *@
+            <div class="table-responsive">
+
+                @* Aqui comienza la tabla total *@
+                <table class="table table-hover align-middle mb-0">
+
+                    @* Es como decir el header *@
+                    <thead class="table-light position-sticky top-0" style="z-index:1;">
+                        <tr>
+                            <th scope="col" class="ps-3" style="width: 120px;">ID</th>
+                            <th scope="col" class="ps-3" style="width: 120px;">Tittle</th>
+                            <th scope="col">Description</th>
+                            <th scope="col" class="text-end pe-3" style="width: 260px;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            @* Item Comic *@
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">@item.Id </span>
+                                </td>
+                                <td class="ps-3">
+                                    <span class="badge text-bg-light border">@item.Title </span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.Description </div>
+                                </td>
+
+
+
+                                <td class="text-end pe-3 ">
+                                    <div class="btn-group" role="group" aria-label="Actions del autor ">
+                                        <a asp-controller="Comic"
+                                            asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-outline-secondary btn-sm"
+                                           title="Ver detalle">
+                                            <i class="bi bi-eye"></i>
+                                            <span class="d-none d-lg-inline ms-1">Detalle</span>
+                                        </a>
+
+                                        <a asp-action="Edit"
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span class="d-none d-lg-inline ms-1">Editar</span>
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           class="btn btn-outline-danger btn-sm"
+                                           title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                            <span class="d-none d-lg-inline ms-1">Eliminar</span>
+                                        </a>
+                                    </div>
+                                </td>
+
+                            </tr>
+                            @* Item Comic *@
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @* Listado *@
+        }
+    </div>
+    @* Total *@
+    <div class="card-footer bg-body d-flex justify-content-between align-items-center small text-muted">
+        <span>Total: <strong> @total </strong> Comics</span>
+    </div>
+</div>
