@@ -1,125 +1,116 @@
-﻿@model List<DualBid.Application.DTOs.ComicDTO>
+﻿@model IEnumerable<DualBid.Application.DTOs.ComicDTO>
 
 @{
-    ViewData["Title"] = "Index";
-    var total = Model?.Count() ?? 0;
+	ViewData["Title"] = "Catálogo de libros";
+	var total = Model?.Count() ?? 0;
 }
 
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+	<div>
+		<h1 class="h3 mb-1">Catálogo de libros</h1>
+		<p class="text-muted mb-0">Explora el catálogo disponible. Total: <strong>@total</strong>.</p>
+	</div>
 
-@* Esta Sección contiene información general  *@
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-    <div>
-        <h1 class="h3 mb-1">Comics</h1>
-        <p class="text-muted mb-0">Count of comics registered </p>
-    </div>
-
-    <div class="d-flex align-items-center gap-2">
-        <span class="badge text-bg-secondary" title="Total of Comics.">@total </span>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> New Comic
+	 <div class="d-flex gap-2">
+        <a asp-controller="Home" asp-action="Index"
+           class="btn btn-outline-secondary">
+			<i class="bi bi-arrow-return-left mb-1"></i> Back home
         </a>
-    </div>
+    </div> 
 
 </div>
 
+@if (Model == null || !Model.Any())
+{
+	<div class="alert alert-info d-flex align-items-center" role="alert">
+		<i class="bi bi-info-circle me-2"></i>
+		<div>There is not Comics Available yet.</div>
+	</div>
+}
+else
+{
+	<section aria-label="List of comics">
+		<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 ">
 
+			@foreach (var item in Model)
+			{
+				<div class="col">
+					<article class="card h-100 shadow-lg">
+						<!-- Imagen -->
+						<div class="rounded-top overflow-hidden bg-body-tertiary" style="height: 360px;">
+							@* Si hay imagen, la mostramos; si no, placeholder *@
+							@if (item.ImgComic != null && item.ImgComic.Any())
+							{
+								var imgSola = item.ImgComic.FirstOrDefault();
 
-@* Contenedor General *@
-<div class="card shadow-sm">
-
-    <div class="card-header bg-body d-flex align-items-center justify-content-between  ">
-        <span class="fw-semibold">List of Comics</span>
-    </div>
-
-    <div class="card-body p-0">
-        @if (Model == null || !Model.Any())
-        {
-            @* Sin registros, En este caso Solo aparece un breve mensaje *@
-            <div class="p-4 text-center">
-                <div class="display-6 mb-2">
-                    <i class="bi bi-person-x"></i>
-                </div>
-                <h2 class="h5">There is not comics registered yet.</h2>
-                <p class="text-muted mb-3">Create the first Comic to start the catalog.</p>
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Create Comic
-                </a>
-            </div>
-            @* Sin registros *@
-        }
-        else
-        {
-            @* Listado cuando si hay comics creados *@
-            <div class="table-responsive">
-
-                @* Aqui comienza la tabla total *@
-                <table class="table table-hover align-middle mb-0">
-
-                    @* Es como decir el header *@
-                    <thead class="table-light position-sticky top-0" style="z-index:1;">
-                        <tr>
-                            <th scope="col" class="ps-3" style="width: 120px;">ID</th>
-                            <th scope="col" class="ps-3" style="width: 120px;">Tittle</th>
-                            <th scope="col">Description</th>
-                            <th scope="col" class="text-end pe-3" style="width: 260px;">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            @* Item Comic *@
-                            <tr>
-                                <td class="ps-3">
-                                    <span class="badge text-bg-light border">@item.Id </span>
-                                </td>
-                                <td class="ps-3">
-                                    <span class="badge text-bg-light border">@item.Title </span>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">@item.Description </div>
-                                </td>
+								<img class="w-100 h-100 object-fit-cover  rounded-top"
+									 src="data:image/jpeg;base64,@Convert.ToBase64String(imgSola.Img)"
+									 alt="Portada del libro @item.Title"
+									 loading="lazy" />
+							}
+							else
+							{
+								<div class="ratio ratio-4x3">
+									<div class="d-flex flex-column justify-content-center align-items-center text-muted h-100">
+										<i class="bi bi-image fs-1"></i>
+										<span class="small">No Cover</span>
+									</div>
+								</div>
+							}
+						</div>
 
 
 
-                                <td class="text-end pe-3 ">
-                                    <div class="btn-group" role="group" aria-label="Actions del autor ">
-                                        <a asp-controller="Comic"
-                                            asp-action="Details"
-                                           asp-route-id="@item.Id"
-                                           class="btn btn-outline-secondary btn-sm"
-                                           title="Ver detalle">
-                                            <i class="bi bi-eye"></i>
-                                            <span class="d-none d-lg-inline ms-1">Detalle</span>
-                                        </a>
+						@* Nombre,descripcion, editorial, estado de conservación *@
+						<div class="card-body bg-light text-center ">
+							<h2 class="h6 fw-semibold mb-1 text-truncate" title="@item.Title">
+								@item.Title
+							</h2>
 
-                                        <a asp-action="Edit"
-                                           class="btn btn-outline-primary btn-sm"
-                                           title="Editar">
-                                            <i class="bi bi-pencil-square"></i>
-                                            <span class="d-none d-lg-inline ms-1">Editar</span>
-                                        </a>
+							<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+								<span class="badge text-bg-light border">
+									<i class="bi bi-person me-1"></i>
+									@(item.Publisher?.Description ?? "Publisher no available")
+								</span>
 
-                                        <a asp-action="Delete"
-                                           class="btn btn-outline-danger btn-sm"
-                                           title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                            <span class="d-none d-lg-inline ms-1">Eliminar</span>
-                                        </a>
-                                    </div>
-                                </td>
+								<span class="badge text-bg-light border">
+									<i class="bi bi-person me-1"></i>
+									@(item.StateConservation?.Description ?? "State of conservation no availabe")
+								</span>
+							</div>
+						</div>
 
-                            </tr>
-                            @* Item Comic *@
-                        }
-                    </tbody>
-                </table>
-            </div>
-            @* Listado *@
-        }
-    </div>
-    @* Total *@
-    <div class="card-footer bg-body d-flex justify-content-between align-items-center small text-muted">
-        <span>Total: <strong> @total </strong> Comics</span>
-    </div>
-</div>
+
+							@* Acciones *@						
+							<div class="d-flex justify-content-center gap-2 pb-2 bg-light ">
+
+								<a asp-controller="Comic" asp-action="Details" asp-route-id="@item.Id"
+								   class="btn btn-sm btn-outline-warning" title="Details">
+									<i class="bi bi-eye"></i>
+								</a>
+
+								<a class="btn btn-sm btn-outline-primary" title="Edit">
+									<i class="bi bi-pencil-square"></i>
+								</a>
+
+								<a class="btn btn-sm btn-outline-danger" title="Delete">
+									<i class="bi bi-trash"></i>
+								</a>
+							</div>
+						
+					</article>
+				</div>
+			}
+
+		</div>
+	</section>
+}
+
+@section Scripts {
+	<style>
+		.card:hover {
+			transform: translateY(-3px);
+			transition: transform .18s ease;
+		}
+	</style>
+}
