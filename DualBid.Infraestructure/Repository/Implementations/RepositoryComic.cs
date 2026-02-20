@@ -25,11 +25,12 @@ namespace DualBid.Infraestructure.Repository.Implementations
             //Incluimos el publisher y el estado de conservación para que no nos de error al mostrar la vista de detalles
 
             var @object = await _context.Set<Comic>().
-                                        Where(comic => comic.Id == id)
-                                        .Include(x => x.Publisher)
-                                        .Include(x => x.StateConservation)
-                                        .AsNoTracking()
-                                        .FirstOrDefaultAsync();
+                        Where(comic => comic.Id == id)
+                        .Include(x => x.Publisher)
+                        .Include(x => x.StateConservation)
+                        .Include(x => x.ImgComic)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
             return @object!;
         }
 
@@ -38,6 +39,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
             var collection = await _context.Set<Comic>()
                 .Include(x => x.Publisher)
                 .Include(x => x.StateConservation)
+                .Include(x => x.ImgComic)
                 .AsNoTracking()
                 .ToListAsync();
 

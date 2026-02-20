@@ -30,5 +30,8 @@ namespace DualBid.Application.DTOs
         public Publisher Publisher { get; set; } = new();
 
         public StateConservation StateConservation { get; set; } = new();
+
+        [Display(Name = "Images")]
+        public List<ImgComicDTO> ImgComic { get; set; } = new();
     }
 }

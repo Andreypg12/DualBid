@@ -24,7 +24,8 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.CreationDate, orig => orig.MapFrom(o => o.CreationDate))
                 .ForMember(dest => dest.YearPublication, orig => orig.MapFrom(o => o.YearPublication))
                 .ForMember(dest => dest.Publisher, orig => orig.MapFrom(o => o.Publisher))
-                .ForMember(dest => dest.StateConservation, orig => orig.MapFrom(o => o.StateConservation));
+                .ForMember(dest => dest.StateConservation, orig => orig.MapFrom(o => o.StateConservation))
+                .ForMember(dest => dest.ImgComic, orig => orig.MapFrom(o => o.ImgComic));
         }
     }
 }
