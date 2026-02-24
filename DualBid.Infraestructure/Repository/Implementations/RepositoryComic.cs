@@ -34,6 +34,18 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return @object!;
         }
 
+        //public async Task<ICollection<Comic>> ListAsync()
+        //{
+        //    var collection = await _context.Set<Comic>()
+        //        .Include(x => x.Publisher)
+        //        .Include(x => x.StateConservation)
+        //        .Include(x => x.ImgComic)
+        //        .AsNoTracking()
+        //        .ToListAsync();
+
+        //    return collection;
+        //}
+
         public async Task<ICollection<Comic>> ListAsync()
         {
             var collection = await _context.Set<Comic>()
