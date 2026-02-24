@@ -53,8 +53,8 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.ExpectedEndDate)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ActualEndDate)
+                <td class="text-center">
+                    @(item.ActualEndDate?.ToString("dd/MM/yyyy HH:mm") ?? "Pendiente")
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.BasePrice)

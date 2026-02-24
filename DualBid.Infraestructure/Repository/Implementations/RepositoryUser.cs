@@ -25,6 +25,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Where(l => l.Id == id)
                 .Include(x => x.Role)
                 .Include(x => x.State)
+                .Include(x => x.Auction)
                 .FirstOrDefaultAsync();
             return @object!;
         }
@@ -34,6 +35,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
             var collection = await _context.Set<User>()
                 .Include(x => x.Role)
                 .Include(x => x.State)
+                .Include(x => x.Auction)
                 .OrderBy(x => x.Id)
                 .AsNoTracking()
                 .ToListAsync();

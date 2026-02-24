@@ -53,6 +53,10 @@
                         <!-- Role -->
                         @await Html.PartialAsync("_RoleBadge", Model.Role)
                     </div>
+                    <div class="d-flex justify-content-center justify-content-md-start gap-2">
+                        Cantidad de subastas
+                        @Model.Auction.Count
+                    </div>
                 </div>
 
             </div>
