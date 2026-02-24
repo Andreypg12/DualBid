@@ -13,9 +13,7 @@ namespace DualBid.Application.Profiles
     {
         public UserProfile()
         {
-            CreateMap<UserDTO, User>().ReverseMap();
-
-            CreateMap<UserDTO, User>()
+            CreateMap<User, UserDTO>()
                 .ForMember(dest => dest.Id, orig => orig.MapFrom(o => o.Id))
                 .ForMember(dest => dest.Name, orig => orig.MapFrom(o => o.Name))
                 .ForMember(dest => dest.LastNames, orig => orig.MapFrom(o => o.LastNames))

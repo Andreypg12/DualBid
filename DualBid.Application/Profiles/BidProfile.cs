@@ -14,9 +14,6 @@ namespace DualBid.Application.Profiles
         public BidProfile()
         {
             CreateMap<Bid, BidDTO>();
-            /* CreateMap<Libro, LibroDTO>(); 
-            CreateMap<Autor, AutorDTO>() 
-                .ForMember(d => d.Libros, opt => opt.MapFrom(s => s.Libro));*/
         }
     }
 }

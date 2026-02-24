@@ -14,9 +14,6 @@ namespace DualBid.Application.Profiles
         public RoleProfile()
         {
             CreateMap<Role, RoleDTO>();
-            /* CreateMap<Role, RoleDTO>(); 
-            CreateMap<Role, AutoRoleDTOrDTO>() 
-                .ForMember(d => d.Libros, opt => opt.MapFrom(s => s.Libro));*/
         }
     }
 }

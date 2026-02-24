@@ -11,11 +11,9 @@ namespace DualBid.Application.Profiles
 {
     public class UserStatusProfile : Profile
     {
-        public UserStatusProfile() 
+        public UserStatusProfile()
         {
             CreateMap<UserStatus, UserStateDTO>();
-                /*.ForMember(dest => dest.id, opt => opt.MapFrom(src => src.Id.ToString()))
-                .ForMember(dest => dest.description, opt => opt.MapFrom(src => src.Description));*/
         }
     }
 }
