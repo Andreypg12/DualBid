@@ -13,9 +13,7 @@ namespace DualBid.Application.Profiles
     {
         public ComicProfile()
         {
-            CreateMap<ComicDTO, Comic>().ReverseMap();
-
-            CreateMap<ComicDTO, Comic>()
+            CreateMap<Comic, ComicDTO>()
                 .ForMember(dest => dest.Id, orig => orig.MapFrom(o => o.Id))
                 .ForMember(dest => dest.Title, orig => orig.MapFrom(o => o.Title))
                 .ForMember(dest => dest.Description, orig => orig.MapFrom(o => o.Description))

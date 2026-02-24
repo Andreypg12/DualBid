@@ -27,6 +27,8 @@ public partial class Comic
 
     public int ConditionId { get; set; }
 
+    public bool Availability { get; set; }
+
     public virtual ICollection<Auction> Auction { get; set; } = new List<Auction>();
 
     public virtual ICollection<ImgComic> ImgComic { get; set; } = new List<ImgComic>();

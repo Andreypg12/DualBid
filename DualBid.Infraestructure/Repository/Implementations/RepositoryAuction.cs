@@ -28,6 +28,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
         {
             //Select * from Autor 
             var collection = await _context.Set<Auction>()
+                .Include(a => a.State)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

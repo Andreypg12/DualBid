@@ -1,0 +1,85 @@
+﻿@model IEnumerable<DualBid.Application.DTOs.AuctionDTO>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExpectedEndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ActualEndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BasePrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MinimunIncrease)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.State)
+            </th>
+
+            @*             <th>
+                @Html.DisplayNameFor(model => model.Comic)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatorUser)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WinningBid)
+            </th> *@
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ExpectedEndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActualEndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BasePrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MinimunIncrease)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.State.Description)
+                </td>
+                @*             <td>
+                @Html.DisplayFor(modelItem => item.Comic.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatorUser.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WinningBid.Id)
+            </td> *@
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

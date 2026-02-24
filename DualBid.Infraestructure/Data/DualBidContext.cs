@@ -121,6 +121,7 @@ public partial class DualBidContext : DbContext
         modelBuilder.Entity<Comic>(entity =>
         {
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Availability).HasColumnName("availability");
             entity.Property(e => e.ConditionId).HasColumnName("condition_id");
             entity.Property(e => e.CreationDate).HasColumnName("creation_date");
             entity.Property(e => e.Description)
