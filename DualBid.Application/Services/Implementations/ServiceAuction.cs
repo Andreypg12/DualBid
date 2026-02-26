@@ -21,9 +21,11 @@ namespace DualBid.Application.Services.Implementations
             _mapper = mapper;
         }
 
-        public Task<AuctionDTO?> FindByIdAsync(int id)
+        public async Task<AuctionDTO?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _repository.FindByIdAsync(id);
+            var objectMapped = _mapper.Map<AuctionDTO>(@object);
+            return objectMapped;
         }
 
         public async Task<ICollection<AuctionDTO>> ListAsync()

@@ -12,15 +12,15 @@
 
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
+
     <header class="sticky-top">
         @await Html.PartialAsync("_Menu")
     </header>
-    <div class="container flex-grow-1 py-3">
-        <main role="main" class="">
-            @RenderBody()
-        </main>
-    </div>
+
+    <main class="container flex-grow-1 py-3">
+        @RenderBody()
+    </main>
 
 
     <footer class="mt-auto">

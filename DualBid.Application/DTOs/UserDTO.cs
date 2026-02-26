@@ -28,7 +28,9 @@ namespace DualBid.Application.DTOs
         [Display(Name = "State")]
         public UserStateDTO State { get; set; } = new();
 
-        public List<Auction> Auction { get; set; } = new();
+        public List<Auction> Auctions { get; set; } = new();
+
+        public List<Bid> Bids { get; set; } = new();
 
         public string CompleteName => $"{Name} {LastNames}";
 

@@ -21,7 +21,9 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.BasePrice, orig => orig.MapFrom(o => o.BasePrice))
                 .ForMember(dest => dest.MinimunIncrease, orig => orig.MapFrom(o => o.MinimunIncrease))
                 .ForMember(dest => dest.Comic, orig => orig.MapFrom(o => o.Comic))
-                .ForMember(dest => dest.State, orig => orig.MapFrom(o => o.State));
+                .ForMember(dest => dest.CreatorUser, orig => orig.MapFrom(o => o.CreatorUser))
+                .ForMember(dest => dest.State, orig => orig.MapFrom(o => o.State))
+                .ForMember(dest => dest.Bids, orig => orig.MapFrom(o => o.Bid));
         }
     }
 }

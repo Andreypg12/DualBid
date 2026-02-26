@@ -26,6 +26,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(x => x.Role)
                 .Include(x => x.State)
                 .Include(x => x.Auction)
+                .Include(x => x.Bid)
                 .FirstOrDefaultAsync();
             return @object!;
         }
@@ -36,6 +37,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(x => x.Role)
                 .Include(x => x.State)
                 .Include(x => x.Auction)
+                .Include(x => x.Bid)
                 .OrderBy(x => x.Id)
                 .AsNoTracking()
                 .ToListAsync();
