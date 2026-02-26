@@ -13,14 +13,20 @@ namespace DualBid.Application.DTOs
         public int Id { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime ExpectedEndDate { get; set; }
-        public DateTime ActualEndDate { get; set; }
+        public DateTime? ActualEndDate { get; set; }
         public decimal BasePrice { get; set; }
         public decimal MinimunIncrease { get; set; }
         public AuctionState State { get; set; } = new();
+        public Comic Comic { get; set; } = new();
+        public User CreatorUser { get; set; } = new();
+        public List<Bid> Bids { get; set; } = new();
 
-        //public User user_Creator { get; set; }
+        public decimal CurrentBid => Bids.Max(x => x.AmountOffered);
+
+        public int NumberOfBids => Bids.Count();
+
+
         //public Bid winning_bid { get; set; }
-        //public Comic comic { get; set; }
 
     }
 }

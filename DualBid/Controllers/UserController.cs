@@ -1,6 +1,7 @@
 ﻿using DualBid.Application.Services.Interfaces;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
+using X.PagedList.Extensions;
 
 namespace Libreria.Web.Controllers
 {
@@ -14,10 +15,15 @@ namespace Libreria.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
             var collection = await _serviceUser.ListAsync();
-            return View(collection);
+
+            int pageNumber = page ?? 1;
+
+            int pageSize = 5;
+
+            return View(collection.ToPagedList(pageNumber, pageSize));
         }
 
         public async Task<ActionResult> Details(int? id)

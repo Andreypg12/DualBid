@@ -19,9 +19,18 @@ namespace DualBid.Infraestructure.Repository.Implementations
             this._context = Context;
         }
 
-        public Task<Auction> FindByIdAsync(int id)
+        public async Task<Auction> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _context.Set<Auction>()
+                .Where(a => a.Id == id)
+                .Include(a => a.State)
+                .Include(a => a.Comic)
+                .Include(a => a.Comic.ImgComic)
+                .Include(a => a.Bid)
+                .Include(a => a.CreatorUser)
+                .FirstOrDefaultAsync();
+
+            return @object!;
         }
 
         public async Task<ICollection<Auction>> ListAsync()
@@ -29,6 +38,9 @@ namespace DualBid.Infraestructure.Repository.Implementations
             //Select * from Autor 
             var collection = await _context.Set<Auction>()
                 .Include(a => a.State)
+                .Include(a => a.Comic)
+                .Include(a => a.Comic.ImgComic)
+                .Include(a => a.Bid)
                 .AsNoTracking()
                 .ToListAsync();
             return collection;

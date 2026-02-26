@@ -184,10 +184,10 @@ public partial class DualBidContext : DbContext
             entity.Property(e => e.ComicId).HasColumnName("comic_id");
             entity.Property(e => e.Img).HasColumnName("img");
 
-            entity.HasOne(d => d.Comic).WithMany(p => p.ImgComic)
-                .HasForeignKey(d => d.ComicId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Img_ comic_Comic");
+            //entity.HasOne(d => d.Comic).WithMany(p => p.ImgComic)
+            //    .HasForeignKey(d => d.ComicId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_Img_ comic_Comic");
         });
 
         modelBuilder.Entity<Publisher>(entity =>

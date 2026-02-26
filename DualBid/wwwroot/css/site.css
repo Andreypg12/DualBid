@@ -234,3 +234,30 @@ body {
 
 
 /*Carousel burbuja FIN*/
+
+/*Parte de las subastas*/
+
+.auction-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+    .auction-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+    }
+
+/* Overlay */
+.auction-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.auction-card:hover .auction-overlay {
+    opacity: 1;
+}
+
+/*Parte de las subastas fin*/

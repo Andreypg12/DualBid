@@ -9,77 +9,89 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExpectedEndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ActualEndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BasePrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MinimunIncrease)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.State)
-            </th>
 
-            @*             <th>
-                @Html.DisplayNameFor(model => model.Comic)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatorUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.WinningBid)
-            </th> *@
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StartDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ExpectedEndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ActualEndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BasePrice)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.MinimunIncrease)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.State.Description)
-                </td>
-                @*             <td>
-                @Html.DisplayFor(modelItem => item.Comic.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatorUser.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.WinningBid.Id)
-            </td> *@
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        <div>There are no comics available yet.</div>
+    </div>
+}
+else
+{
+    <section aria-label="List of comics">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <a asp-controller="Auction" asp-action="Details" asp-route-id="@item.Id"
+                       class="text-decoration-none text-dark">
+
+                        <article class="card h-100 shadow-sm border-0 auction-card">
+
+                            <!-- Imagen -->
+                            <div class="position-relative rounded-top overflow-hidden bg-body-tertiary"
+                                 style="height: 360px;">
+                                @if (item.Comic.ImgComic != null && item.Comic.ImgComic.Any())
+                                {
+                                    var img = item.Comic.ImgComic.First();
+
+                                    <img class="w-100 h-100 object-fit-cover"
+                                         src="data:image/jpeg;base64,@Convert.ToBase64String(img.Img)"
+                                         alt="Cover of @item.Comic.Title"
+                                         loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="d-flex flex-column justify-content-center align-items-center text-muted h-100">
+                                        <i class="bi bi-image fs-1"></i>
+                                        <span class="small">No Cover</span>
+                                    </div>
+                                }
+
+                                <!-- Overlay hover -->
+                                <div class="auction-overlay d-flex align-items-center justify-content-center">
+                                    <span class="badge bg-dark fs-6">
+                                        <i class="bi bi-eye-fill me-1"></i> View Auction
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="card-body bg-light text-center">
+                                <h2 class="h6 fw-semibold mb-3 text-truncate"
+                                    title="@item.Comic.Title">
+                                    <i class="bi bi-book me-1"></i>
+                                    @item.Comic.Title
+                                </h2>
+
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <span class="badge text-bg-light border">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        End Date<br />
+                                        @item.ExpectedEndDate.ToString("dd MMM yyyy : HH:mm")
+                                    </span>
+
+                                    <span class="badge text-bg-light border">
+                                        <i class="bi bi-cash-coin me-1"></i>
+                                        Current Bid<br />
+                                        $@item.CurrentBid
+                                    </span>
+
+                                    <span class="badge text-bg-light border">
+                                        <i class="bi bi-hammer me-1"></i>
+                                        Bids<br />
+                                        @item.NumberOfBids
+                                    </span>
+                                </div>
+                            </div>
+
+                        </article>
+                    </a>
+                </div>
+            }
+
+        </div>
+    </section>
+}
