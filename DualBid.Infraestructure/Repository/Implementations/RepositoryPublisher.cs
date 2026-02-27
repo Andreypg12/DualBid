@@ -27,10 +27,13 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return @object!;
         }
 
-        public Task<ICollection<Publisher>> ListAsync()
+        public async Task<ICollection<Publisher>> ListAsync()
         {
-            throw new NotImplementedException();
+            var collection = await _context.Set<Publisher>()
+                .AsNoTracking()
+                .ToListAsync();
 
+            return collection;
         }
     }
 }

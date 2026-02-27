@@ -13,7 +13,7 @@ namespace DualBid.Application.Profiles
     {
         public PublisherProfile()
         {
-            CreateMap<Role, RoleDTO>();
+            CreateMap<Publisher, PublisherDTO>();
         }
     }
 }

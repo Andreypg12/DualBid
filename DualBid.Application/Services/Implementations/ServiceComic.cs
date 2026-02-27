@@ -22,6 +22,11 @@ namespace DualBid.Application.Services.Implementations
             _mapper = mapper;
         }
 
+        public Task AddAsync(ComicDTO dto, string[] selectedCategorias)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<ComicDTO?> FindByIdAsync(int id)
         {
             var @objeto = await _repositoryComic.FindByIdAsync(id);

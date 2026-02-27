@@ -29,6 +29,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                         .Include(x => x.Publisher)
                         .Include(x => x.StateConservation)
                         .Include(x => x.ImgComic)
+                        .Include(x => x.Category)
+                        .Include(x => x.Auction)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
             return @object!;

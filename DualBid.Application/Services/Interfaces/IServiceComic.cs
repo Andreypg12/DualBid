@@ -11,5 +11,6 @@ namespace DualBid.Application.Services.Interfaces
     {
         Task<ICollection<ComicDTO>> ListAsync();
         Task<ComicDTO?> FindByIdAsync(int id);
+        Task AddAsync(ComicDTO dto, string[] selectedCategorias);
     }
 }

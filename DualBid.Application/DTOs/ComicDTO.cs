@@ -36,5 +36,7 @@ namespace DualBid.Application.DTOs
 
         [Display(Name = "Categories")]
         public List<CategoryDTO> Category { get; set; } = new();
+
+        public List<AuctionDTO> Auction { get; set; } = new();
     }
 }
