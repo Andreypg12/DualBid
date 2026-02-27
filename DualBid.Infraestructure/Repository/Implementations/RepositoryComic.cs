@@ -31,6 +31,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                         .Include(x => x.ImgComic)
                         .Include(x => x.Category)
                         .Include(x => x.Auction)
+                        .Include(x => x.Seller)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
             return @object!;

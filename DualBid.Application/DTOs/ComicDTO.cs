@@ -38,5 +38,7 @@ namespace DualBid.Application.DTOs
         public List<CategoryDTO> Category { get; set; } = new();
 
         public List<AuctionDTO> Auction { get; set; } = new();
+
+        public virtual User Seller { get; set; } = null!;
     }
 }
