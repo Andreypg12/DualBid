@@ -38,11 +38,12 @@
 
 
 @* Contenedor con toda la información del comic *@
-<article class="card shadow-sm border-0 overflow-hidden">
+<article class="card shadow-lg border-0 overflow-hidden rounded-4">
     <div class="row g-0">
 
-        @* Parte izquierda, la portada *@
-        <div class="col-12 col-lg-5 border-end">
+        <!-- SECCIÓN IZQUIERDA - PORTAFOLIO DE IMÁGENES (SIN BORDES GRISES) -->
+        <div class="col-12 col-lg-5 p-0" >
+            <!-- Un poco más oscuro que rgb(217, 227, 241) -->
             @{
                 var ListaImagenes = Model.ImgComic;
                 var imgCuentaValid = ListaImagenes.Count(i => i.Img != null && i.Img.Length > 0);
@@ -50,178 +51,308 @@
                 var index = 0;
             }
 
-            <div class="p-3">
-                <div class="ratio ratio-4x3 bg-body-tertiary rounded-3 overflow-hidden">
+            <!-- Contenedor principal sin padding -->
+            <div class="h-100 d-flex flex-column">
 
-                    @* Esto será true, solo si tiene almenos una imagen *@
-                    @if (tieneImagenes)
-                    {
-                        <div id="carouselComic-@Model.Id" class="carousel slide w-100 h-100">
-                            <div class="carousel-inner w-100 h-100">
-                                @foreach (var img in ListaImagenes)
-                                {
-                                    @* esta condicion salta imagenes vacias *@
-                                    if (img.Img == null || img.Img.Length == 0) { continue; }
-
-                                    var base64 = Convert.ToBase64String(img.Img);
-                                    var src = $"data:image/jpeg;base64,{base64}";
-
-                                    <div class="carousel-item @(index == 0 ? "active" : "") w-100 h-100">
-                                        <img src="@src" class="d-block w-100 h-100 object-fit-cover" />
-                                    </div>
-
-                                    index++;
-                                }
-                            </div>
-
-                            @* Esto es por si hay varias imagenes entonces que aparezcan las flechas *@
-                            @if (imgCuentaValid > 1)
-                            {
-                                <button class="carousel-control-prev" type="button"
-                                        data-bs-target="#carouselComic-@Model.Id" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button"
-                                        data-bs-target="#carouselComic-@Model.Id" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="d-flex justify-content-center align-items-center h-100 text-muted">
-                            <div class="text-center">
-                                <i class="bi bi-image fs-1"></i>
-                                <div>No Cover</div>
-                            </div>
-                        </div>
-                    }
+                <!-- Encabezado con padding solo arriba -->
+                <div class="d-flex align-items-center gap-2 p-4 pb-2">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                        <i class="bi bi-images text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase fw-semibold mb-0" style="color: #1a2634;">Galería</h6>
+                        <span class="small" style="color: #2c3e50;">@imgCuentaValid imagen(es)</span>
+                    </div>
                 </div>
 
+                <!-- Carrusel SIN FONDO GRIS -->
+                <div class="flex-grow-1" style="min-height: 500px;">
+                    <div class="h-100 overflow-hidden position-relative">
+                        @if (tieneImagenes)
+                        {
+                            <div id="carouselComic-@Model.Id" class="carousel slide w-100 h-100 carousel-fade">
+                                <div class="carousel-indicators">
+                                    @for (int i = 0; i < imgCuentaValid; i++)
+                                    {
+                                        <button type="button"
+                                                data-bs-target="#carouselComic-@Model.Id"
+                                                data-bs-slide-to="@i"
+                                                class="@(i == 0 ? "active" : "")"
+                                                aria-current="@(i == 0 ? "true" : "false")"
+                                                aria-label="Slide @(i + 1)"
+                                                style="background-color: #1a2634;">
+                                        </button>
+                                    }
+                                </div>
 
-                @* Estas son las casillas con información sobre el comic  NO RELEVANTE *@
-                <div class="mt-3 d-flex flex-wrap gap-2">
-                    <span class="badge text-bg-light border"><i class="bi bi-hash me-1"></i>ID: @Model.Id</span>
-                    <span class="badge text-bg-light border"><i class="bi bi-upc-scan me-1"></i><span class="font-monospace">@Model.Isbn</span></span>
-                    <span class="badge text-bg-light border"><i class="bi bi-journal-bookmark me-1"></i>Edition: @Model.EditionNumber</span>
-                    <span class="badge text-bg-light border"><i class="bi bi-calendar3 me-1"></i>Year: @Model.YearPublication</span>
+                                <div class="carousel-inner w-100 h-100">
+                                    @foreach (var img in ListaImagenes.Where(i => i.Img != null && i.Img.Length > 0))
+                                    {
+                                        var base64 = Convert.ToBase64String(img.Img);
+                                        var src = $"data:image/jpeg;base64,{base64}";
+
+                                        <div class="carousel-item @(index == 0 ? "active" : "") w-100 h-100">
+                                            <img src="@src"
+                                                 class="d-block w-100 h-100 object-fit-contain"
+                                                 alt="Portada de @Model.Title - Imagen @(index + 1)"
+                                                 loading="lazy" />
+                                            <div class="carousel-caption d-none d-md-block rounded-3 p-2" style="background: rgba(26, 38, 52, 0.7);">
+                                                <small style="color: white;">Página @(index + 1)</small>
+                                            </div>
+                                        </div>
+
+                                        index++;
+                                    }
+                                </div>
+
+                                @if (imgCuentaValid > 1)
+                                {
+                                    <button class="carousel-control-prev" type="button"
+                                            data-bs-target="#carouselComic-@Model.Id" data-bs-slide="prev"
+                                            style="width: 50px; height: 50px; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"
+                                              style="background-color: rgba(26, 38, 52, 0.7); border-radius: 50%; padding: 20px; background-size: 60%; width: 50px; height: 50px;"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                            data-bs-target="#carouselComic-@Model.Id" data-bs-slide="next"
+                                            style="width: 50px; height: 50px; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"
+                                              style="background-color: rgba(26, 38, 52, 0.7); border-radius: 50%; padding: 20px; background-size: 60%; width: 50px; height: 50px;"></span>
+                                        <span class="visually-hidden">Siguiente</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-center align-items-center h-100">
+                                <div class="text-center">
+                                    <div class="p-4 rounded-circle mb-3" style="background: rgba(26, 38, 52, 0.1);">
+                                        <i class="bi bi-image fs-1" style="color: #1a2634;"></i>
+                                    </div>
+                                    <div style="color: #1a2634; font-weight: 600;">Sin portada disponible</div>
+                                    <small style="color: #2c3e50;">Añade imágenes para mejorar la presentación</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Metadatos con padding abajo -->
+                <div class="d-flex flex-wrap gap-2 p-4 pt-3">
+                    <span class="badge border-0 rounded-pill px-3 py-2" style="background: rgba(26, 38, 52, 0.8); color: white;">
+                        <i class="bi bi-hash me-1"></i>ID: @Model.Id.ToString().Substring(0, Math.Min(8, Model.Id.ToString().Length))
+                    </span>
+                    <span class="badge border-0 rounded-pill px-3 py-2" style="background: rgba(26, 38, 52, 0.8); color: white;">
+                        <i class="bi bi-upc-scan me-1"></i>@Model.Isbn
+                    </span>
+                    <span class="badge border-0 rounded-pill px-3 py-2" style="background: rgba(26, 38, 52, 0.8); color: white;">
+                        <i class="bi bi-journal-bookmark me-1"></i>Ed. @Model.EditionNumber
+                    </span>
+                    <span class="badge border-0 rounded-pill px-3 py-2" style="background: rgba(26, 38, 52, 0.8); color: white;">
+                        <i class="bi bi-calendar3 me-1"></i>@Model.YearPublication
+                    </span>
                 </div>
             </div>
         </div>
 
+        <!-- SECCIÓN DERECHA - INFORMACIÓN DETALLADA -->
+        <div class="col-12 col-lg-7 ">
+            <div class="card-body p-4 p-xl-5">
 
+                <!-- Cabecera con título y acciones rápidas -->
+                <header class="mb-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                                    <i class="bi bi-book me-1"></i>Cómic
+                                </span>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
+                                    <i class="bi bi-eye me-1"></i>Detalle completo
+                                </span>
+                            </div>
+                            <h1 class="display-6 fw-bold mb-1">@Model.Title</h1>
+                            <div class="d-flex align-items-center gap-3 text-muted">
+                                <span><i class="bi bi-building me-1"></i>@(Model.Publisher?.Description ?? "Editorial no especificada")</span>
+                                <span class="vr"></span>
+                                <span><i class="bi bi-stars me-1"></i>@(Model.StateConservation?.Description ?? "Estado no especificado")</span>
+                            </div>
+                        </div>
 
-
-        @* Parte Derecha, la información del comic *@
-        <div class="col-12 col-lg-7">
-            <div class="card-body p-4">
-
-
-                @* titulo *@
-                <header class="mb-3">
-                    <h2 class="h3 fw-bold mb-1">@Model.Title</h2>
+                        <!-- Badge de condición visual -->
+                        <div class="text-end d-none d-md-block">
+                            <div class="bg-light rounded-3 p-3">
+                                <div class="small text-muted mb-1">Condición</div>
+                                <span class="badge bg-@(Model.StateConservation?.Description?.ToLower() == "nuevo" ? "success" : "warning") rounded-pill px-4 py-2 fs-6">
+                                    <i class="bi bi-stars me-2"></i>@(Model.StateConservation?.Description ?? "N/A")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </header>
 
-                <hr class="my-3" />
+                <!-- DESCRIPCIÓN -->
+                <section class="mb-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                            <i class="bi bi-card-text text-primary"></i>
+                        </div>
+                        <h3 class="h5 fw-semibold mb-0">Sinopsis</h3>
+                    </div>
 
-
-                @* Descripcion *@
-                <section class="mb-4">
-                    <h3 class="h6 text-uppercase text-muted mb-2">
-                        <i class="bi bi-card-text me-1"></i> Description
-                    </h3>
-
-                    <div class="p-3 rounded-3 bg-body-tertiary border">
+                    <div class="p-4 rounded-4 bg-light border-0" style="background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);">
                         @if (!string.IsNullOrWhiteSpace(Model.Description))
                         {
-                            <p class="mb-0" style="white-space: pre-line;">@Model.Description</p>
+                            <p class="mb-0 lh-lg" style="white-space: pre-line;">@Model.Description</p>
                         }
                         else
                         {
-                            <p class="text-muted mb-0">No description available.</p>
+                            <div class="text-center py-4">
+                                <i class="bi bi-chat-square-text fs-1 text-muted opacity-25 mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No hay descripción disponible para este cómic.</p>
+                                <small class="text-muted">Puedes añadir una descripción editando el cómic</small>
+                            </div>
                         }
                     </div>
                 </section>
 
-
-                @* Detalles del comic, ISBN, numero de edicion, Fecha de creación, año de publicación *@
-                <section class="mb-4">
-                    <h3 class="h6 text-uppercase text-muted mb-2">
-                        <i class="bi bi-info-circle me-1"></i> Comic Details
-                    </h3>
-
-                    <div class="row g-2">
-                        <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 h-100">
-                                <div class="small text-muted">ISBN</div>
-                                <div class="fw-semibold font-monospace">@Model.Isbn</div>
-                            </div>
+                <!-- DETALLES TÉCNICOS -->
+                <section class="mb-5">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                            <i class="bi bi-info-circle text-primary"></i>
                         </div>
+                        <h3 class="h5 fw-semibold mb-0">Ficha técnica</h3>
+                    </div>
 
-                        <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 h-100">
-                                <div class="small text-muted">Edition Number</div>
-                                <div class="fw-semibold">@Model.EditionNumber</div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 h-100">
-                                <div class="small text-muted">Creation Date</div>
-                                <div class="fw-semibold">@Model.CreationDate.ToString("dd/MM/yyyy")</div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 h-100">
-                                <div class="small text-muted">Year of Publication</div>
-                                <div class="fw-semibold">@Model.YearPublication</div>
-                            </div>
-                        </div>
-
-
-                        @* Editorial y condición del comic *@
-                        <div class="col-12">
-                            <div class="row g-2">
-                                <div class="col-12 col-md-6">
-                                    <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white border rounded-pill shadow-sm h-100">
-                                        <i class="bi bi-send text-primary"></i>
-                                        <div>
-                                            <div class="small text-muted">Publisher</div>
-                                            <div class="fw-semibold">@(Model.Publisher.Description ?? "Not available")</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6">
-                                    <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white border rounded-pill shadow-sm h-100">
-                                        <i class="bi bi-stars text-warning"></i>
-                                        <div>
-                                            <div class="small text-muted">Condition</div>
-                                            <div class="fw-semibold">@(Model.StateConservation.Description ?? "Not available")</div>
-                                        </div>
-                                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-primary">
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">ISBN</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-upc-scan text-primary"></i>
+                                    <span class="fw-semibold font-monospace">@Model.Isbn</span>
                                 </div>
                             </div>
                         </div>
 
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-success">
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">Edición</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-journal-bookmark text-success"></i>
+                                    <span class="fw-semibold">Número @Model.EditionNumber</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-info">
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">Fecha de creación</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-plus text-info"></i>
+                                    <span class="fw-semibold">@Model.CreationDate.ToString("dd MMMM yyyy")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-warning">
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">Año publicación</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-event text-warning"></i>
+                                    <span class="fw-semibold">@Model.YearPublication</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <hr class="my-4" />
+                <!-- CATEGORÍAS -->
+                @if (Model.Category != null && Model.Category.Any())
+                {
+                    <section class="mb-5">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                                <i class="bi bi-tags text-primary"></i>
+                            </div>
+                            <h3 class="h5 fw-semibold mb-0">Categorías</h3>
+                        </div>
 
-                @* Botones finales, Editar y Volver al catalogo *@
-                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
-                    <a asp-controller="Comic" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-                        <i class="bi bi-pencil-square me-1"></i> Edit
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var category in Model.Category)
+                            {
+                                <span class="badge bg-light text-dark border rounded-pill px-4 py-2 fw-normal shadow-sm">
+                                    <i class="bi bi-asterisk text-warning me-1"></i>
+                                    @category.Description
+                                </span>
+                            }
+                        </div>
+                    </section>
+                }
+
+                <hr class="my-4 opacity-25">
+
+                <!-- ACCIONES FINALES -->
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-end align-items-center">
+                    <a asp-controller="Comic" asp-action="Edit" asp-route-id="@Model.Id"
+                       class="btn btn-primary px-5 py-3 rounded-pill shadow-sm hover-lift bg-white">
+                        <i class="bi bi-pencil-square me-2"></i>Editar cómic
+                    </a>
+
+                    <a asp-controller="Comic" asp-action="Index"
+                       class="btn btn-outline-secondary px-5 py-3 rounded-pill hover-lift bg-white">
+                        <i class="bi bi-arrow-left me-2"></i>Volver al catálogo
                     </a>
                 </div>
 
             </div>
         </div>
-
     </div>
 </article>
+
+<!-- Estilos adicionales -->
+<style>
+    .tracking-wide {
+        letter-spacing: 0.5px;
+    }
+
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.15) !important;
+        }
+
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        background-size: 60%;
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin: 0 5px;
+    }
+
+    /* Ajuste para pantallas grandes */
+    @@media (min-width: 992px) {
+        .col-lg-5 {
+            min-height: 100vh;
+            max-height: 900px;
+        }
+    }
+
+    /* Ajuste para móviles */
+    @@media (max-width: 991px) {
+        .col-12.col-lg-5 [style*="min-height: 500px"] {
+            min-height: 400px !important;
+        }
+    }
+</style>
