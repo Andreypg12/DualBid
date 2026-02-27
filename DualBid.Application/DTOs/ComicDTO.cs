@@ -33,5 +33,8 @@ namespace DualBid.Application.DTOs
 
         [Display(Name = "Images")]
         public List<ImgComicDTO> ImgComic { get; set; } = new();
+
+        [Display(Name = "Categories")]
+        public List<CategoryDTO> Category { get; set; } = new();
     }
 }

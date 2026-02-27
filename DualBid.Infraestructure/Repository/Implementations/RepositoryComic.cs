@@ -52,6 +52,20 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(x => x.Publisher)
                 .Include(x => x.StateConservation)
                 .Include(x => x.ImgComic)
+                .Include(x => x.Category)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return collection;
+        }
+
+        public async Task<ICollection<Comic>> ListAsyncCategoria()
+        {
+            var collection = await _context.Set<Comic>()
+                .Include(x => x.Publisher)
+                .Include(x => x.StateConservation)
+                .Include(x => x.ImgComic)
+                .Include(x => x.Category)
                 .AsNoTracking()
                 .ToListAsync();
 

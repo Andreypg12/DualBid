@@ -29,81 +29,109 @@
 }
 else
 {
-	<section aria-label="List of comics">
-		<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 ">
-
-			@foreach (var item in Model)
-			{
-				<div class="col">
-					<article class="card h-100 shadow-lg">
-						<!-- Imagen -->
-						<div class="rounded-top overflow-hidden bg-body-tertiary" style="height: 360px;">
-							@* Si hay imagen, la mostramos; si no, placeholder *@
-							@if (item.ImgComic != null && item.ImgComic.Any())
-							{
-								var imgSola = item.ImgComic.FirstOrDefault();
-
-								<img class="w-100 h-100 object-fit-cover  rounded-top"
-									 src="data:image/jpeg;base64,@Convert.ToBase64String(imgSola.Img)"
-									 alt="Portada del libro @item.Title"
-									 loading="lazy" />
-							}
-							else
-							{
-								<div class="ratio ratio-4x3">
-									<div class="d-flex flex-column justify-content-center align-items-center text-muted h-100">
-										<i class="bi bi-image fs-1"></i>
-										<span class="small">No Cover</span>
-									</div>
-								</div>
-							}
-						</div>
+    <section aria-label="List of comics">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
 
 
-
-						@* Nombre,descripcion, editorial, estado de conservación *@
-						<div class="card-body bg-light text-center ">
-							<h2 class="h6 fw-semibold mb-1 text-truncate" title="@item.Title">
-								@item.Title
-							</h2>
-
-							<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-								<span class="badge text-bg-light border">
-									<i class="bi bi-person me-1"></i>
-									@(item.Publisher?.Description ?? "Publisher no available")
-								</span>
-
-								<span class="badge text-bg-light border">
-									<i class="bi bi-person me-1"></i>
-									@(item.StateConservation?.Description ?? "State of conservation no availabe")
-								</span>
-							</div>
-						</div>
+                    <article class="card h-100 border-0 shadow-sm hover-shadow transition-all">
 
 
-							@* Acciones *@						
-							<div class="d-flex justify-content-center gap-2 pb-2 bg-light ">
+                        @* Imagen *@
+                        <div class="position-relative rounded-top overflow-hidden" style="height: 280px;">
+                            @if (item.ImgComic != null && item.ImgComic.Any())
+                            {
+                                var imgSola = item.ImgComic.FirstOrDefault();
+                                <img class="w-100 h-100 object-fit-cover transition-transform hover-scale"
+                                     src="data:image/jpeg;base64,@Convert.ToBase64String(imgSola.Img)"
+                                     alt="Portada del libro @item.Title"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center text-muted bg-light">
+                                    <i class="bi bi-image fs-1 mb-2"></i>
+                                    <span class="small fw-medium">Sin portada</span>
+                                </div>
+                            }
 
-								<a asp-controller="Comic" asp-action="Details" asp-route-id="@item.Id"
-								   class="btn btn-sm btn-outline-warning" title="Details">
-									<i class="bi bi-eye"></i>
-								</a>
+                            @* Estado de conservación sobre la imagen *@
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-@(item.StateConservation?.Description?.ToLower() == "nuevo" ? "success" : "warning") bg-opacity-90 rounded-pill px-3 py-2">
+                                <i class="bi bi-stars me-1"></i>
+                                @(item.StateConservation?.Description ?? "Estado no disponible")
+                            </span>
+                        </div>
 
-								<a class="btn btn-sm btn-outline-primary" title="Edit">
-									<i class="bi bi-pencil-square"></i>
-								</a>
+                        @* Contenido de la tarjeta *@
+                        <div class="card-body bg-white">
 
-								<a class="btn btn-sm btn-outline-danger" title="Delete">
-									<i class="bi bi-trash"></i>
-								</a>
-							</div>
-						
-					</article>
-				</div>
-			}
 
-		</div>
-	</section>
+                            @* Titulo *@
+                            <div class="mb-3">
+
+                                <h3 class="h5 fw-bold text-dark mb-2 text-truncate" title="@item.Title">
+                                    @item.Title
+                                </h3>
+
+                            </div>
+
+                            @* Categorias *@ 
+                            @if (item.Category != null && item.Category.Any())
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+                                        <i class="bi bi-tags fs-6"></i>
+                                        <span class="small fw-semibold">Categorías</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var category in item.Category)
+                                        {
+                                            <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-normal">
+                                                <i class="bi bi-asterisk text-warning me-1"></i>
+                                                @category.Description
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Acciones con diseño mejorado -->
+                        <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+
+                            <div class="d-flex justify-content-end gap-2">
+
+                                @* Ojo de detalles *@
+                                <a asp-controller="Comic" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px;"
+                                   title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                @* Editar *@
+                                <a class="btn btn-sm btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px;"
+                                   title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                @* Eliminar *@
+                                <a class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px;"
+                                   title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
 }
 
 @section Scripts {
@@ -114,3 +142,36 @@ else
 		}
 	</style>
 }
+
+<!-- Estilos adicionales para efectos -->
+<style>
+	.transition-all {
+		transition: all 0.3s ease;
+	}
+
+	.hover-shadow:hover {
+		box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+		transform: translateY(-5px);
+	}
+
+	.transition-transform {
+		transition: transform 0.5s ease;
+	}
+
+	.hover-scale:hover {
+		transform: scale(1.05);
+	}
+
+	.bg-opacity-90 {
+		--bs-bg-opacity: 0.9;
+	}
+
+	.btn.rounded-circle {
+		padding: 0;
+		line-height: 1;
+	}
+
+		.btn.rounded-circle i {
+			font-size: 1.1rem;
+		}
+</style>
