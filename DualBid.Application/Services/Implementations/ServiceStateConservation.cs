@@ -31,9 +31,11 @@ namespace DualBid.Application.Services.Implementations
             return objectMapped;
         }
 
-        public Task<ICollection<StateConservationDTO>> ListAsync()
+        public async Task<ICollection<StateConservationDTO>> ListAsync()
         {
-            throw new NotImplementedException();
+            var list = await _repository.ListAsync();
+
+            return _mapper.Map<ICollection<StateConservationDTO>>(list);
         }
     }
 }

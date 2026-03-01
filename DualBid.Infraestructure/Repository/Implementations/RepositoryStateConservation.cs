@@ -27,9 +27,13 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return @object!;
         }
 
-        public Task<ICollection<StateConservation>> ListAsync()
+        public async Task<ICollection<StateConservation>> ListAsync()
         {
-            throw new NotImplementedException();
+            var collection = await _context.Set<StateConservation>()
+                .AsNoTracking()
+                .ToListAsync();
+
+            return collection;
 
         }
     }

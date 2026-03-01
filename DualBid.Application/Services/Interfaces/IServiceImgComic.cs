@@ -11,5 +11,7 @@ namespace DualBid.Application.Services.Interfaces
     public interface IServiceImgComic
     {
         Task<ICollection<ImgComicDTO>> FindByComicIdAsync(int comicId);
+
+        
     }
 }

@@ -37,18 +37,6 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return @object!;
         }
 
-        //public async Task<ICollection<Comic>> ListAsync()
-        //{
-        //    var collection = await _context.Set<Comic>()
-        //        .Include(x => x.Publisher)
-        //        .Include(x => x.StateConservation)
-        //        .Include(x => x.ImgComic)
-        //        .AsNoTracking()
-        //        .ToListAsync();
-
-        //    return collection;
-        //}
-
         public async Task<ICollection<Comic>> ListAsync()
         {
             var collection = await _context.Set<Comic>()
@@ -73,6 +61,72 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .ToListAsync();
 
             return collection;
+        }
+
+
+        public async Task<int> AddAsync(Comic entity, string[] selectedCategorias)
+        {
+            try
+            {
+                // Autor: si solo llega IdAutor, no es necesario setear navigation;
+                await ApplyCategoriasAsync(entity, selectedCategorias);
+
+                await _context.Set<Comic>().AddAsync(entity);
+                entity.SellerId = 13;
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                var sqlEx = ex.GetBaseException() as Microsoft.Data.SqlClient.SqlException;
+
+                if (sqlEx != null)
+                {
+                    Console.WriteLine($"SQL Error #{sqlEx.Number}: {sqlEx.Message}");
+
+                    foreach (Microsoft.Data.SqlClient.SqlError err in sqlEx.Errors)
+                        Console.WriteLine($"  - #{err.Number}: {err.Message}");
+                }
+                else
+                {
+                    Console.WriteLine(ex.GetBaseException().Message);
+                }
+
+                throw;
+            }
+
+            return entity.Id;
+        }
+
+
+        private async Task ApplyCategoriasAsync(Comic libroToUpdate, string[] selectedCategorias)
+        {
+            // Si no enviaron categorías, se establece vacío
+            if (selectedCategorias == null || selectedCategorias.Length == 0)
+            {
+                libroToUpdate.Category = new List<Category>();
+                return;
+            }
+
+            // Parse seguro
+            var ids = selectedCategorias
+                .Select(x => int.TryParse(x, out var n) ? n : (int?)null)
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value)
+                .Distinct()
+                .ToList();
+
+            if (ids.Count == 0)
+            {
+                libroToUpdate.Category = new List<Category>();
+                return;
+            }
+
+            // Trae SOLO las categorías requeridas
+            var categorias = await _context.Category
+                .Where(c => ids.Contains(c.Id))
+                .ToListAsync();
+
+            libroToUpdate.Category = categorias;
         }
     }
 }

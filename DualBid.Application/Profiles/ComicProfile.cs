@@ -25,6 +25,15 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.StateConservation, orig => orig.MapFrom(o => o.StateConservation))
                 .ForMember(dest => dest.ImgComic, orig => orig.MapFrom(o => o.ImgComic))
                 .ForMember(dest => dest.Category, orig => orig.MapFrom(o => o.Category));
+
+
+            CreateMap<ComicDTO, Comic>()
+    // para Create te conviene ignorar navegaciones y asignarlas manual
+    .ForMember(dest => dest.Publisher, opt => opt.Ignore())
+    .ForMember(dest => dest.StateConservation, opt => opt.Ignore())
+    .ForMember(dest => dest.Category, opt => opt.Ignore())
+    .ForMember(dest => dest.ImgComic, opt => opt.Ignore())
+    .ForMember(dest => dest.Seller, opt => opt.Ignore()); // si existe en la entidad
         }
     }
 }

@@ -6,21 +6,20 @@
 
 <div class="container py-4">
     <!-- Encabezado con diseño atractivo -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-        <div>
+    <div class="container py-4">
+        <!-- Encabezado con diseño atrás -->
+        <div class="d-flex flex-column">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a></li>
-                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Catálogo</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Crear cómic</li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/About">About</a></li>
+                    <li class="breadcrumb-item"><a href="/Contact">Contact</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create</li>
                 </ol>
             </nav>
-            <h1 class="display-6 fw-bold mb-1">
-                <i class="bi bi-plus-circle-fill text-primary me-2"></i>
-                Crear Nuevo Cómic
-            </h1>
-            <p class="text-muted mb-0">Completa los detalles para añadir un nuevo ejemplar a la colección</p>
         </div>
+        <h1 class="display-6 fw-semibold">Crear Nuevo Cómic</h1>
+        <p class="text-muted mb-4">Completa los detalles para añadir un nuevo ejemplar a la colección</p>
     </div>
 
     <div class="row g-4">
@@ -28,8 +27,8 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <form asp-action="Create" enctype="multipart/form-data" id="createComicForm">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
+                        @* <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div> *@
 
                         <!-- Información básica -->
                         <div class="mb-4">
@@ -44,6 +43,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-book text-primary"></i></span>
                                         <input asp-for="Title" class="form-control form-control-lg border-0 bg-light" placeholder="Ej: Amazing Fantasy" />
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="Title" class="text-danger small"></span>
                                 </div>
 
@@ -53,6 +53,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-card-text text-primary"></i></span>
                                         <textarea asp-for="Description" class="form-control border-0 bg-light" rows="4" placeholder="Describe la historia o detalles relevantes..."></textarea>
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="Description" class="text-danger small"></span>
                                 </div>
                             </div>
@@ -71,6 +72,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-upc-scan text-primary"></i></span>
                                         <input asp-for="Isbn" class="form-control border-0 bg-light" placeholder="978-XXXXXXXXXX" />
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="Isbn" class="text-danger small"></span>
                                 </div>
 
@@ -80,6 +82,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-sort-numeric-up text-primary"></i></span>
                                         <input asp-for="EditionNumber" class="form-control border-0 bg-light" placeholder="Ej: 1" />
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="EditionNumber" class="text-danger small"></span>
                                 </div>
 
@@ -89,6 +92,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-event text-primary"></i></span>
                                         <input asp-for="YearPublication" class="form-control border-0 bg-light" placeholder="Ej: 1962" />
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="YearPublication" class="text-danger small"></span>
                                 </div>
 
@@ -98,6 +102,7 @@
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-plus text-primary"></i></span>
                                         <input asp-for="CreationDate" class="form-control border-0 bg-light" type="date" />
                                     </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="CreationDate" class="text-danger small"></span>
                                 </div>
                             </div>
@@ -110,60 +115,49 @@
                                 Editorial y categorías
                             </h5>
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium">Editorial</label>
-                                    <select class="form-select border-0 bg-light">
-                                        <option value="">Seleccionar editorial...</option>
-                                        <option value="1">Marvel Comics</option>
-                                        <option value="2">DC Comics</option>
-                                        <option value="3">Image Comics</option>
-                                        <option value="4">Dark Horse</option>
+
+                                <!-- EDITORIAL - Selección única -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Publisher" class="form-label">Editorial</label>
+                                    <!-- Cambiamos asp-for por name para evitar el Tag Helper problemático -->
+                                    <select name="Publisher.Id"
+                                            id="Publisher_Id"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListPublisher">
+                                        <option value="">-- Seleccionar editorial... --</option>
                                     </select>
+                                    <!-- El span de validación SÍ puede usar asp-for -->
+                                    <span asp-validation-for="Publisher" class="text-danger small"></span>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label fw-medium">Estado de conservación</label>
-                                    <select class="form-select border-0 bg-light">
-                                        <option value="">Seleccionar estado...</option>
-                                        <option value="1">Mint (Nuevo)</option>
-                                        <option value="2">Near Mint</option>
-                                        <option value="3">Very Fine</option>
-                                        <option value="4">Fine</option>
-                                        <option value="5">Good</option>
+                                <!-- ESTADO DE CONSERVACIÓN - Selección única -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="StateConservation" class="form-label">Estado de conservación</label>
+                                    <!-- Cambiamos asp-for por name -->
+                                    <select name="StateConservation.Id"
+                                            id="StateConservation_Id"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListStateConservation">
+                                        <option value="">-- Seleccionar estado... --</option>
                                     </select>
+                                    <span asp-validation-for="StateConservation" class="text-danger small"></span>
                                 </div>
+                            
 
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Categorías</label>
-                                    <div class="bg-light p-3 rounded-3">
-                                        <div class="d-flex flex-wrap gap-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="catSuperhero">
-                                                <label class="form-check-label" for="catSuperhero">
-                                                    Superhéroes
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="catSciFi">
-                                                <label class="form-check-label" for="catSciFi">
-                                                    Ciencia ficción
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="catFantasy">
-                                                <label class="form-check-label" for="catFantasy">
-                                                    Fantasía
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="catHorror">
-                                                <label class="form-check-label" for="catHorror">
-                                                    Horror
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                               @* Seleccion de categorias  Seleccion multiple *@
+                                <div class="col-12 mt-5">
+                                    <label class="form-label">Categorías</label>
+                                    <select id="selectedCategorias"
+                                            name="selectedCategorias"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListCategorias"
+                                            multiple>
+                                    </select>
+                                    <div class="form-text">Puede seleccionar múltiples categorías.</div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="Category" class="text-danger small"></span>
+                                </div> 
+
                             </div>
                         </div>
 
@@ -200,19 +194,23 @@
                         </div>
                     </div>
 
-                    <!-- Área de dropzone para imágenes -->
-                    <div class="upload-area border border-2 border-dashed rounded-4 p-4 mb-3 text-center"
-                         id="dropzone"
-                         style="border-color: #dee2e6; cursor: pointer; transition: all 0.3s ease; background: #f8f9fa;">
-                        <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
-                        <h6 class="fw-semibold mb-1">Arrastra tus imágenes aquí</h6>
-                        <p class="small text-muted mb-3">o haz clic para seleccionar archivos</p>
-                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" />
-                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="selectFilesBtn">
-                            <i class="bi bi-folder2-open me-2"></i>Seleccionar archivos
-                        </button>
-                        <p class="small text-muted mt-3 mb-0">Formatos: JPG, PNG, GIF (Máx. 5MB por imagen)</p>
+
+
+                    <!-- Selector simple de imágenes -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seleccionar imágenes (máx. 5)</label>
+
+                        <input type="file"
+                               class="form-control"
+                               name="imageFile"
+                               id="fileInput"
+                               multiple
+                               accept="image/*" />
+
+                        <p class="small text-muted mt-2 mb-0">Formatos: JPG, PNG, GIF, WEBP (Máx. 5MB por imagen)</p>
                     </div>
+
+
 
                     <!-- Previsualización de imágenes -->
                     <div class="image-preview-container mb-4">
@@ -224,7 +222,9 @@
                             <!-- Las imágenes se añadirán aquí dinámicamente -->
                         </div>
                     </div>
-
+                    
+                    @* Muestra etiqueta en caso de error  *@
+                    <span class="text-danger small">@Html.ValidationMessage("Imagen")</span>
                     <!-- Consejos para imágenes -->
                     <div class="bg-light rounded-3 p-3">
                         <h6 class="fw-semibold small text-uppercase text-muted mb-2">
@@ -317,184 +317,121 @@
     </style>
 
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('createComicForm');
+      const fileInput = document.getElementById('fileInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const imageCount = document.getElementById('imageCount');
+      const maxFiles = 5;
+      const maxSize = 5 * 1024 * 1024;
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropzone = document.getElementById('dropzone');
-            const fileInput = document.getElementById('fileInput');
-            const selectFilesBtn = document.getElementById('selectFilesBtn');
-            const imagePreview = document.getElementById('imagePreview');
-            const imageCount = document.getElementById('imageCount');
-            const maxFiles = 5;
-            let filesArray = [];
+      function updateCount(n) {
+        if (imageCount) imageCount.textContent = `${n}/${maxFiles}`;
+      }
 
-            // Abrir selector de archivos
-            selectFilesBtn.addEventListener('click', function() {
-                fileInput.click();
+      function clearPreview() {
+        if (imagePreview) imagePreview.innerHTML = '';
+      }
+
+      fileInput?.addEventListener('change', function () {
+        const files = Array.from(fileInput.files || []);
+
+        clearPreview();
+
+        if (files.length === 0) {
+          updateCount(0);
+          return;
+        }
+
+        if (files.length > maxFiles) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Límite de imágenes',
+            text: `Solo puedes subir hasta ${maxFiles} imágenes.`
+          });
+          fileInput.value = '';
+          updateCount(0);
+          return;
+        }
+
+        // Validar tipos/tamaño
+        for (const f of files) {
+          if (!validTypes.includes(f.type)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Formato no válido',
+              text: `Usa JPG, PNG, GIF o WEBP. (${f.name})`
             });
-
-            // Hacer clic en el dropzone
-            dropzone.addEventListener('click', function(e) {
-                if (e.target !== selectFilesBtn && !selectFilesBtn.contains(e.target)) {
-                    fileInput.click();
-                }
+            fileInput.value = '';
+            updateCount(0);
+            return;
+          }
+          if (f.size > maxSize) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Archivo muy grande',
+              text: `Máximo 5MB. (${f.name})`
             });
+            fileInput.value = '';
+            updateCount(0);
+            return;
+          }
+        }
 
-            // Prevenir comportamiento por defecto del drag & drop
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, preventDefaults, false);
-            });
+        updateCount(files.length);
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+        // Preview
+        files.forEach((file, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-6';
 
-            // Resaltar dropzone al arrastrar
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropzone.addEventListener(eventName, () => {
-                    dropzone.classList.add('highlight');
-                }, false);
-            });
+          const wrap = document.createElement('div');
+          wrap.className = 'preview-item';
 
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, () => {
-                    dropzone.classList.remove('highlight');
-                }, false);
-            });
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.alt = 'Preview';
 
-            // Manejar drop de archivos
-            dropzone.addEventListener('drop', function(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(files);
-            }, false);
+          const badge = document.createElement('div');
+          badge.className = 'order-badge';
+          badge.textContent = (idx + 1);
 
-            // Manejar selección de archivos
-            fileInput.addEventListener('change', function() {
-                handleFiles(this.files);
-            });
-
-            // Procesar archivos seleccionados
-            function handleFiles(files) {
-                const fileList = Array.from(files);
-
-                // Verificar límite
-                if (filesArray.length + fileList.length > maxFiles) {
-                    alert(`Solo puedes subir hasta ${maxFiles} imágenes`);
-                    return;
-                }
-
-                // Validar cada archivo
-                fileList.forEach(file => {
-                    if (validateFile(file)) {
-                        filesArray.push(file);
-                        previewFile(file, filesArray.length);
-                    }
-                });
-
-                updateImageCount();
-            }
-
-            // Validar archivo
-            function validateFile(file) {
-                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
-
-                if (!validTypes.includes(file.type)) {
-                    alert(`Formato no válido: ${file.name}. Usa JPG, PNG o GIF.`);
-                    return false;
-                }
-
-                if (file.size > maxSize) {
-                    alert(`Archivo demasiado grande: ${file.name}. Máximo 5MB.`);
-                    return false;
-                }
-
-                return true;
-            }
-
-            // Previsualizar archivo
-            function previewFile(file, index) {
-                const reader = new FileReader();
-                const col = document.createElement('div');
-                col.className = 'col-6';
-
-                reader.readAsDataURL(file);
-                reader.onloadend = function() {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    previewItem.innerHTML = `
-                        <img src="${reader.result}" alt="Preview">
-                        <button class="remove-image" data-filename="${file.name}">
-                            <i class="bi bi-x"></i>
-                        </button>
-                        <div class="order-badge">${index}</div>
-                    `;
-                    col.appendChild(previewItem);
-                    imagePreview.appendChild(col);
-
-                    // Botón para eliminar
-                    previewItem.querySelector('.remove-image').addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const filename = this.dataset.filename;
-                        filesArray = filesArray.filter(f => f.name !== filename);
-                        col.remove();
-
-                        // Reordenar badges
-                        document.querySelectorAll('.preview-item .order-badge').forEach((badge, idx) => {
-                            badge.textContent = idx + 1;
-                        });
-
-                        updateImageCount();
-                    });
-                };
-            }
-
-            // Actualizar contador
-            function updateImageCount() {
-                imageCount.textContent = `${filesArray.length}/${maxFiles}`;
-
-                // Aquí podrías añadir un campo oculto para enviar las imágenes al servidor
-                // usando FormData en el submit del formulario
-            }
-
-            // Enviar formulario con imágenes
-            const form = document.getElementById('createComicForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-
-                // Añadir imágenes al FormData
-                filesArray.forEach((file, index) => {
-                    formData.append('images', file);
-                });
-
-                // Enviar mediante fetch o dejar que el formulario envíe normalmente
-                // Si quieres envío normal, elimina el e.preventDefault() y asegúrate
-                // de que el formulario tenga enctype="multipart/form-data"
-
-                // Para envío con fetch (AJAX):
-                
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    window.location.href = '@Url.Action("Index")';
-                })
-                .catch(error => console.error('Error:', error));
-                
-
-                // Para envío normal, descomenta la siguiente línea:
-                this.submit();
-            });
+          wrap.appendChild(img);
+          wrap.appendChild(badge);
+          col.appendChild(wrap);
+          imagePreview?.appendChild(col);
         });
-    </script>
-}
+      });
+
+      // Debug opcional (puedes borrarlo luego)
+      form?.addEventListener('submit', function () {
+        console.log("Cantidad de archivos:", fileInput?.files?.length ?? 0);
+      });
+
+      // Multiselect categorías (si lo usas)
+      if (window.$ && $.fn.multiselect) {
+        $('#selectedCategorias').multiselect({
+          buttonClass: 'form-select',
+          templates: {
+            button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+          },
+          includeSelectAllOption: true,
+          selectAllText: 'Seleccionar todas',
+          allSelectedText: 'Todas las opciones',
+          nonSelectedText: 'Seleccione una opción',
+          nSelectedText: ' - seleccionadas',
+        });
+      }
+    });
+</script>
+
+    @*  SweetAlert desde el Controller al volver con errores *@
+    @if (ViewBag.Notificacion != null)
+    {
+        <script>
+            Swal.fire(@Html.Raw(ViewBag.Notificacion));
+        </script>
+    }
+    }
