@@ -94,7 +94,9 @@ public partial class DualBidContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("amount_offered");
             entity.Property(e => e.AuctionId).HasColumnName("auction_id");
-            entity.Property(e => e.Date).HasColumnName("date");
+            entity.Property(e => e.Date)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnName("date");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.AuctionNavigation).WithMany(p => p.Bid)
@@ -122,7 +124,6 @@ public partial class DualBidContext : DbContext
         {
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Availability).HasColumnName("availability");
-            entity.Property(e => e.ConditionId).HasColumnName("condition_id");
             entity.Property(e => e.CreationDate).HasColumnName("creation_date");
             entity.Property(e => e.Description)
                 .HasMaxLength(500)
