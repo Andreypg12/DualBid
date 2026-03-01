@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,20 @@ namespace DualBid.Application.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias)
+        {
+            try
+            {
+                var entity = _mapper.Map<Comic>(dto);
+                return await _repositoryComic.AddAsync(entity, selectedCategorias);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
+                throw;
+            }
+        }
+
         public async Task<ComicDTO?> FindByIdAsync(int id)
         {
             var @objeto = await _repositoryComic.FindByIdAsync(id);
@@ -35,5 +50,6 @@ namespace DualBid.Application.Services.Implementations
 
             return _mapper.Map<ICollection<ComicDTO>>(list);
         }
+
     }
 }

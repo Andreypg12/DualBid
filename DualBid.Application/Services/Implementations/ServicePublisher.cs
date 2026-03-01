@@ -31,9 +31,10 @@ namespace DualBid.Application.Services.Implementations
             return objectMapped;
         }
 
-        public Task<ICollection<PublisherDTO>> ListAsync()
+        public async Task<ICollection<PublisherDTO>> ListAsync()
         {
-            throw new NotImplementedException();
+            var list = await _repository.ListAsync();      // trae Entities
+            return _mapper.Map<ICollection<PublisherDTO>>(list); // mapea a DTO
         }
     }
 }
