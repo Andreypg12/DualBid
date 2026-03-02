@@ -5,6 +5,11 @@
     {
       "library": "bootstrap@5.3.8",
       "destination": "wwwroot/lib/bootstrap/dist/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "sweetalert2@11.10.4",
+      "destination": "wwwroot/lib/sweetalert2/"
     }
   ]
 }

@@ -21,7 +21,7 @@ namespace Libreria.Web.Controllers
 
             int pageNumber = page ?? 1;
 
-            int pageSize = 5;
+            int pageSize = 1;
 
             return View(collection.ToPagedList(pageNumber, pageSize));
         }
