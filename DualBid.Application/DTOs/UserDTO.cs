@@ -29,8 +29,12 @@ namespace DualBid.Application.DTOs
         public UserStateDTO State { get; set; } = new();
 
         public List<Auction> Auctions { get; set; } = new();
+        public int NumberOfAuctions => Auctions.Count();
+
 
         public List<Bid> Bids { get; set; } = new();
+        public int NumberOfBids => Bids.Count();
+
 
         public string CompleteName => $"{Name} {LastNames}";
 
