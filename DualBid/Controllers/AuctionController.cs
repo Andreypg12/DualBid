@@ -1,5 +1,6 @@
 ﻿using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
+using DualBid.ViewModels.Auction;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +16,20 @@ namespace DualBid.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string state = "active")
         {
-            var collection = await _serviceAuction.ListAsync();
-            return View(collection);
+            var all = await _serviceAuction.ListAsync(); // o el método que tengas
+            bool showActive = state != "inactive";
+
+            var filtered = all.Where(a => showActive ? a.State.Id == 1 : a.State.Id != 1);
+
+            var vm = new AuctionIndexViewModel
+            {
+                SelectedState = showActive ? "active" : "inactive",
+                Auctions = filtered
+            };
+
+            return View(vm);
         }
 
         public async Task<ActionResult> Details(int? id)

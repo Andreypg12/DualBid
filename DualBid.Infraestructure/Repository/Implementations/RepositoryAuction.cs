@@ -26,6 +26,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(a => a.State)
                 .Include(a => a.Comic)
                 .Include(a => a.Comic.ImgComic)
+                .Include(a => a.Comic.Category)
+                .Include(a => a.Comic.StateConservation)
                 .Include(a => a.Bid)
                 .Include(a => a.CreatorUser)
                 .FirstOrDefaultAsync();
