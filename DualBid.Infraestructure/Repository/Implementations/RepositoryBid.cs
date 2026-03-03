@@ -19,6 +19,16 @@ namespace DualBid.Infraestructure.Repository.Implementations
             this._context = Context;
         }
 
+        public async Task<ICollection<Bid>> AuctionBiddingHistory(int auctionId)
+        {
+            var collection = await _context.Set<Bid>()
+                .Where(b => b.AuctionId == auctionId)
+                .Include(b => b.User)
+                .AsNoTracking()
+                .ToListAsync();
+            return collection;
+        }
+
         public Task<Bid> FindByIdAsync(int id)
         {
             throw new NotImplementedException();
