@@ -85,5 +85,9 @@ namespace DualBid.Application.DTOs
 
 
         public int SellerId { get; set; }
+
+        public bool availability { get; set; }
+
+        public int AuctionCount => Auction.Count();
     }
 }
