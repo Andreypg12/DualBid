@@ -8,14 +8,15 @@
 <nav class="mb-5">
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item">
-            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Inicio</a>
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a>
         </li>
         <li class="breadcrumb-item">
-            <a asp-controller="Comic" asp-action="Index" class="text-decoration-none">Cómics</a>
+            <a asp-controller="Comic" asp-action="Index" class="text-decoration-none">Cómics list</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">Detalle</li>
+        <li class="breadcrumb-item active" aria-current="page">Details</li>
     </ol>
 </nav>
+
 
 @* Esta sección es la que tiene el bóton y contiene algunas etiquetas *@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
@@ -41,9 +42,8 @@
 <article class="card shadow-lg border-0 overflow-hidden rounded-4">
     <div class="row g-0">
 
-        <!-- SECCIÓN IZQUIERDA - PORTAFOLIO DE IMÁGENES (SIN BORDES GRISES) -->
+        @* Seccion de la izquierda, imagenes e infomración rápida. *@
         <div class="col-12 col-lg-5 p-0" >
-            <!-- Un poco más oscuro que rgb(217, 227, 241) -->
             @{
                 var ListaImagenes = Model.ImgComic;
                 var imgCuentaValid = ListaImagenes.Count(i => i.Img != null && i.Img.Length > 0);
@@ -51,21 +51,21 @@
                 var index = 0;
             }
 
-            <!-- Contenedor principal sin padding -->
+            @* Contenedor principal *@
             <div class="h-100 d-flex flex-column">
 
-                <!-- Encabezado con padding solo arriba -->
+                @* Encabezado *@
                 <div class="d-flex align-items-center gap-2 p-4 pb-2">
                     <div class="bg-primary bg-opacity-10 p-2 rounded-3">
                         <i class="bi bi-images text-primary fs-5"></i>
                     </div>
                     <div>
-                        <h6 class="text-uppercase fw-semibold mb-0" style="color: #1a2634;">Galería</h6>
-                        <span class="small" style="color: #2c3e50;">@imgCuentaValid imagen(es)</span>
+                        <h6 class="text-uppercase fw-semibold mb-0" style="color: #1a2634;">Gallery</h6>
+                        <span class="small" style="color: #2c3e50;">@imgCuentaValid image(es)</span>
                     </div>
                 </div>
 
-                <!-- Carrusel SIN FONDO GRIS -->
+                @* Carousel del comic *@
                 <div class="flex-grow-1" style="min-height: 500px;">
                     <div class="h-100 overflow-hidden position-relative">
                         @if (tieneImagenes)
@@ -96,9 +96,6 @@
                                                  class="d-block w-100 h-100 object-fit-contain"
                                                  alt="Portada de @Model.Title - Imagen @(index + 1)"
                                                  loading="lazy" />
-                                            <div class="carousel-caption d-none d-md-block rounded-3 p-2" style="background: rgba(26, 38, 52, 0.7);">
-                                                <small style="color: white;">Página @(index + 1)</small>
-                                            </div>
                                         </div>
 
                                         index++;
@@ -139,7 +136,7 @@
                     </div>
                 </div>
 
-                <!-- Metadatos con padding abajo -->
+                @* Datos rápidos acerca del comic *@
                 <div class="d-flex flex-wrap gap-2 p-4 pt-3">
                     <span class="badge border-0 rounded-pill px-3 py-2" style="background: rgba(26, 38, 52, 0.8); color: white;">
                         <i class="bi bi-hash me-1"></i>ID: @Model.Id.ToString().Substring(0, Math.Min(8, Model.Id.ToString().Length))
@@ -157,11 +154,11 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DERECHA - INFORMACIÓN DETALLADA -->
+        @* Seccion de la derecha, informacion del comic *@
         <div class="col-12 col-lg-7 ">
             <div class="card-body p-4 p-xl-5">
 
-                <!-- Cabecera con título y acciones rápidas -->
+                @* Titulo y y mas información importante *@
                 <header class="mb-4">
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                         <div>
@@ -175,7 +172,7 @@
                             </div>
                             <h1 class="display-6 fw-bold mb-1">@Model.Title</h1>
                             <div class="d-flex align-items-center gap-3 text-muted">
-                                <span><i class="bi bi-building me-1"></i>@(Model.Publisher?.Description ?? "Editorial no especificada")</span>
+                                <span><i class="bi bi-building me-1"></i> Publisher: @(Model.Publisher?.Description ?? "Editorial no especificada")</span>
                                 <span class="vr"></span>
                                 <span class="fw-semibold rounded-pill px-3 py-2 shadow-sm"
                                       style="background-color: #ffffff; color: rgb(123, 149, 206);">
@@ -187,7 +184,7 @@
                             </div>
                         </div>
 
-                        <!-- Badge de condición visual -->
+                        @* Cuadro que muetra el estado de conservacion *@
                         <div class="text-end d-none d-md-block">
                             <div class="bg-light rounded-3 p-3">
                                 <div class="small text-muted mb-1">Condición</div>
@@ -198,8 +195,8 @@
                         </div>
                     </div>
                 </header>
-
-                <!-- DESCRIPCIÓN -->
+@* 
+                Descripcion *@
                 <section class="mb-5">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="bg-primary bg-opacity-10 p-2 rounded-3">
@@ -224,15 +221,19 @@
                     </div>
                 </section>
 
-                <!-- DETALLES TÉCNICOS -->
+                @* Detalles técnicos del Comic *@
                 <section class="mb-5">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="bg-primary bg-opacity-10 p-2 rounded-3">
                             <i class="bi bi-info-circle text-primary"></i>
                         </div>
-                        <h3 class="h5 fw-semibold mb-0">Ficha técnica</h3>
+                        <h3 class="h5 fw-semibold mb-0">
+                            Technical details
+                        </h3>
                     </div>
 
+
+                    @* ISB *@
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-primary">
@@ -244,9 +245,11 @@
                             </div>
                         </div>
 
+
+                        @* Numero de edición *@
                         <div class="col-sm-6">
                             <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-success">
-                                <div class="small text-muted text-uppercase tracking-wide mb-2">Edición</div>
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">Edition</div>
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-journal-bookmark text-success"></i>
                                     <span class="fw-semibold">Número @Model.EditionNumber</span>
@@ -254,9 +257,13 @@
                             </div>
                         </div>
 
+
+                        @* Fecha de Creación *@
                         <div class="col-sm-6">
                             <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-info">
-                                <div class="small text-muted text-uppercase tracking-wide mb-2">Fecha de creación</div>
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">
+                                    Creation date
+                                </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-calendar-plus text-info"></i>
                                     <span class="fw-semibold">@Model.CreationDate.ToString("dd MMMM yyyy")</span>
@@ -264,9 +271,13 @@
                             </div>
                         </div>
 
+
+                        @* Año de publicacion *@
                         <div class="col-sm-6">
                             <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-warning">
-                                <div class="small text-muted text-uppercase tracking-wide mb-2">Año publicación</div>
+                                <div class="small text-muted text-uppercase tracking-wide mb-2">
+                                    Year of publication
+                                </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-calendar-event text-warning"></i>
                                     <span class="fw-semibold">@Model.YearPublication</span>
@@ -276,17 +287,20 @@
                     </div>
                 </section>
 
+
+                <section class="mb-2">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                            <i class="bi bi-tags text-primary"></i>
+                        </div>
+                        <h3 class="h5 fw-semibold mb-0">Categories</h3>
+                    </div>
+                </section>
+
                 <!-- CATEGORÍAS -->
                 @if (Model.Category != null && Model.Category.Any())
                 {
                     <section class="mb-5">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-3">
-                                <i class="bi bi-tags text-primary"></i>
-                            </div>
-                            <h3 class="h5 fw-semibold mb-0">Categorías</h3>
-                        </div>
-
                         <div class="d-flex flex-wrap gap-2">
                             @foreach (var category in Model.Category)
                             {
@@ -297,8 +311,13 @@
                             }
                         </div>
                     </section>
-                }
+                }else 
+                {
+                        <span class="text-danger fs-4">No Categories selected</span>           
+                } 
+                
 
+                @* Subastas Relacionadas *@
                 @if (Model.Auction != null && Model.Auction.Any())
                 {
                     <section class="mb-5">
@@ -323,7 +342,7 @@
 
                                         <span class="small">
                                             <i class="bi bi-calendar-check me-1"></i>
-                                            End: @(auction.ActualEndDate?.ToString("dd/MM/yyyy HH:mm") ?? "No end date")
+                                            End: @(auction.ExpectedEndDate.ToString("dd/MM/yyyy HH:mm") ?? "No end date")
                                         </span>
 
                                         <span class="badge bg-secondary rounded-pill px-3 py-2">
@@ -351,12 +370,12 @@
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-end align-items-center">
                     <a asp-controller="Comic" asp-action="Edit" asp-route-id="@Model.Id"
                        class="btn btn-primary px-5 py-3 rounded-pill shadow-sm hover-lift text-white" style="background-color: rgb(55, 141, 252)">
-                        <i class="bi bi-pencil-square me-2"></i>Editar cómic
+                        <i class="bi bi-pencil-square me-2"></i>Edit comic
                     </a>
 
                     <a asp-controller="Comic" asp-action="Index" 
                        class="btn btn-outline-secondary px-5 py-3 rounded-pill hover-lift text-white" style="background-color: red">
-                        <i class="bi bi-arrow-left me-2"></i>Volver al catálogo
+                        <i class="bi bi-arrow-left me-2"></i>Back to catalog
                     </a>
                 </div>
 

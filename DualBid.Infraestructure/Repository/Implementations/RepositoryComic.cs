@@ -30,8 +30,10 @@ namespace DualBid.Infraestructure.Repository.Implementations
                         .Include(x => x.StateConservation)
                         .Include(x => x.ImgComic)
                         .Include(x => x.Category)
-                        .Include(x => x.Auction)
                         .Include(x => x.Seller)
+
+                        .Include(x => x.Auction)
+                            .ThenInclude(a => a.State)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
             return @object!;
@@ -44,6 +46,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(x => x.StateConservation)
                 .Include(x => x.ImgComic)
                 .Include(x => x.Category)
+                .Include(x => x.Auction)
+                .Include(x => x.Seller)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -57,6 +61,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(x => x.StateConservation)
                 .Include(x => x.ImgComic)
                 .Include(x => x.Category)
+                .Include(x => x.Auction)
+                .Include(x => x.Seller)
                 .AsNoTracking()
                 .ToListAsync();
 
