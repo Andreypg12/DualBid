@@ -1,0 +1,299 @@
+﻿@model DualBid.ViewModels.Bid.AuctionBiddingHistoryViewModel
+@{
+    ViewData["Title"] = "Bid History";
+}
+
+<div class="container py-5">
+    <!-- Header with comic title as main heading -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h1 class="display-6 fw-bold mb-1 text-primary">
+                        <i class="bi bi-book me-2"></i>
+                        @Model.ComicTitle
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        <i class="bi bi-cash-stack me-1"></i> Bid History
+                    </p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Improved order selector -->
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="sortOrder" id="sortDesc" value="desc" checked>
+                        <label class="btn btn-outline-primary rounded-start-3" for="sortDesc">
+                            <i class="bi bi-arrow-down me-1"></i> Newest first
+                        </label>
+                        
+                        <input type="radio" class="btn-check" name="sortOrder" id="sortAsc" value="asc">
+                        <label class="btn btn-outline-primary rounded-end-3" for="sortAsc">
+                            <i class="bi bi-arrow-up me-1"></i> Oldest first
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Bids == null || !Model.Bids.Any())
+    {
+        <!-- Empty state with attractive design -->
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 bg-light text-center p-5 rounded-4 shadow-sm">
+                    <div class="display-1 text-primary opacity-25 mb-3">
+                        <i class="bi bi-cash"></i>
+                    </div>
+                    <h3 class="h5 mb-3">No bids yet</h3>
+                    <p class="text-secondary mb-4">Be the first to make an offer on this amazing comic.</p>
+                    <a asp-controller="Auction" asp-action="Details" asp-route-id="@Model.AuctionId"
+                       class="btn btn-primary rounded-pill px-4 py-2">
+                        <i class="bi bi-gavel me-2"></i>View Auction
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Bids list with improved design -->
+        <div id="bids-container" class="row g-4">
+            @{
+                var orderedBids = Model.Bids.OrderByDescending(b => b.Date).ToList();
+                var previousAmount = orderedBids.FirstOrDefault()?.AmountOffered;
+            }
+            
+            @foreach (var bid in orderedBids)
+            {
+                var isHighest = bid.AmountOffered == previousAmount;
+                previousAmount = bid.AmountOffered;
+                
+                <div class="col-12 col-md-6 col-lg-4 bid-card" 
+                     data-date="@bid.Date.ToString("O")"
+                     data-amount="@bid.AmountOffered">
+                    <div class="card border-0 h-100 hover-shadow rounded-4 overflow-hidden">
+                        <!-- Top color bar based on position -->
+                        <div class="position-relative">
+                            <div class="@(isHighest ? "bg-success" : "bg-primary")" style="height: 4px;"></div>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <!-- Bid header -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-light p-2">
+                                        <i class="bi bi-person-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">@bid.User.CompleteName</h6>
+                                        <small class="text-primary">
+                                            <i class="bi bi-envelope me-1"></i>@bid.User.Email
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Amount badge -->
+                                <span class="badge @(isHighest ? "bg-success" : "bg-primary") rounded-pill px-3 py-2 fs-6">
+                                    $@bid.AmountOffered.ToString("N2")
+                                </span>
+                            </div>
+                            
+                            <!-- Bid information -->
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light">
+     
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-stopwatch me-1"></i>@bid.Date.ToString("dd MMM yyyy : HH:mm")
+                                </span>
+                            </div>
+                            
+                            <!-- Highest bid indicator -->
+                            @if (isHighest)
+                            {
+                                <div class="mt-3">
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-trophy-fill me-1"></i>Highest bid
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Statistics summary -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 bg-primary bg-gradient text-white rounded-4 p-4">
+                    <div class="row g-4 text-center">
+                        <div class="col-6 col-md-3">
+                            <div class="small opacity-75 mb-2">Highest bid</div>
+                            <div class="h4 fw-bold mb-0">
+                                $@Model.Bids.Max(b => b.AmountOffered).ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="small opacity-75 mb-2">Lowest bid</div>
+                            <div class="h4 fw-bold mb-0">
+                                $@Model.Bids.Min(b => b.AmountOffered).ToString("N2")
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="small opacity-75 mb-2">Total bids</div>
+                            <div class="h4 fw-bold mb-0">
+                                @Model.Bids.Count()
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="small opacity-75 mb-2">Unique bidders</div>
+                            <div class="h4 fw-bold mb-0">
+                                @Model.Bids.Select(b => b.User.Email).Distinct().Count()
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 2rem rgba(0,0,0,0.1) !important;
+    }
+    
+    .bid-card {
+        animation: fadeInUp 0.5s ease-out forwards;
+        opacity: 0;
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .badge.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    .badge.bg-success {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%) !important;
+        color: #333 !important;
+    }
+    
+    .card {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .card:hover::after {
+        opacity: 0.1;
+    }
+    
+    .btn-check:checked + .btn-outline-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+    }
+    
+    .btn-outline-primary {
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+        color: #495057;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #f8f9fa;
+        border-color: #667eea;
+        color: #667eea;
+    }
+    
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    @@media (max-width: 768px) {
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .display-6 {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        (() => {
+            // Sorting functionality
+            const sortDesc = document.getElementById('sortDesc');
+            const sortAsc = document.getElementById('sortAsc');
+            const container = document.getElementById('bids-container');
+            
+            if (!sortDesc || !sortAsc || !container) return;
+            
+            const sortBids = (ascending) => {
+                const cards = Array.from(container.querySelectorAll('.bid-card'));
+                
+                cards.sort((a, b) => {
+                    const dateA = new Date(a.dataset.date);
+                    const dateB = new Date(b.dataset.date);
+                    return ascending ? dateA - dateB : dateB - dateA;
+                });
+                
+                // Reordering animation
+                cards.forEach((card, index) => {
+                    card.style.animation = 'none';
+                    card.offsetHeight; // Trigger reflow
+                    card.style.animation = 'fadeInUp 0.3s ease-out forwards';
+                    card.style.animationDelay = (index * 0.05) + 's';
+                    container.appendChild(card);
+                });
+            };
+            
+            sortDesc.addEventListener('change', () => {
+                if (sortDesc.checked) sortBids(false);
+            });
+            
+            sortAsc.addEventListener('change', () => {
+                if (sortAsc.checked) sortBids(true);
+            });
+            
+            // Animate cards entrance with delay
+            document.querySelectorAll('.bid-card').forEach((card, index) => {
+                card.style.animationDelay = (index * 0.05) + 's';
+            });
+        })();
+    </script>
+}

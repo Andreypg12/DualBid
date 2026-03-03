@@ -10,6 +10,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
     public interface IRepositoryBid
     {
         Task<ICollection<Bid>> ListAsync();
+        Task<ICollection<Bid>> AuctionBiddingHistory(int auctionId);
         Task<Bid> FindByIdAsync(int id);
     }
 }

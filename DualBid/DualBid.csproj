@@ -21,8 +21,4 @@
     <ProjectReference Include="..\DualBid.Infraestructure\DualBid.Infraestructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
 </Project>

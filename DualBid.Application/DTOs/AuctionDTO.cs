@@ -21,7 +21,9 @@ namespace DualBid.Application.DTOs
         public User CreatorUser { get; set; } = new();
         public List<Bid> Bids { get; set; } = new();
 
-        public decimal CurrentBid => Bids.Max(x => x.AmountOffered);
+        public decimal CurrentBid => Bids.Any()
+            ? Bids.Max(x => x.AmountOffered)
+            : 0m;
 
         public int NumberOfBids => Bids.Count();
 

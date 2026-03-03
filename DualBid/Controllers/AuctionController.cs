@@ -18,7 +18,7 @@ namespace DualBid.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string state = "active")
         {
-            var all = await _serviceAuction.ListAsync(); // o el método que tengas
+            var all = await _serviceAuction.ListAsync();
             bool showActive = state != "inactive";
 
             var filtered = all.Where(a => showActive ? a.State.Id == 1 : a.State.Id != 1);
