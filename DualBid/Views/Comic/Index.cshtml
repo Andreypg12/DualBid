@@ -1,0 +1,190 @@
+﻿@model IEnumerable<DualBid.Application.DTOs.ComicDTO>
+
+@{
+	ViewData["Title"] = "Catálogo de libros";
+	var total = Model?.Count() ?? 0;
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+    @* Titulo y contador de comics *@
+    <div>
+        <h1 class="h3 mb-1">Comic catalog</h1>
+        <p class="text-muted mb-0"> Explore the available catalog. Total: <strong>@total</strong>.
+        </p>
+    </div>
+
+    @* Botones agrupados a la izquierda *@
+    <div class="d-flex gap-2">
+        
+        @* Boton crear un nuevo Comic *@
+        <a asp-controller="Comic" asp-action="Create"
+           class="btn btn-outline-primary shadow fw-bolder" style="background-color: rgb(132, 249, 178)">
+            Create new Comic
+        </a>
+
+        @* Boton de volver a Home *@
+        <a asp-controller="Home" asp-action="Index"
+           class="btn" style="background-color: rgb(229, 37, 39); color: white">
+            <i class="bi bi-arrow-return-left mb-1"></i> Back home
+        </a>
+    </div>
+</div>
+
+
+
+@if (Model == null || !Model.Any())
+{
+	<div class="alert alert-info d-flex align-items-center" role="alert">
+		<i class="bi bi-info-circle me-2"></i>
+		<div>There is not Comics Available yet.</div>
+	</div>
+}
+else
+{
+    <section aria-label="List of comics">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+
+
+                    <article class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+
+
+                        @* Imagen *@
+                        <div class="position-relative rounded-top overflow-hidden" style="height: 280px;">
+                            @if (item.ImgComic != null && item.ImgComic.Any())
+                            {
+                                var imgSola = item.ImgComic.FirstOrDefault();
+                                <img class="w-100 h-100 object-fit-cover transition-transform hover-scale"
+                                     src="data:image/jpeg;base64,@Convert.ToBase64String(imgSola.Img)"
+                                     alt="Portada del libro @item.Title"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center text-muted bg-light">
+                                    <i class="bi bi-image fs-1 mb-2"></i>
+                                    <span class="small fw-medium">No cover</span>
+                                </div>
+                            }
+
+
+                            @* Estado de conservación sobre la imagen *@
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-@(item.StateConservation?.Description?.ToLower() == "nuevo" ? "success" : "warning") bg-opacity-90 rounded-pill px-3 py-2">
+                                <i class="bi bi-stars me-1"></i>
+                                @(item.StateConservation?.Description ?? "Estado no disponible")
+                            </span>
+                        </div>
+
+                        @* Contenido de la tarjeta *@
+                        <div class="card-body bg-white">
+
+
+                            @* Titulo *@
+                            <div class="mb-3">
+
+                                <h3 class="h5 fw-bold text-dark mb-2 text-truncate" title="@item.Title">
+                                    @item.Title
+                                </h3>
+
+                            </div>
+
+                            @* Categorias *@ 
+                            @if (item.Category != null && item.Category.Any())
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+                                        <i class="bi bi-tags fs-6"></i>
+                                        <span class="small fw-semibold">Categories</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var category in item.Category)
+                                        {
+                                            <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-normal">
+                                                <i class="bi bi-asterisk text-warning me-1"></i>
+                                                @category.Description
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Acciones con diseño mejorado -->
+                        <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
+
+                            <div class="d-flex justify-content-end gap-2">
+
+                                @* Ojo de detalles *@
+                                <a asp-controller="Comic" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px; background-color: rgb(104, 119, 224)"
+                                   title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                @* Boton de editar *@
+                                <a asp-controller="Comic" asp-action="Edit" asp-route-id="@item.Id"
+                                   class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px; background-color: rgb(179, 216, 252)">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                @* Eliminar *@
+                                <a class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center"
+                                   style="width: 36px; height: 36px; background-color:  rgb(219, 77, 74))"
+                                   title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@section Scripts {
+	<style>
+		.card:hover {
+			transform: translateY(-3px);
+			transition: transform .18s ease;
+		}
+	</style>
+}
+
+<!-- Estilos adicionales para efectos -->
+<style>
+	.transition-all {
+		transition: all 0.3s ease;
+	}
+
+	.hover-shadow:hover {
+		box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+		transform: translateY(-5px);
+	}
+
+	.transition-transform {
+		transition: transform 0.5s ease;
+	}
+
+	.hover-scale:hover {
+		transform: scale(1.05);
+	}
+
+	.bg-opacity-90 {
+		--bs-bg-opacity: 0.9;
+	}
+
+	.btn.rounded-circle {
+		padding: 0;
+		line-height: 1;
+	}
+
+		.btn.rounded-circle i {
+			font-size: 1.1rem;
+		}
+</style>

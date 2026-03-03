@@ -1,0 +1,33 @@
+﻿@model DualBid.Application.DTOs.RoleDTO
+
+@{
+    var roleId = Model?.Id;
+    var roleText = Model?.Description ?? "Without role";
+}
+
+@switch (roleId)
+{
+    case 1:
+        <span class="badge bg-danger">
+            <i class="bi bi-shield-lock-fill"></i> @roleText
+        </span>
+        break;
+
+    case 2:
+        <span class="badge bg-primary">
+            <i class="bi bi-shop"></i> @roleText
+        </span>
+        break;
+
+    case 3:
+        <span class="badge bg-warning text-dark">
+            <i class="bi bi-cart-fill"></i> @roleText
+        </span>
+        break;
+
+    default:
+        <span class="badge bg-secondary">
+            <i class="bi bi-question-circle"></i> @roleText
+        </span>
+        break;
+}

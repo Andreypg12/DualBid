@@ -1,12 +1,13 @@
-﻿using System;
+﻿using AutoMapper;
+using DualBid.Application.DTOs;
+using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Repository.Implementations;
+using DualBid.Infraestructure.Repository.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using DualBid.Application.DTOs;
-using DualBid.Application.Services.Interfaces;
-using DualBid.Infraestructure.Repository.Interfaces;
 
 namespace DualBid.Application.Services.Implementations
 {
@@ -21,9 +22,11 @@ namespace DualBid.Application.Services.Implementations
             _mapper = mapper;
         }
 
-        public Task<UserStateDTO?> FindByIdAsync(int id)
+        public async Task<UserStateDTO?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _repository.FindByIdAsync(id);
+            var objectMapped = _mapper.Map<UserStateDTO>(@object);
+            return objectMapped;
         }
 
         public async Task<ICollection<UserStateDTO>> ListAsync()

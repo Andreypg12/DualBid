@@ -29,5 +29,5 @@ public partial class User
 
     public virtual Role Role { get; set; } = null!;
 
-    public virtual UserStatus RoleNavigation { get; set; } = null!;
+    public virtual UserStatus State { get; set; } = null!;
 }

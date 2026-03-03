@@ -10,16 +10,25 @@ namespace DualBid.Application.DTOs
     public class AuctionDTO
     {
 
-        public int id { get; set; }
-        public Comic comic { get; set; }
-        public User user_Creator { get; set; }
-        public DateTime startDate { get; set; }
-        public DateTime expected_end_date { get; set; }
-        public DateTime actual_end_date { get; set; }
-        public decimal base_Price { get; set; }
-        public decimal minimun_increase { get; set; }
-        public AuctionState state { get; set; }
-        public Bid winning_bid { get; set; }
+        public int Id { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime ExpectedEndDate { get; set; }
+        public DateTime? ActualEndDate { get; set; }
+        public decimal BasePrice { get; set; }
+        public decimal MinimunIncrease { get; set; }
+        public AuctionState State { get; set; } = new();
+        public Comic Comic { get; set; } = new();
+        public User CreatorUser { get; set; } = new();
+        public List<Bid> Bids { get; set; } = new();
+
+        public decimal CurrentBid => Bids.Any()
+            ? Bids.Max(x => x.AmountOffered)
+            : 0m;
+
+        public int NumberOfBids => Bids.Count();
+
+
+        //public Bid winning_bid { get; set; }
 
     }
 }

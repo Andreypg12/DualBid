@@ -1,25 +1,122 @@
 ﻿@{
     ViewData["Title"] = "Inicio";
 }
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-<section class="py-5 text-center bg-light rounded-3 mb-4 shadow-sm">
-    <div class="container">
-        <h1 class="display-5 fw-bold mb-3">
-            Bienvenido a la Librería Virtual
-        </h1>
 
-        <p class="lead text-muted mb-4">
-            Explora autores, libros y reportes con una interfaz clara y moderna.
-        </p>
+@* Carousel de comics y categorias  *@
+<section class="container my-5">
+    <h1 class="comic-title text-center mb-4">Comics'Categories</h1>
 
-        @if (ViewBag.Id != null)
-        {
-            <span class="badge text-bg-primary fs-6 px-3 py-2">
-                Identificador activo: @ViewBag.Id
-            </span>
-        }
+    <div class="circle-carousel position-relative">
+
+        <!-- Flecha izquierda -->
+        <button type="button" class="cc-arrow cc-prev" aria-label="Previous">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <!-- Pista (scroll horizontal) -->
+        <div class="cc-track" id="ccTrack">
+            <a class="cc-item" href="/Catalog">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Accion1.jpg" alt="Accion" />
+
+                </div>
+                <div class="cc-label">Action</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Aventura1.jfif" alt="Aventura" />
+
+                </div>
+                <div class="cc-label">Adventure</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_CienciaFiccion1.jpg" alt="Ciencia Ficción" />
+
+                </div>
+                <div class="cc-label">Science Fiction</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Comedia1.webp" alt="Comedia" />
+
+                </div>
+                <div class="cc-label">Comedy</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Drama1.webp" alt="Drama" />
+
+                </div>
+                <div class="cc-label">Drama</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Fantasia1.jpg" alt="Fantasia" />
+
+                </div>
+                <div class="cc-label">Fantasy</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Historical1.avif" alt="Historia" />
+
+                </div>
+                <div class="cc-label">Historical</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Horror1.jpg" alt="Horror" />
+
+                </div>
+                <div class="cc-label">Horror</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Manga1.webp" alt="Manga" />
+
+                </div>
+                <div class="cc-label">Manga</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_Misterio1.jpg" alt="Misterio" />
+
+                </div>
+                <div class="cc-label">Mystery</div>
+            </a>
+
+            <a class="cc-item" href="#">
+                <div class="cc-circle">
+                    <img src="/images/Comic_SuperHeroes1.jpg" alt="Super Heroes" />
+
+                </div>
+                <div class="cc-label">Super Heroes</div>
+            </a>
+        </div>
+
+        <!-- Flecha derecha -->
+        <button type="button" class="cc-arrow cc-next" aria-label="Next">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
+
+    <!-- Dots -->
+    <div class="cc-dots mt-3" id="ccDots"></div>
 </section>
+
+
 
 <!-- CAROUSEL -->
 <div id="carruselHome" class="carousel slide mb-5 shadow rounded overflow-hidden" data-bs-ride="carousel">
@@ -31,31 +128,61 @@
                 aria-label="Imagen 2"></button>
         <button type="button" data-bs-target="#carruselHome" data-bs-slide-to="2"
                 aria-label="Imagen 3"></button>
+        <button type="button" data-bs-target="#carruselHome" data-bs-slide-to="3"
+                aria-label="Imagen 4"></button>
+        <button type="button" data-bs-target="#carruselHome" data-bs-slide-to="4"
+                aria-label="Imagen 5"></button>
+        <button type="button" data-bs-target="#carruselHome" data-bs-slide-to="5"
+                aria-label="Imagen 6"></button>
     </div>
 
     <div class="carousel-inner">
 
         <div class="carousel-item active">
-            <img src="~/images/slide-1.jpg" class="d-block w-100 object-fit-cover" style="height:460px;" loading="lazy" alt="Libros en estantería">
+            <img src="~/images/slide-1.jpg" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Books on shelves">
             <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
-                <h5 class="fw-bold">Bienvenido a tu biblioteca digital</h5>
-                <p>Explora contenido organizado y accesible.</p>
+                <h5 class="carousel-title">Welcome to your comic world</h5>
+                <p class="carousel-text">Discover, buy and collect your favorite stories all in one place.</p>
             </div>
         </div>
 
         <div class="carousel-item">
-            <img src="~/images/slide-2.jpg" class="d-block w-100 object-fit-cover" style="height:460px;" loading="lazy" alt="Autores destacados">
+            <img src="~/images/slide-2.jpg" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Featured authors">
             <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
-                <h5 class="fw-bold">Autores destacados</h5>
-                <p>Conoce los creadores detrás de cada obra.</p>
+                <h5 class="carousel-title">Explore thousands of comics</h5>
+                <p class="carousel-text">Browse by categories, publishers and find true gems.</p>
             </div>
         </div>
 
         <div class="carousel-item">
-            <img src="~/images/slide-3.png" class="d-block w-100 object-fit-cover" style="height:460px;" loading="lazy" alt="Reportes de ventas y estadísticas">
+            <img src="~/images/slide-3.png" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Sales reports and statistics">
             <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
-                <h5 class="fw-bold">Reportes y estadísticas</h5>
-                <p>Obtén reportes claros para tomar mejores decisiones.</p>
+                <h5 class="carousel-title">Participate in auctions</h5>
+                <p class="carousel-text">Bid on exclusive comics and get unique pieces.</p>
+            </div>
+        </div>
+
+        <div class="carousel-item">
+            <img src="~/images/slide-4.png" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Sales reports and statistics">
+            <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
+                <h5 class="carousel-title">Shop securely</h5>
+                <p class="carousel-text">Make your purchases with confidence and protect your transactions.</p>
+            </div>
+        </div>
+
+        <div class="carousel-item">
+            <img src="~/images/slide-5.png" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Sales reports and statistics">
+            <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
+                <h5 class="carousel-title">Sell your comics</h5>
+                <p class="carousel-text">List your collections and connect with interested buyers.</p>
+            </div>
+        </div>
+
+        <div class="carousel-item">
+            <img src="~/images/slide-6.jpg" class="d-block w-100 object-fit-cover" style="height:600px;" loading="lazy" alt="Sales reports and statistics">
+            <div class="carousel-caption bg-dark bg-opacity-50 p-3 rounded-3">
+                <h5 class="carousel-title">Manage your collection</h5>
+                <p class="carousel-text">Track your purchases, sales and statistics in real time.</p>
             </div>
         </div>
     </div>
@@ -73,64 +200,152 @@
 
 </div>
 
-<!-- ACCESOS RÁPIDOS -->
-<section class="container mb-5">
-    <h2 class="h4 fw-bold mb-4 text-center">Accesos rápidos</h2>
+<!-- Información Extra -->
+<section class=" row g-4 justify-content-center container mb-5">
+    <h1 class="comic-title text-center mb-5">
+        Why DualBid?
+    </h1>
 
     <div class="row g-4">
 
-        <!-- Autores -->
-        <div class="col-12 col-md-4">
+        <!-- Mas información -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Autor" asp-action="Index" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-people fs-1 mb-3 text-primary"></i>
-                        <h5 class="fw-semibold">Autores</h5>
-                        <p class="text-muted small">Gestiona y visualiza tus autores registrados.</p>
+                        <i class="bi bi-info-circle fs-1 mb-3 text-primary"></i>
+                        <h5 class="fw-semibold">About DualBid</h5>
+                        <p class="text-muted small">History of DualBid, its beginnings.</p>
                     </div>
                 </div>
             </a>
         </div>
 
-        <!-- Libros -->
-        <div class="col-12 col-md-4">
+        <!-- Autores -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a asp-controller="Autor" asp-action="Index" class="text-decoration-none text-dark">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-person-check fs-1 mb-3 text-danger"></i>
+                        <h5 class="fw-semibold">Authors</h5>
+                        <p class="text-muted small">Meet the creators of DualBid.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Reseñas de clientes -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Libro" asp-action="Index" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-book-half fs-1 mb-3 text-success"></i>
-                        <h5 class="fw-semibold">Libros</h5>
-                        <p class="text-muted small">Consulta el catálogo de libros disponible.</p>
+                        <i class="bi bi-star-fill fs-1 mb-3 text-warning"></i>
+                        <h5 class="fw-semibold">Customer reviews</h5>
+                        <p class="text-muted small">
+                            Recommendations and positive interactions from our customers..
+                        </p>
                     </div>
                 </div>
             </a>
         </div>
 
-        <!-- Reportes -->
-        <div class="col-12 col-md-4">
+        <!-- Protección de los clientes -->
+        <div class="col-12 col-sm-6 col-lg-3">
             <a asp-controller="Reporte" asp-action="GraficoVentas" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm border-0 hover-card">
+                <div class="card h-100 shadow-sm border-0 hover-card bg-light">
                     <div class="card-body text-center py-4">
-                        <i class="bi bi-bar-chart-line fs-1 mb-3 text-danger"></i>
-                        <h5 class="fw-semibold">Reportes</h5>
-                        <p class="text-muted small">Visualiza estadísticas y reportes de ventas.</p>
+                        <i class="bi bi-shield-check fs-1 mb-3 text-success"></i>
+                        <h5 class="fw-semibold">Buyer protection</h5>
+                        <p class="text-muted small">We ensure that payments are secure and that sellers are verified.</p>
                     </div>
                 </div>
             </a>
         </div>
-
     </div>
 </section>
 
 @section Scripts {
     <script>
-        const myCarouselElement = document.querySelector('#carruselHome')
-
+        // Bootstrap carousel grande (el tuyo)
+        const myCarouselElement = document.querySelector('#carruselHome');
         const carousel = new bootstrap.Carousel(myCarouselElement, {
             interval: 3500,
             pause: false,
             ride: 'carousel'
-        })
+        });
     </script>
+
+    <script>
+        // Circle carousel (flechas + dots)
+        (function () {
+            const track = document.getElementById('ccTrack');
+            const dotsWrap = document.getElementById('ccDots');
+            const prev = document.querySelector('.cc-prev');
+            const next = document.querySelector('.cc-next');
+
+            if (!track || !dotsWrap || !prev || !next) return;
+
+            const items = Array.from(track.querySelectorAll('.cc-item'));
+            if (items.length === 0) return;
+
+            function itemsPerView() {
+                const itemW = items[0].getBoundingClientRect().width;
+                const gap = parseFloat(getComputedStyle(track).gap) || 0;
+                return Math.max(1, Math.floor(track.clientWidth / (itemW + gap)));
+            }
+
+            function pageCount() {
+                return Math.ceil(items.length / itemsPerView());
+            }
+
+            function buildDots() {
+                dotsWrap.innerHTML = '';
+                const pages = pageCount();
+                for (let i = 0; i < pages; i++) {
+                    const b = document.createElement('button');
+                    b.className = 'cc-dot';
+                    b.type = 'button';
+                    b.setAttribute('aria-label', `Go to page ${i + 1}`);
+                    b.addEventListener('click', () => scrollToPage(i));
+                    dotsWrap.appendChild(b);
+                }
+                setActiveDot();
+            }
+
+            function currentPageIndex() {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                if (maxScroll <= 0) return 0;
+                return Math.round((track.scrollLeft / maxScroll) * (pageCount() - 1));
+            }
+
+            function setActiveDot() {
+                const idx = currentPageIndex();
+                const dots = Array.from(dotsWrap.querySelectorAll('.cc-dot'));
+                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            }
+
+            function scrollToPage(i) {
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                const pages = pageCount();
+                const target = pages <= 1 ? 0 : (maxScroll * (i / (pages - 1)));
+                track.scrollTo({ left: target, behavior: 'smooth' });
+            }
+
+            function scrollByOnePage(dir) {
+                track.scrollBy({ left: dir * track.clientWidth, behavior: 'smooth' });
+            }
+
+            prev.addEventListener('click', () => scrollByOnePage(-1));
+            next.addEventListener('click', () => scrollByOnePage(1));
+            track.addEventListener('scroll', () => requestAnimationFrame(setActiveDot));
+            window.addEventListener('resize', buildDots);
+
+            buildDots();
+        })();
+    </script>
+}
+
+
 
     <style>
         .hover-card:hover {
@@ -138,5 +353,49 @@
             transition: all 0.25s ease;
             box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
         }
+
+
+        .comic-title {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 3.2rem;
+            color: #1e3c72;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .comic-title:hover {
+                transform: scale(1.08);
+        }
+
+
+        /*Segundo carousel, El normal*/
+    .carousel-title {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        margin-bottom: 10px;
+    }
+
+    .carousel-text {
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 400;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+        margin: 0;
+    }
+
+
+       /*  Estilos de Carousel circular */
+    .cc-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        width: fit-content;
+        margin: 0 auto; /* centra */
+    }
+
     </style>
-}
+

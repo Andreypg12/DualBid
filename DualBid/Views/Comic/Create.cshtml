@@ -1,0 +1,437 @@
+﻿@model DualBid.Application.DTOs.ComicDTO
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container py-4">
+    <!-- Encabezado con diseño atractivo -->
+    <div class="container py-4">
+        <!-- Encabezado con diseño atrás -->
+        <div class="d-flex flex-column">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/About">About</a></li>
+                    <li class="breadcrumb-item"><a href="/Contact">Contact</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create</li>
+                </ol>
+            </nav>
+        </div>
+        <h1 class="display-6 fw-semibold">Crear Nuevo Cómic</h1>
+        <p class="text-muted mb-4">Completa los detalles para añadir un nuevo ejemplar a la colección</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulario principal -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
+                        @* <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div> *@
+
+                        <!-- Información básica -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-3">
+                                <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                Información básica
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="Title" class="form-label fw-medium">Título del cómic <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-book text-primary"></i></span>
+                                        <input asp-for="Title" class="form-control form-control-lg border-0 bg-light" placeholder="Ej: Amazing Fantasy" />
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="Title" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="Description" class="form-label fw-medium">Sinopsis</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-card-text text-primary"></i></span>
+                                        <textarea asp-for="Description" class="form-control border-0 bg-light" rows="4" placeholder="Describe la historia o detalles relevantes..."></textarea>
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="Description" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detalles de publicación -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-3">
+                                <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>
+                                Detalles de publicación
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Isbn" class="form-label fw-medium">ISBN</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-upc-scan text-primary"></i></span>
+                                        <input asp-for="Isbn" class="form-control border-0 bg-light" placeholder="978-XXXXXXXXXX" />
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="Isbn" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="EditionNumber" class="form-label fw-medium">Número de edición</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-sort-numeric-up text-primary"></i></span>
+                                        <input asp-for="EditionNumber" class="form-control border-0 bg-light" placeholder="Ej: 1" />
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="EditionNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="YearPublication" class="form-label fw-medium">Año de publicación</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-event text-primary"></i></span>
+                                        <input asp-for="YearPublication" class="form-control border-0 bg-light" placeholder="Ej: 1962" />
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="YearPublication" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="CreationDate" class="form-label fw-medium">Fecha de registro</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-plus text-primary"></i></span>
+                                        <input asp-for="CreationDate" class="form-control border-0 bg-light" type="date" />
+                                    </div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="CreationDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos adicionales (puedes añadir Publisher y Category aquí) -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold mb-3">
+                                <i class="bi bi-building text-primary me-2"></i>
+                                Editorial y categorías
+                            </h5>
+                            <div class="row g-3">
+
+                                <!-- EDITORIAL - Selección única -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Publisher" class="form-label">Editorial</label>
+                                    <!-- Cambiamos asp-for por name para evitar el Tag Helper problemático -->
+                                    <select name="Publisher.Id"
+                                            id="Publisher_Id"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListPublisher">
+                                        <option value="">-- Seleccionar editorial... --</option>
+                                    </select>
+                                    <!-- El span de validación SÍ puede usar asp-for -->
+                                    <span asp-validation-for="Publisher" class="text-danger small"></span>
+                                </div>
+
+                                <!-- ESTADO DE CONSERVACIÓN - Selección única -->
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="StateConservation" class="form-label">Estado de conservación</label>
+                                    <!-- Cambiamos asp-for por name -->
+                                    <select name="StateConservation.Id"
+                                            id="StateConservation_Id"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListStateConservation">
+                                        <option value="">-- Seleccionar estado... --</option>
+                                    </select>
+                                    <span asp-validation-for="StateConservation" class="text-danger small"></span>
+                                </div>
+                            
+
+                               @* Seleccion de categorias  Seleccion multiple *@
+                                <div class="col-12 mt-5">
+                                    <label class="form-label">Categorías</label>
+                                    <select id="selectedCategorias"
+                                            name="selectedCategorias"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListCategorias"
+                                            multiple>
+                                    </select>
+                                    <div class="form-text">Puede seleccionar múltiples categorías.</div>
+                                    @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                    <span asp-validation-for="Category" class="text-danger small"></span>
+                                </div> 
+
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-3 justify-content-end mt-4">
+                            <a asp-action="Index" class="btn rounded-pill px-4 py-2" style="background-color: red">
+                                <i class="bi bi-x-lg me-2 text-white"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn rounded-pill px-5 py-2 shadow-sm" style="background-color: greenyellow">
+                                <i class="bi bi-check-lg me-2 text-white"></i>Crear cómic
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <!-- SECCIÓN DE IMÁGENES - ÁREA DE SUBIDA MÚLTIPLE -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-images text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-semibold mb-1">Galería de imágenes</h5>
+                            <p class="text-muted small mb-0">Sube hasta 5 imágenes del cómic</p>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Selector simple de imágenes -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seleccionar imágenes (máx. 5)</label>
+
+                        <input type="file"
+                               class="form-control"
+                               name="imageFile"
+                               id="fileInput"
+                               multiple
+                               accept="image/*" />
+
+                        <p class="small text-muted mt-2 mb-0">Formatos: JPG, PNG, GIF, WEBP (Máx. 5MB por imagen)</p>
+                    </div>
+
+
+
+                    <!-- Previsualización de imágenes -->
+                    <div class="image-preview-container mb-4">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="bi bi-eye me-2"></i>Previsualización
+                            <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
+                        </h6>
+                        <div class="row g-2" id="imagePreview">
+                            <!-- Las imágenes se añadirán aquí dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    @* Muestra etiqueta en caso de error  *@
+                    <span class="text-danger small">@Html.ValidationMessage("Imagen")</span>
+                    <!-- Consejos para imágenes -->
+                    <div class="bg-light rounded-3 p-3">
+                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                            <i class="bi bi-lightbulb me-2"></i>Consejos
+                        </h6>
+                        <ul class="small text-muted ps-3 mb-0">
+                            <li>La primera imagen será la portada principal</li>
+                            <li>Usa imágenes de buena calidad (mínimo 800x600 px)</li>
+                            <li>Las imágenes se optimizarán automáticamente</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <style>
+        /* Estilos para el área de subida */
+        .upload-area:hover {
+            border-color: #0d6efd !important;
+            background: #e7f1ff !important;
+        }
+
+        .upload-area.highlight {
+            border-color: #0d6efd !important;
+            background: #e7f1ff !important;
+        }
+
+        .border-dashed {
+            border-style: dashed !important;
+        }
+
+        /* Estilos para la previsualización de imágenes */
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+            .preview-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .preview-item .remove-image {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: rgba(220, 53, 69, 0.9);
+                color: white;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 12px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                padding: 0;
+            }
+
+            .preview-item:hover .remove-image {
+                opacity: 1;
+            }
+
+            .preview-item .order-badge {
+                position: absolute;
+                bottom: 5px;
+                left: 5px;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: rgba(13, 110, 253, 0.9);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+    </style>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('createComicForm');
+      const fileInput = document.getElementById('fileInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const imageCount = document.getElementById('imageCount');
+      const maxFiles = 5;
+      const maxSize = 5 * 1024 * 1024;
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+      function updateCount(n) {
+        if (imageCount) imageCount.textContent = `${n}/${maxFiles}`;
+      }
+
+      function clearPreview() {
+        if (imagePreview) imagePreview.innerHTML = '';
+      }
+
+      fileInput?.addEventListener('change', function () {
+        const files = Array.from(fileInput.files || []);
+
+        clearPreview();
+
+        if (files.length === 0) {
+          updateCount(0);
+          return;
+        }
+
+        if (files.length > maxFiles) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Límite de imágenes',
+            text: `Solo puedes subir hasta ${maxFiles} imágenes.`
+          });
+          fileInput.value = '';
+          updateCount(0);
+          return;
+        }
+
+        // Validar tipos/tamaño
+        for (const f of files) {
+          if (!validTypes.includes(f.type)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Formato no válido',
+              text: `Usa JPG, PNG, GIF o WEBP. (${f.name})`
+            });
+            fileInput.value = '';
+            updateCount(0);
+            return;
+          }
+          if (f.size > maxSize) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Archivo muy grande',
+              text: `Máximo 5MB. (${f.name})`
+            });
+            fileInput.value = '';
+            updateCount(0);
+            return;
+          }
+        }
+
+        updateCount(files.length);
+
+        // Preview
+        files.forEach((file, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-6';
+
+          const wrap = document.createElement('div');
+          wrap.className = 'preview-item';
+
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.alt = 'Preview';
+
+          const badge = document.createElement('div');
+          badge.className = 'order-badge';
+          badge.textContent = (idx + 1);
+
+          wrap.appendChild(img);
+          wrap.appendChild(badge);
+          col.appendChild(wrap);
+          imagePreview?.appendChild(col);
+        });
+      });
+
+      // Debug opcional (puedes borrarlo luego)
+      form?.addEventListener('submit', function () {
+        console.log("Cantidad de archivos:", fileInput?.files?.length ?? 0);
+      });
+
+      // Multiselect categorías (si lo usas)
+      if (window.$ && $.fn.multiselect) {
+        $('#selectedCategorias').multiselect({
+          buttonClass: 'form-select',
+          templates: {
+            button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+          },
+          includeSelectAllOption: true,
+          selectAllText: 'Seleccionar todas',
+          allSelectedText: 'Todas las opciones',
+          nonSelectedText: 'Seleccione una opción',
+          nSelectedText: ' - seleccionadas',
+        });
+      }
+    });
+</script>
+
+    @*  SweetAlert desde el Controller al volver con errores *@
+    @if (ViewBag.Notificacion != null)
+    {
+        <script>
+            Swal.fire(@Html.Raw(ViewBag.Notificacion));
+        </script>
+    }
+    }

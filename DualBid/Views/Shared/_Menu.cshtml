@@ -1,12 +1,20 @@
-﻿<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+﻿<nav class="navbar navbar-expand-lg Menu-Custom" data-bs-theme="dark">
     <div class="container">
-        <a class="navbar-brand fw-semibold" asp-action="Index" asp-controller="Home">
-            <i class="bi bi-book me-2"></i>Librería
+        <a class="navbar-brand fw-semibold d-flex align-items-center"
+           asp-action="Index"
+           asp-controller="Home">
+
+            <img src="~/images/Logo_DualBid.png"
+                 alt="DualBid Logo"
+                 height="35"
+                 class="rounded-circle me-2" />
+
+            DualBid
         </a>
 
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarMain"
-                aria-controls="navbarMain" aria-expanded="false" aria-label="Abrir menú">
+                aria-controls="navbarMain" aria-expanded="false" aria-label="Open menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -15,20 +23,46 @@
 
                 <li class="nav-item">
                     <a class="nav-link">
-                        <i class="bi bi-collection me-1"></i>Catálogo
+                        <i class="bi bi-collection me-1"></i>Catalog
                     </a>
                 </li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-wrench me-1"></i>Mantenimiento
+                        <i class="bi bi-wrench me-1"></i>Maintenance
                     </a>
                     <ul class="dropdown-menu">
 
-                        <li><a class="dropdown-item" asp-action="Index" asp-controller="Category">Categorias</a></li>
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="Category">
+                                Categories
+                            </a>
+                        </li>
 
-                        <li><a class="dropdown-item">Libros</a></li>
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="User">
+                                Users
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="Role">
+                                Roles
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="Comic">
+                                Comics
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" asp-action="Index" asp-controller="Auction">
+                                Auctions
+                            </a>
+                        </li>
 
                     </ul>
                 </li>
@@ -36,30 +70,30 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-gear-fill me-1"></i>Proceso
+                        <i class="bi bi-gear-fill me-1"></i>Process
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Órdenes</a></li>
+                        <li><a class="dropdown-item">Orders</a></li>
                     </ul>
                 </li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bar-chart-fill me-1"></i>Reportes
+                        <i class="bi bi-bar-chart-fill me-1"></i>Reports
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Gráfico Ventas</a></li>
+                        <li><a class="dropdown-item">Sales Chart</a></li>
                     </ul>
                 </li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-people me-1"></i>Seguridad
+                        <i class="bi bi-people me-1"></i>Security
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Usuarios</a></li>
+                        <li><a class="dropdown-item">Users</a></li>
                     </ul>
                 </li>
             </ul>
@@ -70,19 +104,19 @@
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <img class="rounded-circle me-2"
                              src="~/images/profile.png"
-                             alt="Perfil"
+                             alt="Profile"
                              width="32" height="32" />
                         <span class="d-none d-sm-inline">
-                            Invitado
+                            Guest
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item">Salir</a></li>
-                        <li><a class=" dropdown-item">Ingresar</a></li>
-
+                        <li><a class="dropdown-item">Logout</a></li>
+                        <li><a class="dropdown-item">Login</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+

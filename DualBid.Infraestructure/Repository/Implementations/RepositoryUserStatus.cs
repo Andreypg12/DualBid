@@ -1,13 +1,14 @@
-﻿using System;
+﻿using DualBid.Infraestructure.Data;
+using DualBid.Infraestructure.Models;
+using DualBid.Infraestructure.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DualBid.Infraestructure.Data;
-using DualBid.Infraestructure.Models;
-using DualBid.Infraestructure.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DualBid.Infraestructure.Repository.Implementations
 {
@@ -20,9 +21,11 @@ namespace DualBid.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        Task<UserStatus> IRepositoryUserStatus.FindByIdAsync(int id)
+        public async Task<UserStatus?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Set<UserStatus>()
+               .AsNoTracking()
+               .FirstOrDefaultAsync(u => u.Id == id);
         }
         public async Task<ICollection<UserStatus>> ListAsync()
         {

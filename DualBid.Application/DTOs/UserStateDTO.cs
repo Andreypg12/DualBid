@@ -8,7 +8,7 @@ namespace DualBid.Application.DTOs
 {
     public record UserStateDTO
     {
-        public string id { get; init; }
-        public string description { get; init; }
+        public int Id { get; set; }
+        public string Description { get; set; } = string.Empty;
     }
 }

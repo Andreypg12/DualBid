@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Interfaces;
 
 namespace DualBid.Application.Services.Implementations
@@ -19,6 +20,12 @@ namespace DualBid.Application.Services.Implementations
         {
             _repository = repository;
             _mapper = mapper;
+        }
+
+        public async Task<ICollection<BidDTO>> AuctionBiddingHistory(int auctionId)
+        {
+            var list = await _repository.AuctionBiddingHistory(auctionId);
+            return _mapper.Map<ICollection<BidDTO>>(list);
         }
 
         public Task<BidDTO?> FindByIdAsync(int id)

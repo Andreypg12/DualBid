@@ -31,9 +31,11 @@ namespace DualBid.Application.Services.Implementations
 
         // Obtiene un rol específico según su identificador
         // Retorna un RoleDTO si existe, o null si no se encuentra
-        public Task<RoleDTO?> FindByIdAsync(int id)
+        public async Task<RoleDTO?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var @object = await _repositoryRole.FindByIdAsync(id);
+            var objectMapped = _mapper.Map<RoleDTO>(@object);
+            return objectMapped;
         }
 
         // Obtiene la lista completa de roles desde la base de datos

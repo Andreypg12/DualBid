@@ -11,5 +11,5 @@ public partial class ImgComic
 
     public int ComicId { get; set; }
 
-    public virtual Comic Comic { get; set; } = null!;
+    //public virtual Comic Comic { get; set; } = null!;
 }

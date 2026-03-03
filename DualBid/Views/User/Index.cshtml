@@ -1,65 +1,138 @@
-﻿@model IEnumerable<DualBid.Application.DTOs.UserDTO>
+﻿@model X.PagedList.IPagedList<DualBid.Application.DTOs.UserDTO>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Usuarios";
 }
 
-<h1>Index</h1>
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+        <div>
+            <p class="text-uppercase text-muted mb-1 fw-semibold small">Administración</p>
+            <h1 class="h3 mb-0 d-flex align-items-center gap-2 page-title">
+                <i class="bi bi-people-fill text-primary"></i>
+                Usuarios
+            </h1>
+            <p class="text-muted small mb-0">Gestiona roles y estados de los usuarios.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus"></i> Crear usuario
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastNames)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Password)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Registration_date)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdUser)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastNames)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Registration_date)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="row g-3">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a asp-controller="User"
+                       asp-action="Details"
+                       asp-route-id="@item.Id"
+                       class="card h-100 user-card text-decoration-none border-0 shadow-sm position-relative">
+                        <!-- Status arriba a la derecha -->
+                        <div class="position-absolute top-0 end-0 m-3"
+                             title="User status"
+                             data-bs-toggle="tooltip"
+                             data-bs-placement="left">
+                            @await Html.PartialAsync("_UserStatusBadge", item.State)
+                        </div>
+
+                        <div class="card-body d-flex flex-column gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="avatar-bubble bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-person-circle"></i>
+                                </span>
+                                <div>
+                                    <div class="fw-semibold text-dark mb-1">@item.CompleteName</div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-envelope-open me-1"></i>@item.Email
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <div class="d-flex align-items-center gap-2"
+                                     title="User role"
+                                     data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom">
+                                    @await Html.PartialAsync("_RoleBadge", item.Role)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center px-3 pb-3 pt-0">
+                            <span class="small text-muted">View details</span>
+                            <i class="bi bi-arrow-right-circle text-primary fs-5"></i>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-light border text-muted text-center mb-0">
+                    <i class="bi bi-inbox-fill me-2"></i> No registered users.
+                </div>
+            </div>
+        }
+    </div>
+
+    @* Paginación *@
+    @if (Model != null && Model.PageCount > 1)
+    {
+        <div class="card-footer bg-body d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 mt-3 shadow-sm border-0">
+            <div class="small text-muted">
+                Página <strong>@Model.PageNumber</strong> de <strong>@Model.PageCount</strong>
+            </div>
+
+            <nav aria-label="User pagination">
+                @Html.PagedListPager(
+                Model,
+                        page => Url.Action("Index", new { page }),
+                        new PagedListRenderOptions
+                        {
+                            UlElementClasses = new[] { "pagination", "mb-0" },
+                            LiElementClasses = new[] { "page-item" },
+                            PageClasses = new[] { "page-link" },
+
+                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+
+                            MaximumPageNumbersToDisplay = 5
+                        }
+                        )
+        </nav>
+    </div>
+        }
+</div>
+
+<style>
+    .page-title {
+        letter-spacing: 0.3px;
+    }
+
+    .user-card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        border-radius: 12px;
+    }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.08);
+        }
+
+    .avatar-bubble {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        font-size: 1.3rem;
+    }
+</style>

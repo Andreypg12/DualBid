@@ -1,0 +1,198 @@
+﻿@model DualBid.Application.DTOs.UserDTO
+
+<div class="container my-5">
+    <div class="card profile-card border-0 rounded-4 overflow-hidden shadow-lg">
+
+        <!-- Header -->
+        <div class="profile-header text-white px-4 py-5">
+            <div class="d-flex flex-wrap align-items-center gap-4">
+                <!-- Avatar -->
+                <div class="profile-avatar">
+                    <i class="bi bi-person-fill fs-1"></i>
+                </div>
+                <!-- Name & badges -->
+                <div class="flex-grow-1">
+                    <h2 class="mb-1 fw-bold">@Model.CompleteName</h2>
+                    <p class="mb-2 opacity-75">
+                        <i class="bi bi-envelope-at me-1"></i>@Model.Email
+                    </p>
+                </div>
+                <!-- Registration date (desktop) -->
+                <div class="text-end d-none d-md-block">
+                    <small class="d-block opacity-75">Member since</small>
+                    <span class="fw-semibold">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        @Model.RegistrationDate.ToString("dd MMM yyyy")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Role -->
+                <div class="col-sm-6 col-lg-4">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-primary">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Role</span>
+                            <span class="stat-value">@Model.Role.Description</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-sm-6 col-lg-4">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-success">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value">@Model.State.Description</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auctions / Bids -->
+                <div class="col-sm-12 col-lg-4">
+                    @if (Model.Role.Id == 2)
+                    {
+                        <div class="stat-card">
+                            <div class="stat-card-icon text-warning">
+                                <i class="bi bi-hammer"></i>
+                            </div>
+                            <div>
+                                <span class="stat-label">Auctions created</span>
+                                <span class="stat-value">@Model.NumberOfAuctions</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="stat-card">
+                            <div class="stat-card-icon text-info">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+                            <div>
+                                <span class="stat-label">Bids placed</span>
+                                <span class="stat-value">@Model.NumberOfBids</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Registration date (mobile only) -->
+                <div class="col-12 d-md-none">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-secondary">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Member since</span>
+                            <span class="stat-value">@Model.RegistrationDate.ToString("dd MMM yyyy • HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Header ──────────────────────────   ─── */
+    .profile-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+        position: relative;
+    }
+
+        .profile-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+    /* ── Avatar ─────────────────────────────── */
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, .15);
+        backdrop-filter: blur(6px);
+        border: 2px solid rgba(255, 255, 255, .25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* ── Stat cards ─────────────────────────── */
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        background: #f8f9fb;
+        border: 1px solid #eef1f5;
+        height: 100%;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+        }
+
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: color-mix(in srgb, currentColor 12%, transparent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    /* ── Card global ────────────────────────── */
+    .profile-card {
+        transition: box-shadow .2s ease;
+    }
+
+        .profile-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .1) !important;
+        }
+</style>

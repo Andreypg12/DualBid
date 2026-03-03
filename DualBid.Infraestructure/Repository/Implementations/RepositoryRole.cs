@@ -19,9 +19,11 @@ namespace DualBid.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public Task<Role> FindByIdAsync(int id)
+        public async Task<Role?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Set<Role>()
+               .AsNoTracking()
+               .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<ICollection<Role>> ListAsync()
@@ -31,6 +33,6 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .AsNoTracking()
                 .ToListAsync();
             return collection;
-        } 
+        }
     }
 }
