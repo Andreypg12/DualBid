@@ -31,7 +31,6 @@ namespace DualBid.Infraestructure.Repository.Implementations
                         .Include(x => x.ImgComic)
                         .Include(x => x.Category)
                         .Include(x => x.Seller)
-
                         .Include(x => x.Auction)
                             .ThenInclude(a => a.State)
                         .AsNoTracking()

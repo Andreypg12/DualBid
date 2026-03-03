@@ -22,14 +22,18 @@ namespace DualBid.Infraestructure.Repository.Implementations
         public async Task<Auction> FindByIdAsync(int id)
         {
             var @object = await _context.Set<Auction>()
+                .AsNoTracking()
+                .AsSplitQuery()
                 .Where(a => a.Id == id)
                 .Include(a => a.State)
                 .Include(a => a.Comic)
-                .Include(a => a.Comic.ImgComic)
-                .Include(a => a.Comic.Category)
-                .Include(a => a.Comic.StateConservation)
+                    .ThenInclude(c => c.ImgComic)
+                .Include(a => a.Comic)
+                    .ThenInclude(c => c.Category)
+                .Include(a => a.Comic)
+                    .ThenInclude(c => c.StateConservation)
                 .Include(a => a.Bid)
-                .Include(a => a.CreatorUser)
+                    .ThenInclude(b => b.User)
                 .FirstOrDefaultAsync();
 
             return @object!;
@@ -41,7 +45,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
             var collection = await _context.Set<Auction>()
                 .Include(a => a.State)
                 .Include(a => a.Comic)
-                .Include(a => a.Comic.ImgComic)
+                    .ThenInclude(c => c.ImgComic)
                 .Include(a => a.Bid)
                 .AsNoTracking()
                 .ToListAsync();
