@@ -373,7 +373,7 @@
 
                 <hr class="my-4 opacity-25">
 
-                <!-- ACCIONES FINALES -->
+                @* Acciones *@
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-end align-items-center">
                     <a asp-controller="Comic" asp-action="Edit" asp-route-id="@Model.Id"
                        class="btn btn-primary px-5 py-3 rounded-pill shadow-sm hover-lift text-white" style="background-color: rgb(55, 141, 252)">
@@ -391,7 +391,6 @@
     </div>
 </article>
 
-<!-- Estilos adicionales -->
 <style>
     .tracking-wide {
         letter-spacing: 0.5px;
@@ -427,7 +426,7 @@
         }
     }
 
-    /* Ajuste para móviles */
+    /* Ajuste para celulares */
     @@media (max-width: 991px) {
         .col-12.col-lg-5 [style*="min-height: 500px"] {
             min-height: 400px !important;

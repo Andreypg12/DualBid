@@ -17,7 +17,7 @@
                         <i class="bi bi-envelope-at me-1"></i>@Model.Email
                     </p>
                 </div>
-                <!-- Registration date (desktop) -->
+                <!-- Registration date-->
                 <div class="text-end d-none d-md-block">
                     <small class="d-block opacity-75">Member since</small>
                     <span class="fw-semibold">
@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <!-- Auctions / Bids -->
+                <!-- Auctions y Bids -->
                 <div class="col-sm-12 col-lg-4">
                     @if (Model.Role.Id == 2)
                     {
@@ -85,7 +85,7 @@
                     }
                 </div>
 
-                <!-- Registration date (mobile only) -->
+                <!-- Registration date-->
                 <div class="col-12 d-md-none">
                     <div class="stat-card">
                         <div class="stat-card-icon text-secondary">
@@ -113,7 +113,7 @@
 </div>
 
 <style>
-    /* ── Header ──────────────────────────   ─── */
+    /* Header inicio */
     .profile-header {
         background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
         position: relative;
@@ -126,8 +126,9 @@
             background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             pointer-events: none;
         }
+    /* Header fin */
 
-    /* ── Avatar ─────────────────────────────── */
+    /* Avatar inicio */
     .profile-avatar {
         width: 80px;
         height: 80px;
@@ -140,8 +141,10 @@
         justify-content: center;
         flex-shrink: 0;
     }
+    /* Avatar fin */
 
-    /* ── Stat cards ─────────────────────────── */
+
+    /* Stat cards inicio*/
     .stat-card {
         display: flex;
         align-items: center;
@@ -186,8 +189,10 @@
         font-weight: 700;
         color: #212529;
     }
+    /* Stat cards fin */
 
-    /* ── Card global ────────────────────────── */
+
+    /* Card global */
     .profile-card {
         transition: box-shadow .2s ease;
     }

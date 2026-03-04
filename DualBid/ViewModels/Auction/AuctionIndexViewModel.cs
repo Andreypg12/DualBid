@@ -4,7 +4,8 @@ namespace DualBid.ViewModels.Auction
 {
     public class AuctionIndexViewModel
     {
-        public string SelectedState { get; set; } = "active"; // "active" | "inactive"
+        // "active" | "inactive"
+        public string SelectedState { get; set; } = "active"; 
         public IEnumerable<AuctionDTO> Auctions { get; set; } = Enumerable.Empty<AuctionDTO>();
     }
 }
