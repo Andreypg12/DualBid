@@ -176,7 +176,7 @@
                                 <span class="small opacity-75">Current Bid</span>
                                 <i class="bi bi-cash-stack fs-4 opacity-75"></i>
                             </div>
-                            <div class="h2 fw-bold mb-0">$@Model.CurrentBid.ToString("N0")</div>
+                            <div class="h2 fw-bold mb-0" id="currentBidLabel">$@Model.CurrentBid.ToString("N0")</div>
                             <small class="opacity-75">USD</small>
                         </div>
                     </div>
@@ -213,7 +213,7 @@
                             <div class="d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <span class="text-muted small d-block">Total bids</span>
-                                    <div class="fw-bold display-6 mb-0">@Model.NumberOfBids</div>
+                                    <div class="fw-bold display-6 mb-0" id="totalBidsLabel">@Model.NumberOfBids</div>
                                 </div>
 
                                 <a asp-controller="Bid"
@@ -426,3 +426,14 @@
         line-height: 1.6;
     }
 </style>
+
+@section Scripts {
+    <script>
+        window.auctionDetailsRealtimeConfig = {
+            auctionId: "@Model.Id",
+            userId: "2"
+        };
+    </script>
+
+    <script src="~/js/auctionDetailsRealtime.js"></script>
+}

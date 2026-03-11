@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 using Serilog;
 
+//NUEVO SIGNALR
+using DualBid.Hubs;
+
 //Sin este using no se puede usar Encoding.UTF8 en la configuración de Serilog para los archivos de log.
 using System.Text;
 using DualBid.Middleware;
@@ -136,6 +139,7 @@ builder.Services.AddTransient<IServiceStateConservation, ServiceStateConservatio
 
 builder.Services.AddTransient<IServiceImgComic, ServiceImgComic>();
 
+builder.Services.AddSignalR();
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>
@@ -209,13 +213,20 @@ if (!app.Environment.IsDevelopment())
 //  El orden de estos comandos debe ser obligatoriamente este.
 
 app.UseHttpsRedirection();
+
+//Signal R requiere que UseStaticFiles esté antes de UseRouting para servir correctamente los archivos necesarios para la comunicación en tiempo real (como el script de SignalR).
+app.UseStaticFiles();
 app.UseRouting();
+
 
 //Activar soporte a la solicitud de registro con Serilog (recomienda usarlo después de UseRouting y antes de UseEndpoints / MapControllerRoute)
 app.UseSerilogRequestLogging();
 
 app.UseAuthorization();
 
+
+//Signal R
+app.MapHub<AuctionHub>("/auctionHub");
 
 app.UseAntiforgery();
 
