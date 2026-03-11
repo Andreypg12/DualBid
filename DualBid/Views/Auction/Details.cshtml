@@ -322,7 +322,14 @@
 
         @if (Model.ActualEndDate == null)
         {
-            <a asp-action="CreateBid" asp-route-auctionId="@Model.Id" class="btn btn-primary btn-lg px-5 shadow-sm">
+            <a asp-controller="Bid" 
+            asp-action="Create" 
+            asp-route-auctionId="@Model.Id"
+            asp-route-userId=14
+            asp-route-titleComicAuction="@Model.Comic?.Title"
+            asp-route-minimunIncrease="@Model.MinimunIncrease"
+            asp-route-currentBidPrice="@Model.CurrentBid"
+            class="btn btn-primary btn-lg px-5 shadow-sm">
                 <i class="bi bi-cash-stack me-2"></i>
                 Place Your Bid
             </a>
