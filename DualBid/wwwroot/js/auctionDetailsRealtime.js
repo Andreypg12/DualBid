@@ -1,69 +1,117 @@
-﻿"use strict";
+﻿"use strict"; // Modo estricto de JavaScript (evita errores comunes)
 
 (() => {
-    console.log("[DetailsRealtime] script cargado");
 
-    if (!window.auctionDetailsRealtimeConfig) {
-        console.warn("[DetailsRealtime] falta window.auctionDetailsRealtimeConfig");
-        return;
-    }
+    // Si no existe la configuración enviada desde Razor, no hace nada
+    if (!window.auctionDetailsRealtimeConfig) return;
 
-    console.log("[DetailsRealtime] config:", window.auctionDetailsRealtimeConfig);
+    // Obtener datos enviados desde la vista Details.cshtml
+    const auctionId = window.auctionDetailsRealtimeConfig.auctionId;
+    const userId = window.auctionDetailsRealtimeConfig.userId;
 
-    if (typeof signalR === "undefined") {
-        console.error("[DetailsRealtime] signalR es undefined. Falta incluir signalr.min.js antes de este script.");
-        return;
-    }
+    console.log("Details realtime config:", { auctionId, userId });
 
-    const auctionId = Number(window.auctionDetailsRealtimeConfig.auctionId || 0);
-    const userId = Number(window.auctionDetailsRealtimeConfig.userId || 0);
-
-    console.log("[DetailsRealtime] parsed:", { auctionId, userId });
-
-    if (!auctionId || auctionId <= 0) {
-        console.warn("[DetailsRealtime] auctionId inválido. Abortando.");
-        return;
-    }
-
+    // Crear conexión con SignalR hacia el Hub
     const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/auctionHub")
-        .withAutomaticReconnect()
+        .withUrl("/auctionHub") // URL del hub configurado en Program.cs
+        .withAutomaticReconnect() // reconectar automáticamente si se pierde conexión
         .build();
 
-    // ✅ ACTUALIZAR UI
-    connection.on("NuevaPujaSimulada", (data) => {
-        console.log("[DetailsRealtime] NuevaPujaSimulada:", data);
 
+    // =============================
+    // Evento cuando llega nueva puja
+    // =============================
+    connection.on("NuevaPujaSimulada", function (data) {
+
+        console.log("NuevaPujaSimulada recibida en Details:", data);
+
+        // Actualizar el monto actual en pantalla
         const currentBidLabel = document.getElementById("currentBidLabel");
-        if (currentBidLabel && data?.nuevoMonto != null) {
-            const formatted = new Intl.NumberFormat("en-US").format(data.nuevoMonto);
-            currentBidLabel.textContent = `$${formatted}`;
+
+        if (currentBidLabel) {
+
+            // Convertimos el número a formato bonito con comas
+            currentBidLabel.textContent =
+                "$" + Number(data.nuevoMonto).toLocaleString();
         }
 
-        const totalBidsLabel = document.getElementById("totalBidsLabel");
-        if (totalBidsLabel && data?.totalBids != null) {
-            totalBidsLabel.textContent = data.totalBids;
+        // Actualizar contador de pujas
+        const totalBidsLabel =
+            document.getElementById("totalBidsLabel");
+
+        if (totalBidsLabel) {
+
+            const current =
+                parseInt(totalBidsLabel.textContent) || 0;
+
+            totalBidsLabel.textContent = current + 1;
         }
+
     });
 
-    connection.on("UsuarioSuperado", (data) => {
-        console.log("[DetailsRealtime] UsuarioSuperado:", data);
-    });
 
-    connection
-        .start()
-        .then(async () => {
-            console.log("[DetailsRealtime] connection started");
+    // =====================================
+    // Evento cuando el usuario fue superado
+    // =====================================
+    connection.on("UsuarioSuperado", function (data) {
 
-            await connection.invoke("JoinAuctionGroup", auctionId.toString());
-            console.log("[DetailsRealtime] joined auction group", auctionId);
+        console.log("UsuarioSuperado recibido en Details:", data);
 
-            if (userId > 0) {
-                await connection.invoke("RegisterUser", userId.toString());
-                console.log("[DetailsRealtime] registered user", userId);
-            }
-        })
-        .catch((err) => {
-            console.error("[DetailsRealtime] start error:", err);
+        // Aquí se muestra la notificación
+        Swal.fire({
+            title: "Outbid!",
+            html: `<b>${data.mensaje}</b>`,
+            icon: "info",
+            toast: false,
+            position: "center",
+            showConfirmButton: true,
+            confirmButtonText: "Continue bidding",
+            confirmButtonColor: "#198754"
         });
+
+    });
+
+
+    // =============================
+    // Iniciar conexión SignalR
+    // =============================
+    connection.start()
+
+        .then(async function () {
+
+            console.log("Conectado a SignalR desde Details");
+
+
+            // Unirse al grupo de la subasta
+            await connection.invoke(
+                "JoinAuctionGroup",
+                auctionId
+            );
+
+            console.log(
+                "Unido al grupo auction-" + auctionId
+            );
+
+
+            // Registrarse en el grupo del usuario
+            await connection.invoke(
+                "RegisterUser",
+                userId.toString()
+            );
+
+            console.log(
+                "Usuario registrado user-" + userId
+            );
+
+        })
+
+        .catch(function (err) {
+
+            console.error(
+                "Error SignalR Details:",
+                err.toString()
+            );
+
+        });
+
 })();

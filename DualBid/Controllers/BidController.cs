@@ -100,10 +100,10 @@ namespace DualBid.Controllers
 
             // Evento 2: UsuarioSuperado (simulado) a un usuario específico
             // Aquí lo simulamos enviándolo a otro userId fijo o recibido desde la vista
-            var usuarioSuperadoId = "2";
+            //var usuarioSuperadoId = "2";
 
             await _hubContext.Clients
-                .Group($"user-{usuarioSuperadoId}")
+                .Group($"user-{_currentUserService.GetCurrentUserId() ?? 0}")
                 .SendAsync("UsuarioSuperado", new
                 {
                     auctionId = viewModeldto.AuctionId,
