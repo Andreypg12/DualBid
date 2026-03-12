@@ -1,6 +1,7 @@
 ﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Hubs;
+using DualBid.Services;
 using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,13 @@ namespace DualBid.Controllers
     {
         private readonly IServiceBid _serviceBid;
         private readonly IHubContext<AuctionHub> _hubContext;
+        private readonly ICurrentUserService _currentUserService;
 
-        public BidController(IServiceBid serviceBid, IHubContext<AuctionHub> hubContext)
+        public BidController(IServiceBid serviceBid, IHubContext<AuctionHub> hubContext, ICurrentUserService currentUserService)
         {
             _serviceBid = serviceBid;
             _hubContext = hubContext;
+            _currentUserService = currentUserService;
         }
 
         [HttpGet]
@@ -40,12 +43,11 @@ namespace DualBid.Controllers
             return View(vm);
         }
 
-        public ActionResult Create(int auctionId, int userId, string titleComicAuction, decimal minimunIncrease, decimal currentBidPrice)
+        public ActionResult Create(int auctionId, string titleComicAuction, decimal minimunIncrease, decimal currentBidPrice)
         {
             var vm = new CreateBidViewModel
             {
                 AuctionId = auctionId,
-                UserId = userId,
                 TitleComicAuction = titleComicAuction,
                 MinimunIncrease = minimunIncrease,
                 CurrentBidPrice = currentBidPrice
@@ -74,6 +76,8 @@ namespace DualBid.Controllers
 
                 return View(viewModeldto);
             }
+
+            viewModeldto.UserId = _currentUserService.GetCurrentUserId() ?? 0;
 
             BidDTO dto = new()
             {

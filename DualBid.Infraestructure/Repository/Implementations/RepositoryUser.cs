@@ -20,17 +20,16 @@ namespace DualBid.Infraestructure.Repository.Implementations
         }
 
         public async Task<User> FindByIdAsync(int id)
-        {
+        { 
             var @object = await _context.Set<User>()
-                .Where(l => l.Id == id)
+                .AsNoTracking()
                 .Include(x => x.Role)
                 .Include(x => x.State)
                 .Include(x => x.Auction)
                 .Include(x => x.Bid)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(u => u.Id == id);
             return @object!;
         }
-
         public async Task<ICollection<User>> ListAsync()
         {
             var collection = await _context.Set<User>()

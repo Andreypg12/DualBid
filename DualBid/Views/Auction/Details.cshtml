@@ -326,10 +326,9 @@
             <a asp-controller="Bid" 
             asp-action="Create" 
             asp-route-auctionId="@Model.Id"
-            asp-route-userId=14
             asp-route-titleComicAuction="@Model.Comic?.Title"
-               asp-route-minimunIncrease="@Model.MinimunIncrease.ToString(CultureInfo.InvariantCulture)"
-               asp-route-currentBidPrice="@Model.CurrentBid.ToString(CultureInfo.InvariantCulture)"
+            asp-route-minimunIncrease="@Model.MinimunIncrease.ToString(CultureInfo.InvariantCulture)"
+            asp-route-currentBidPrice="@Model.CurrentBid.ToString(CultureInfo.InvariantCulture)"
             class="btn btn-primary btn-lg px-5 shadow-sm">
                 <i class="bi bi-cash-stack me-2"></i>
                 Place Your Bid
@@ -432,7 +431,7 @@
     <script>
         window.auctionDetailsRealtimeConfig = {
             auctionId: "@Model.Id",
-            userId: "2"
+            userId: "@(ViewBag.CurrentUserId ?? 0)"
         };
     </script>
 

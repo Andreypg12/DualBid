@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 using Serilog;
 
+using DualBid.Services;
 //NUEVO SIGNALR
 using DualBid.Hubs;
 
@@ -87,6 +88,19 @@ builder.Host.UseSerilog( Log.Logger);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Session + HttpContext
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 //****************
 // Configurar Dependency Injection
 //****************
@@ -118,6 +132,8 @@ builder.Services.AddTransient<IRepositoryImgComic, RepositoryImgComic>();
 
 //*** Services
 builder.Services.AddTransient<IserviceUser, ServiceUser>();
+
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
 
@@ -218,6 +234,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseSession();
 
 //Activar soporte a la solicitud de registro con Serilog (recomienda usarlo después de UseRouting y antes de UseEndpoints / MapControllerRoute)
 app.UseSerilogRequestLogging();

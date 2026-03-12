@@ -9,10 +9,13 @@ namespace DualBid.Controllers
     public class AuctionController : Controller
     {
         private readonly IServiceAuction _serviceAuction;
+        private readonly ICurrentUserService _currentUserService;
 
-        public AuctionController(IServiceAuction serviceAuction)
+        public AuctionController(IServiceAuction serviceAuction, ICurrentUserService currentUserService)
         {
             _serviceAuction = serviceAuction;
+            _currentUserService = currentUserService;
+
         }
 
         [HttpGet]
@@ -51,11 +54,16 @@ namespace DualBid.Controllers
                     throw new Exception("Libro no existente");
 
                 }
+
+                var currentUserId = _currentUserService.GetCurrentUserId();
+                ViewBag.CurrentUserId = currentUserId;
+
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                    "Detalle del Libro",
                    $"Mostrando información del Libro: {@object.Comic.Title}",
                    SweetAlertMessageType.info
-               );
+                );
+
                 return View(@object);
 
             }

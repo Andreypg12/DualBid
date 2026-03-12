@@ -1,0 +1,43 @@
+﻿@model DualBid.ViewModels.Shared.CurrentUserSelectorViewModel
+
+<div class="dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        <img class="rounded-circle me-2"
+             src="~/images/profile.png"
+             alt="Profile"
+             width="32" height="32" />
+        <span class="d-none d-sm-inline">
+            @Model.CurrentUserDisplayName
+        </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 320px;">
+        <li class="mb-2">
+            <label class="form-label fw-semibold">Usuario simulado</label>
+
+            <form asp-controller="CurrentUser" asp-action="Set" method="post">
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                <select name="userId" class="form-select mb-2" onchange="this.form.submit()">
+                    <option value="">Seleccione un usuario</option>
+                    @foreach (var user in Model.Users)
+                    {
+                        <option value="@user.Value" selected="@user.Selected">@user.Text</option>
+                    }
+                </select>
+            </form>
+        </li>
+
+        <li><hr class="dropdown-divider" /></li>
+
+        <li class="px-1 pb-1">
+            <form asp-controller="CurrentUser" asp-action="Clear" method="post">
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                    Quitar selección
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
