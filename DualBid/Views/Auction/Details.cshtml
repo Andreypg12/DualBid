@@ -1,4 +1,5 @@
 ﻿@model DualBid.Application.DTOs.AuctionDTO
+@using System.Globalization
 
 @{
     ViewData["Title"] = "Auction Details";
@@ -327,8 +328,8 @@
             asp-route-auctionId="@Model.Id"
             asp-route-userId=14
             asp-route-titleComicAuction="@Model.Comic?.Title"
-            asp-route-minimunIncrease="@Model.MinimunIncrease"
-            asp-route-currentBidPrice="@Model.CurrentBid"
+               asp-route-minimunIncrease="@Model.MinimunIncrease.ToString(CultureInfo.InvariantCulture)"
+               asp-route-currentBidPrice="@Model.CurrentBid.ToString(CultureInfo.InvariantCulture)"
             class="btn btn-primary btn-lg px-5 shadow-sm">
                 <i class="bi bi-cash-stack me-2"></i>
                 Place Your Bid
