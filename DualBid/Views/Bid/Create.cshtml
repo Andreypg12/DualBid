@@ -48,8 +48,8 @@
                         <input type="hidden" asp-for="UserId" />
                         <input type="hidden" asp-for="AuctionId" />
                         <input type="hidden" asp-for="TitleComicAuction" />
-                        <input type="hidden" asp-for="MinimunIncrease" id="hiddenMinIncrease" />
-                        <input type="hidden" asp-for="CurrentBidPrice" id="hiddenCurrentBid" />
+                       @*  <input type="hidden" asp-for="MinimunIncrease" id="hiddenMinIncrease" />
+                        <input type="hidden" asp-for="CurrentBidPrice" id="hiddenCurrentBid" /> *@
 
                         <!-- Campo de monto a ofrecer -->
                         <div class="mb-4">
@@ -59,10 +59,13 @@
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-light border-end-0">$</span>
                                 <input asp-for="AmountOffered"
+                                       type="text"
+                                       inputmode="numeric"
                                        class="form-control form-control-lg border-start-0 ps-0"
                                        placeholder="0.00"
                                        id="amountOffered"
-                                       autocomplete="off" />
+                                       autocomplete="off"
+                                       data-val="false" />
                             </div>
                             <span asp-validation-for="AmountOffered" class="text-danger small"></span>
 
@@ -252,8 +255,8 @@
 
     <script>
         (() => {
-            const currentBid = @Model.CurrentBidPrice;
-            const minIncrease = @Model.MinimunIncrease;
+            const currentBid = Math.round(parseFloat("@Model.CurrentBidPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
+            const minIncrease = Math.round(parseFloat("@Model.MinimunIncrease.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
             const minRequired = currentBid + minIncrease;
 
             const amountInput = document.getElementById('amountOffered');
@@ -293,11 +296,16 @@
                 validateBidAmount(amount);
             });
 
-            // Botón de monto sugerido
-            suggestedBtn.addEventListener('click', () => {
-                amountInput.value = minRequired.toFixed(2);
-                validateBidAmount(minRequired);
-            });
+            // Botón de monto sugerido  CAMBIADO PARA EVITAR . Y , QUE DAÑAN EL PROCESO
+                    suggestedBtn.addEventListener('click', () => {
+
+            const cleanValue = Math.round(minRequired);
+
+            amountInput.value = cleanValue.toString();
+
+            validateBidAmount(cleanValue);
+
+        });
 
             // Aplicar monto personalizado del modal
             customAmountBtn.addEventListener('click', () => {

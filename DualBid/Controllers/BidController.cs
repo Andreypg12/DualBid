@@ -60,6 +60,8 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CreateBidViewModel viewModeldto)
         {
+            ModelState.Remove(nameof(CreateBidViewModel.CurrentBidPrice));
+            ModelState.Remove(nameof(CreateBidViewModel.MinimunIncrease));
             if (!ModelState.IsValid)
             {
                 var errores = string.Join("<br>",
