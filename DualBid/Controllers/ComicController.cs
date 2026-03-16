@@ -25,10 +25,16 @@ namespace DualBid.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string availability = "available")
         {
+
             var collection = await _serviceComic.ListAsync();
-            return View(collection);
+
+            bool showAvailable = availability != "unavailable";
+            var filtered = collection.Where(c => showAvailable ? c.availability : !c.availability).ToList();
+
+            ViewBag.SelectedAvailability = availability;
+            return View(filtered);
         }
 
         //Esto es lo que hace la comunicacion entre una vista y la otra
