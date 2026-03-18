@@ -405,12 +405,12 @@
         });
       });
 
-      // Debug opcional (puedes borrarlo luego)
+      
       form?.addEventListener('submit', function () {
         console.log("Cantidad de archivos:", fileInput?.files?.length ?? 0);
       });
 
-      // Multiselect categorías (si lo usas)
+      //Multiselect
       if (window.$ && $.fn.multiselect) {
         $('#selectedCategorias').multiselect({
           buttonClass: 'form-select',

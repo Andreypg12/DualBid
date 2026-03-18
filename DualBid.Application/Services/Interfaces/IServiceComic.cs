@@ -13,5 +13,6 @@ namespace DualBid.Application.Services.Interfaces
         Task<ComicDTO?> FindByIdAsync(int id);
        
         Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias);
+        Task<bool> UpdateAvailabilityAsync(int id, bool availability);
     }
 }

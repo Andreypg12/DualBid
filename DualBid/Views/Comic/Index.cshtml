@@ -50,16 +50,17 @@
             </div>
         </div>
 
-        Lado derecho
+       @*  Lado derecho *@
         <div class="d-flex gap-2">
-            <!-- Create button -->
+
+            @* Boton de crear *@
             <a asp-controller="Comic" asp-action="Create"
                class="btn btn-sm d-inline-flex align-items-center gap-2 px-4 py-2 rounded-3 fw-medium"
                style="background-color: #e3f2fd; color: #1976d2; border: 1px solid #1976d2; transition: all 0.2s;">
                 <i class="bi bi-plus-circle" style="font-size: 0.9rem;"></i>
                 <span>Create New</span>
             </a>
-            <!-- Back home button -->
+            @* Boton de volver  *@
             <a asp-controller="Home" asp-action="Index"
                class="btn btn-sm d-inline-flex align-items-center gap-2 px-4 py-2 rounded-3 fw-medium"
                style="background-color: #fee2e2; color: #b91c1c; border: 1px solid #b91c1c; transition: all 0.2s;">
@@ -159,23 +160,42 @@ else
                                 <a asp-controller="Comic" asp-action="Details" asp-route-id="@item.Id"
                                    class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
                                    style="width: 36px; height: 36px; background-color: rgb(104, 119, 224)"
-                                   title="View details">
+                                   title="View details"
+                                   data-action="btn-edit">
                                     <i class="bi bi-eye"></i>
                                 </a>
 
                                 @* Boton de editar *@
                                 <a asp-controller="Comic" asp-action="Edit" asp-route-id="@item.Id"
-                                   class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                                   class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center btn-edit"
                                    style="width: 36px; height: 36px; background-color: rgb(179, 216, 252)">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                @* Eliminar *@
-                                <a class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center"
-                                   style="width: 36px; height: 36px; background-color:  rgb(219, 77, 74))"
-                                   title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                @if (item.availability)
+                                {
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" class="delete-form">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 36px; height: 36px; background-color: rgb(219, 77, 74)"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-route-id="@item.Id" method="post" style="display:inline;" class="restore-form">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 36px; height: 36px; background-color: rgb(148, 230, 137)"
+                                                title="Restore">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    </form>
+                                }
 
                             </div>
                         </div>
@@ -186,43 +206,88 @@ else
 }
 
 @section Scripts {
-	<style>
-		.card:hover {
-			transform: translateY(-3px);
-			transition: transform .18s ease;
-		}
-	</style>
 
-    <!-- Estilos minimalistas sin media queries -->
+    <script>
+        // Confirmación con SweetAlert antes de enviar el formulario
+        document.querySelectorAll('.delete-form, .restore-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const action = this.classList.contains('delete-form') ? 'Delete' : 'Restore';
+                const comicTitle = this.closest('.card')?.querySelector('h3')?.innerText || 'this comic';
+
+                Swal.fire({
+                    title: action === 'Delete' ? 'Delete comic?' : 'Restore comic?',
+                    text: action === 'Delete'
+                        ? `Are you sure you want to delete "${comicTitle}"?`
+                        : `Are you sure you want to restore "${comicTitle}"?`,
+                    icon: action === 'Delete' ? 'warning' : 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'rgb(176, 212, 247)',
+                    cancelButtonColor: 'rgb(215, 75, 72)',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar el formulario
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Para el botón de editar (opcional)
+        document.querySelectorAll('.btn-edit').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Edit comic?',
+                    text: 'You will be redirected to the edit form',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: 'rgb(176, 212, 247)',
+                    cancelButtonColor: 'rgb(215, 75, 72)',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = this.href;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Tus estilos existentes -->
     <style>
-        /* Transiciones suaves para todos los elementos interactivos */
+        .card:hover {
+            transform: translateY(-3px);
+            transition: transform .18s ease;
+        }
+
         a, .btn {
             transition: all 0.2s ease !important;
         }
 
-            /* Hover effects */
             a[asp-route-availability]:hover, .btn:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 8px rgba(0,0,0,0.08);
             }
 
-            /* Hover específico para botones */
             .btn:hover {
                 filter: brightness(0.98);
             }
 
-        /* Para el badge de estado */
         .rounded-circle {
             display: inline-block;
             flex-shrink: 0;
         }
 
-        /* Línea divisoria sutil */
         .border-bottom {
             border-color: #eaeef2 !important;
         }
 
-        /* Ajustes de texto */
         .small {
             font-size: 0.875rem;
         }
@@ -231,8 +296,5 @@ else
             font-size: 1.75rem;
         }
     </style>
-    
-   
-    
 }
 

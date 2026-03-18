@@ -108,48 +108,44 @@
 
                         <!-- Editorial y categorías -->
                         <div class="mb-4">
-                            <h5 class="fw-semibold mb-3">
-                                <i class="bi bi-building text-primary me-2"></i>
-                                Editorial y categorías
-                            </h5>
-                            <div class="row g-3">
-                                @* <div class="col-md-6">
-                                    <label asp-for="PublisherId" class="form-label fw-medium">Editorial</label>
-                                    <select asp-for="PublisherId" class="form-select border-0 bg-light" asp-items="ViewBag.Publishers">
-                                        <option value="">Seleccionar editorial...</option>
-                                    </select>
-                                </div>
 
-                                <div class="col-md-6">
-                                    <label asp-for="StateConservationId" class="form-label fw-medium">Estado de conservación</label>
-                                    <select asp-for="StateConservationId" class="form-select border-0 bg-light" asp-items="ViewBag.States">
-                                        <option value="">Seleccionar estado...</option>
-                                    </select>
-                                </div> *@
-
-                                <div class="col-12">
-                                    <label class="form-label fw-medium">Categorías</label>
-                                    <div class="bg-light p-3 rounded-3">
-                                        <div class="d-flex flex-wrap gap-3">
-                                            @if (ViewBag.Categories != null)
-                                            {
-                                                foreach (var category in ViewBag.Categories)
-                                                {
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox"
-                                                               name="SelectedCategoryIds" value="@category.Value"
-                                                               id="cat_@category.Value"
-                                                        @(Model.Category != null && Model.Category.Any(c => c.Id.ToString() == category.Value) ? "checked" : "")>
-                                                        <label class="form-check-label" for="cat_@category.Value">
-                                                            @category.Text
-                                                        </label>
-                                                    </div>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- EDITORIAL - con asp-for -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Publisher" class="form-label">Editorial</label>
+                                <select asp-for="Publisher.Id"
+                                        class="form-select"
+                                        asp-items="ViewBag.ListPublisher">
+                                    <option value="">-- Seleccionar editorial... --</option>
+                                </select>
+                                <span asp-validation-for="Publisher" class="text-danger small"></span>
                             </div>
+
+                            <!-- ESTADO - con asp-for -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StateConservation" class="form-label">Estado de conservación</label>
+                                <select asp-for="StateConservation.Id"
+                                        class="form-select"
+                                        asp-items="ViewBag.ListStateConservation">
+                                    <option value="">-- Seleccionar estado... --</option>
+                                </select>
+                                <span asp-validation-for="StateConservation" class="text-danger small"></span>
+                            </div>
+
+
+                            @* Seleccion de categorias  Seleccion multiple *@
+                            <div class="col-12 mt-5">
+                                <label class="form-label">Categorías</label>
+                                <select id="selectedCategorias"
+                                        name="selectedCategorias"
+                                        class="form-select"
+                                        asp-items="ViewBag.ListCategorias"
+                                        multiple>
+                                </select>
+                                <div class="form-text">Puede seleccionar múltiples categorías.</div>
+                                @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
+                                <span asp-validation-for="Category" class="text-danger small"></span>
+                            </div>
+
                         </div>
 
                         <!-- Botones de acción -->
@@ -540,6 +536,25 @@
                 })
                 .catch(error => console.error('Error:', error));
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Verificar si el plugin está disponible
+            if (typeof $.fn.multiselect !== 'undefined') {
+                $('#selectedCategorias').multiselect({
+                    buttonClass: 'form-select',
+                    templates: {
+                        button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                    },
+                    includeSelectAllOption: true,
+                    selectAllText: 'Seleccionar todas',
+                    allSelectedText: 'Todas las opciones',
+                    nonSelectedText: 'Seleccione una opción',
+                    nSelectedText: ' - seleccionadas',
+                });
+            }
         });
     </script>
 }

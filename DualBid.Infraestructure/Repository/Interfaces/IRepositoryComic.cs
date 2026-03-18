@@ -12,5 +12,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<ICollection<Comic>> ListAsync();
         Task<Comic> FindByIdAsync(int id);
         Task<int> AddAsync(Comic entity, string[] selectedCategorias);
+
+        Task<bool> UpdateAvailabilityAsync(int id, bool availability);
     }
 }

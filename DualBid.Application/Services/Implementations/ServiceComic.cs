@@ -51,5 +51,18 @@ namespace DualBid.Application.Services.Implementations
             return _mapper.Map<ICollection<ComicDTO>>(list);
         }
 
+        public async Task<bool> UpdateAvailabilityAsync(int id, bool availability)
+        {
+            try
+            {
+                return await _repositoryComic.UpdateAvailabilityAsync(id, availability);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in service updating comic availability: {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

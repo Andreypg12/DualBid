@@ -133,5 +133,26 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
             libroToUpdate.Category = categorias;
         }
+
+        public async Task<bool> UpdateAvailabilityAsync(int id, bool availability)
+        {
+            try
+            {
+                var comic = await _context.Set<Comic>().FindAsync(id);
+                if (comic == null)
+                    return false;
+
+                comic.Availability = availability;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Loggear el error si tienes un sistema de logging
+                Console.WriteLine($"Error updating comic availability: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using DualBid.Application.DTOs;
+﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
@@ -184,7 +185,50 @@ namespace DualBid.Controllers
         }
 
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var comic = await _serviceComic.FindByIdAsync(id);
+            if (comic == null)
+            {
+                TempData["SwalMessage"] = "Comic not found";
+                TempData["SwalIcon"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _serviceComic.UpdateAvailabilityAsync(id, false);
+
+            TempData["SwalMessage"] = "Comic deleted successfully";
+            TempData["SwalIcon"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var comic = await _serviceComic.FindByIdAsync(id);
+            if (comic == null)
+            {
+                TempData["SwalMessage"] = "Comic not found";
+                TempData["SwalIcon"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _serviceComic.UpdateAvailabilityAsync(id, true);
+
+            TempData["SwalMessage"] = "Comic restored successfully";
+            TempData["SwalIcon"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+    }
     }
 
+    
 
-}
+
+
