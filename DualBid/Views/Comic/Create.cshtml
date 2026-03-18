@@ -22,12 +22,13 @@
         <p class="text-muted mb-4">Completa los detalles para añadir un nuevo ejemplar a la colección</p>
     </div>
 
-    <div class="row g-4">
-        <!-- Formulario principal -->
-        <div class="col-lg-7">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
+    <!-- FORMULARIO PRINCIPAL - AHORA INCLUYE TODAS LAS SECCIONES -->
+    <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
+        <div class="row g-4">
+            <!-- Formulario principal -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
                         @* <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div> *@
 
                         <!-- Información básica -->
@@ -142,9 +143,9 @@
                                     </select>
                                     <span asp-validation-for="StateConservation" class="text-danger small"></span>
                                 </div>
-                            
 
-                               @* Seleccion de categorias  Seleccion multiple *@
+
+                                @* Seleccion de categorias  Seleccion multiple *@
                                 <div class="col-12 mt-5">
                                     <label class="form-label">Categorías</label>
                                     <select id="selectedCategorias"
@@ -156,7 +157,7 @@
                                     <div class="form-text">Puede seleccionar múltiples categorías.</div>
                                     @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                     <span asp-validation-for="Category" class="text-danger small"></span>
-                                </div> 
+                                </div>
 
                             </div>
                         </div>
@@ -170,76 +171,68 @@
                                 <i class="bi bi-check-lg me-2 text-white"></i>Crear cómic
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-
-
-
-
-
-        <!-- SECCIÓN DE IMÁGENES - ÁREA DE SUBIDA MÚLTIPLE -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center gap-2 mb-4">
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
-                            <i class="bi bi-images text-primary fs-4"></i>
+            <!-- SECCIÓN DE IMÁGENES - ÁREA DE SUBIDA MÚLTIPLE (AHORA DENTRO DEL FORM) -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-images text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-semibold mb-1">Galería de imágenes</h5>
+                                <p class="text-muted small mb-0">Sube hasta 5 imágenes del cómic</p>
+                            </div>
                         </div>
-                        <div>
-                            <h5 class="fw-semibold mb-1">Galería de imágenes</h5>
-                            <p class="text-muted small mb-0">Sube hasta 5 imágenes del cómic</p>
+
+                        <!-- Selector simple de imágenes -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Seleccionar imágenes (máx. 5)</label>
+
+                            <input type="file"
+                                   class="form-control"
+                                   name="imageFile"
+                                   id="fileInput"
+                                   multiple
+                                   accept="image/*" />
+
+                            <p class="small text-muted mt-2 mb-0">Formatos: JPG, PNG, GIF, WEBP (Máx. 5MB por imagen)</p>
                         </div>
-                    </div>
 
-
-
-                    <!-- Selector simple de imágenes -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Seleccionar imágenes (máx. 5)</label>
-
-                        <input type="file"
-                               class="form-control"
-                               name="imageFile"
-                               id="fileInput"
-                               multiple
-                               accept="image/*" />
-
-                        <p class="small text-muted mt-2 mb-0">Formatos: JPG, PNG, GIF, WEBP (Máx. 5MB por imagen)</p>
-                    </div>
-
-
-
-                    <!-- Previsualización de imágenes -->
-                    <div class="image-preview-container mb-4">
-                        <h6 class="fw-semibold mb-3">
-                            <i class="bi bi-eye me-2"></i>Previsualización
-                            <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
-                        </h6>
-                        <div class="row g-2" id="imagePreview">
-                            <!-- Las imágenes se añadirán aquí dinámicamente -->
+                        <!-- Previsualización de imágenes -->
+                        <div class="image-preview-container mb-4">
+                            <h6 class="fw-semibold mb-3">
+                                <i class="bi bi-eye me-2"></i>Previsualización
+                                <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
+                            </h6>
+                            <div class="row g-2" id="imagePreview">
+                                <!-- Las imágenes se añadirán aquí dinámicamente -->
+                            </div>
                         </div>
-                    </div>
-                    
-                    @* Muestra etiqueta en caso de error  *@
-                    <span class="text-danger small">@Html.ValidationMessage("Imagen")</span>
-                    <!-- Consejos para imágenes -->
-                    <div class="bg-light rounded-3 p-3">
-                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
-                            <i class="bi bi-lightbulb me-2"></i>Consejos
-                        </h6>
-                        <ul class="small text-muted ps-3 mb-0">
-                            <li>La primera imagen será la portada principal</li>
-                            <li>Usa imágenes de buena calidad (mínimo 800x600 px)</li>
-                            <li>Las imágenes se optimizarán automáticamente</li>
-                        </ul>
+
+                        @* Muestra etiqueta en caso de error  *@
+                        <span class="text-danger small">@Html.ValidationMessage("Imagen")</span>
+
+                        <!-- Consejos para imágenes -->
+                        <div class="bg-light rounded-3 p-3">
+                            <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                                <i class="bi bi-lightbulb me-2"></i>Consejos
+                            </h6>
+                            <ul class="small text-muted ps-3 mb-0">
+                                <li>La primera imagen será la portada principal</li>
+                                <li>Usa imágenes de buena calidad (mínimo 800x600 px)</li>
+                                <li>Las imágenes se optimizarán automáticamente</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form> <!-- CIERRE DEL FORMULARIO -->
 </div>
 
 

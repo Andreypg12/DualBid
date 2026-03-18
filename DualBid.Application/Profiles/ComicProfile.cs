@@ -13,6 +13,8 @@ namespace DualBid.Application.Profiles
     {
         public ComicProfile()
         {
+            CreateMap<ImgComic, ImgComicDTO>().ReverseMap();
+
             CreateMap<Comic, ComicDTO>()
                 .ForMember(dest => dest.Id, orig => orig.MapFrom(o => o.Id))
                 .ForMember(dest => dest.Title, orig => orig.MapFrom(o => o.Title))
@@ -28,14 +30,11 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.availability, orig => orig.MapFrom(o => o.Availability));
 
 
-            CreateMap<ComicDTO, Comic>()
-            .ForMember(dest => dest.Publisher, opt => opt.Ignore())
-            .ForMember(dest => dest.StateConservation, opt => opt.Ignore())
-            .ForMember(dest => dest.Category, opt => opt.Ignore())
-            .ForMember(dest => dest.ImgComic, opt => opt.Ignore())
-            .ForMember(dest => dest.Seller, opt => opt.Ignore()); 
-
-
+                CreateMap<ComicDTO, Comic>()
+                .ForMember(dest => dest.Publisher, opt => opt.Ignore())
+                .ForMember(dest => dest.StateConservation, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Seller, opt => opt.Ignore());
         }
     }
 }

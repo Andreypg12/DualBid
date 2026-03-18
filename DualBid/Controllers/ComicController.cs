@@ -120,7 +120,7 @@ namespace DualBid.Controllers
                     });
                 }
 
-                // Si tenías un error duplicado por "Imagen", elimínalo usando la key correcta
+
                 ModelState.Remove("imageFile");
                 ModelState.Remove("ImgComic");
             }
