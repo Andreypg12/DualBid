@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +35,16 @@ namespace DualBid.Application.Services.Implementations
         {
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<UserDTO>>(list);
+        }
+
+        public async Task UpdateAsync(int id, UserDTO dto)
+        {
+
+            var entity = await _repository.FindByIdAsync(id);
+
+            _mapper.Map(dto, entity);
+
+            await _repository.UpdateAsync(entity);
         }
     }
 }

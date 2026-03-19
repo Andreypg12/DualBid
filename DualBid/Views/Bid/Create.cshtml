@@ -25,15 +25,39 @@
                 <div class="d-flex gap-2">
                     <div class="bg-light rounded-3 p-3 text-center">
                         <small class="text-muted d-block">Current bid</small>
-                        <span class="h5 mb-0 text-success fw-bold">$@Model.CurrentBidPrice.ToString("N2")</span>
+                        <span class="h5 mb-0 text-success fw-bold">$@Model.Auction.CurrentBid.AmountOffered.ToString("N2")</span>
                     </div>
                     <div class="bg-light rounded-3 p-3 text-center">
                         <small class="text-muted d-block">Min. increase</small>
-                        <span class="h5 mb-0 text-primary fw-bold">$@Model.MinimunIncrease.ToString("N2")</span>
+                        <span class="h5 mb-0 text-primary fw-bold">$@Model.Auction.MinimunIncrease.ToString("N2")</span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    @{
+        ViewData["Title"] = "Create bid";
+    }
+
+    <!-- Alertas simples -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            alert('@Html.Raw(TempData["SuccessMessage"])');
+        </script>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <script>
+            alert('@Html.Raw(TempData["ErrorMessage"])' + '\n\n' + '@Html.Raw(TempData["ErrorDetails"])');
+        </script>
+    }
+
+    <!-- Resto de tu vista -->
+    <div class="container py-5">
+        <!-- ... -->
     </div>
 
     <div class="row g-4">
@@ -46,10 +70,9 @@
 
                         <!-- Campos ocultos para los IDs -->
                         <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="OutBidUserId" />
                         <input type="hidden" asp-for="AuctionId" />
                         <input type="hidden" asp-for="TitleComicAuction" />
-                       @*  <input type="hidden" asp-for="MinimunIncrease" id="hiddenMinIncrease" />
-                        <input type="hidden" asp-for="CurrentBidPrice" id="hiddenCurrentBid" /> *@
 
                         <!-- Campo de monto a ofrecer -->
                         <div class="mb-4">
@@ -78,7 +101,7 @@
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-outline-primary rounded-pill px-3" id="suggestedBidBtn">
                                         <i class="bi bi-lightning-charge me-1"></i>
-                                        Suggested: $<span id="suggestedAmount">@((Model.CurrentBidPrice + Model.MinimunIncrease).ToString("N2"))</span>
+                                        Suggested: $<span id="suggestedAmount">@(((Model.Auction.CurrentBid.AmountOffered) + Model.Auction.MinimunIncrease).ToString("N2"))</span>
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary rounded-pill px-3" id="customAmountBtn" data-bs-toggle="modal" data-bs-target="#amountModal">
                                         <i class="bi bi-pencil me-1"></i> Custom amount
@@ -96,9 +119,9 @@
                                 <div>
                                     <h6 class="fw-semibold mb-1">Bidding information</h6>
                                     <p class="small text-black mb-0">
-                                        The current bid is <strong class="text-success">$@Model.CurrentBidPrice.ToString("N2")</strong>.
-                                        To place a valid bid, you must offer at least <strong class="text-primary">$@((Model.CurrentBidPrice + Model.MinimunIncrease).ToString("N2"))</strong>
-                                        (current bid + minimum increase of <strong>$@Model.MinimunIncrease.ToString("N2")</strong>).
+                                        The current bid is <strong class="text-success">$@Model.Auction.CurrentBid.AmountOffered.ToString("N2")</strong>.
+                                        To place a valid bid, you must offer at least <strong class="text-primary">$@((Model.Auction.CurrentBid.AmountOffered + Model.Auction.MinimunIncrease).ToString("N2"))</strong>
+                                        (current bid + minimum increase of <strong>$@Model.Auction.MinimunIncrease.ToString("N2")</strong>).
                                     </p>
                                 </div>
                             </div>
@@ -131,15 +154,15 @@
                     <div class="vstack gap-3">
                         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
                             <span class="text-secondary">Current bid</span>
-                            <span class="fw-bold text-success fs-5">$@Model.CurrentBidPrice.ToString("N2")</span>
+                            <span class="fw-bold text-success fs-5">$@Model.Auction.CurrentBid.AmountOffered.ToString("N2")</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
                             <span class="text-secondary">Minimum increase</span>
-                            <span class="fw-bold text-primary">+$@Model.MinimunIncrease.ToString("N2")</span>
+                            <span class="fw-bold text-primary">+$@Model.Auction.MinimunIncrease.ToString("N2")</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary fw-semibold">Minimum required</span>
-                            <span class="fw-bold text-dark fs-4">$@((Model.CurrentBidPrice + Model.MinimunIncrease).ToString("N2"))</span>
+                            <span class="fw-bold text-dark fs-4">$@((Model.Auction.CurrentBid.AmountOffered + Model.Auction.MinimunIncrease).ToString("N2"))</span>
                         </div>
                     </div>
                 </div>
@@ -158,7 +181,7 @@
                         </li>
                         <li class="d-flex gap-2">
                             <i class="bi bi-check-circle-fill flex-shrink-0"></i>
-                            <span>Remember to include the minimum increase of $@Model.MinimunIncrease.ToString("N2")</span>
+                            <span>Remember to include the minimum increase of $@Model.Auction.MinimunIncrease.ToString("N2")</span>
                         </li>
                         <li class="d-flex gap-2">
                             <i class="bi bi-check-circle-fill flex-shrink-0"></i>
@@ -184,12 +207,12 @@
             <div class="modal-body">
                 <p class="small text-secondary mb-3">
                     Enter your custom bid amount. Remember it must be at least
-                    <strong>$@((Model.CurrentBidPrice + Model.MinimunIncrease).ToString("N2"))</strong>
+                    <strong>$@((Model.Auction.CurrentBid.AmountOffered + Model.Auction.MinimunIncrease).ToString("N2"))</strong>
                 </p>
                 <div class="input-group">
                     <span class="input-group-text bg-light">$</span>
                     <input type="number" class="form-control" id="customAmount"
-                           step="0.01" min="@(Model.CurrentBidPrice + Model.MinimunIncrease)"
+                           step="0.01" min="@(Model.Auction.CurrentBid.AmountOffered + Model.Auction.MinimunIncrease)"
                            placeholder="Enter amount">
                 </div>
             </div>
@@ -255,8 +278,8 @@
 
     <script>
         (() => {
-            const currentBid = Math.round(parseFloat("@Model.CurrentBidPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
-            const minIncrease = Math.round(parseFloat("@Model.MinimunIncrease.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
+            const currentBid = Math.round(parseFloat("@Model.Auction.CurrentBid.AmountOffered.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
+            const minIncrease = Math.round(parseFloat("@Model.Auction.MinimunIncrease.ToString(System.Globalization.CultureInfo.InvariantCulture)"));
             const minRequired = currentBid + minIncrease;
 
             const amountInput = document.getElementById('amountOffered');

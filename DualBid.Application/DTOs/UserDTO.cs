@@ -25,6 +25,8 @@ namespace DualBid.Application.DTOs
         [Display(Name = "Role")]
         public RoleDTO Role { get; set; } = new();
 
+        public int StateId { get; set; }
+
         [Display(Name = "State")]
         public UserStateDTO State { get; set; } = new();
 

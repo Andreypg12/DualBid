@@ -1,8 +1,10 @@
 ﻿using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
 using DualBid.ViewModels.Auction;
+using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
