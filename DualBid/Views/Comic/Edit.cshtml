@@ -23,14 +23,15 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Formulario principal -->
-        <div class="col-lg-7">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <form asp-action="Edit" enctype="multipart/form-data" id="editComicForm">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <!-- FORMULARIO PRINCIPAL - AHORA INCLUYE TODAS LAS SECCIONES -->
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editComicForm">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+        <div class="row g-4">
+            <!-- Formulario principal -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
                         <!-- ID oculto para el envío -->
                         <input type="hidden" asp-for="Id" />
 
@@ -108,7 +109,6 @@
 
                         <!-- Editorial y categorías -->
                         <div class="mb-4">
-
                             <!-- EDITORIAL - con asp-for -->
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Publisher" class="form-label">Editorial</label>
@@ -131,7 +131,6 @@
                                 <span asp-validation-for="StateConservation" class="text-danger small"></span>
                             </div>
 
-
                             @* Seleccion de categorias  Seleccion multiple *@
                             <div class="col-12 mt-5">
                                 <label class="form-label">Categorías</label>
@@ -145,115 +144,118 @@
                                 @* Esto es lo que genera el Mensaje de error en caso de que el ModelState haya agarrado el error de validación *@
                                 <span asp-validation-for="Category" class="text-danger small"></span>
                             </div>
-
                         </div>
 
                         <!-- Botones de acción -->
                         <div class="d-flex gap-3 justify-content-end mt-4">
-                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2 text-white" style="background-color: red">
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2 text-white" style="background-color: rgb(215, 75, 72)">
                                 <i class="bi bi-x-lg me-2"></i>Cancel and back
                             </a>
-                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm text-white" style="background-color: greenyellow">
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm text-white" style="background-color: rgb(148, 191, 151)">
                                 <i class="bi bi-check-lg me-2"></i>Save
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- SECCIÓN DE IMÁGENES - ÁREA DE SUBIDA MÚLTIPLE -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center gap-2 mb-4">
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
-                            <i class="bi bi-images text-primary fs-4"></i>
+            <!-- SECCIÓN DE IMÁGENES - ÁREA DE SUBIDA MÚLTIPLE (AHORA DENTRO DEL FORM) -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-images text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-semibold mb-1">Galería de imágenes</h5>
+                                <p class="text-muted small mb-0">Administra las imágenes del cómic</p>
+                            </div>
                         </div>
-                        <div>
-                            <h5 class="fw-semibold mb-1">Galería de imágenes</h5>
-                            <p class="text-muted small mb-0">Administra las imágenes del cómic</p>
-                        </div>
-                    </div>
 
-                    <!-- Imágenes existentes -->
-                    @if (Model.ImgComic != null && Model.ImgComic.Any())
-                    {
+                        <!-- Campo oculto para manejar imágenes eliminadas -->
+                        <input type="hidden" name="DeletedImageIds" id="DeletedImageIds" value="" />
+
+                        <!-- Imágenes existentes -->
+                        @if (Model.ImgComic != null && Model.ImgComic.Any())
+                        {
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="bi bi-image me-2"></i>Imágenes actuales
+                                    <span class="badge bg-primary rounded-pill ms-2">@Model.ImgComic.Count</span>
+                                </h6>
+                                <div class="row g-2" id="existingImages">
+                                    @foreach (var img in Model.ImgComic.Where(i => i.Img != null && i.Img.Length > 0))
+                                    {
+                                        <div class="col-4">
+                                            <div class="existing-image-item position-relative">
+                                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(img.Img)"
+                                                     class="img-fluid rounded-3 border"
+                                                     style="aspect-ratio: 1; object-fit: cover;"
+                                                     alt="Comic image" />
+                                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle remove-existing"
+                                                        data-image-id="@img.Id"
+                                                        style="width: 24px; height: 24px; padding: 0; font-size: 12px;"
+                                                        title="Eliminar imagen">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Área para nuevas imágenes -->
                         <div class="mb-4">
                             <h6 class="fw-semibold mb-3">
-                                <i class="bi bi-image me-2"></i>Imágenes actuales
-                                <span class="badge bg-primary rounded-pill ms-2">@Model.ImgComic.Count</span>
+                                <i class="bi bi-cloud-upload me-2"></i>Añadir nuevas imágenes
                             </h6>
-                            <div class="row g-2" id="existingImages">
-                                @foreach (var img in Model.ImgComic.Where(i => i.Img != null && i.Img.Length > 0))
-                                {
-                                    <div class="col-4">
-                                        <div class="existing-image-item position-relative">
-                                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(img.Img)"
-                                                 class="img-fluid rounded-3 border"
-                                                 style="aspect-ratio: 1; object-fit: cover;"
-                                                 alt="Comic image" />
-                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle remove-existing"
-                                                    data-image-id="@img.Id"
-                                                    style="width: 24px; height: 24px; padding: 0; font-size: 12px;"
-                                                    title="Eliminar imagen">
-                                                <i class="bi bi-x"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                }
+
+                            <!-- Área de dropzone -->
+                            <div class="upload-area border border-2 border-dashed rounded-4 p-4 mb-3 text-center"
+                                 id="dropzone"
+                                 style="border-color: #dee2e6; cursor: pointer; transition: all 0.3s ease; background: #f8f9fa;">
+                                <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
+                                <h6 class="fw-semibold mb-1">Arrastra nuevas imágenes aquí</h6>
+                                <p class="small text-muted mb-3">o haz clic para seleccionar archivos</p>
+                                <input type="file" name="newImages" id="fileInput" multiple accept="image/*" style="display: none;" />
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="selectFilesBtn">
+                                    <i class="bi bi-folder2-open me-2"></i>Seleccionar archivos
+                                </button>
+                                <p class="small text-muted mt-3 mb-0">Formatos: JPG, PNG, GIF (Máx. 5MB por imagen)</p>
+                            </div>
+
+                            <!-- Previsualización de nuevas imágenes -->
+                            <div class="image-preview-container mb-4">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="bi bi-eye me-2"></i>Nuevas imágenes
+                                    <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
+                                </h6>
+                                <div class="row g-2" id="imagePreview">
+                                    <!-- Las nuevas imágenes se añadirán aquí -->
+                                </div>
                             </div>
                         </div>
-                    }
 
-                    <!-- Área para nuevas imágenes -->
-                    <div class="mb-4">
-                        <h6 class="fw-semibold mb-3">
-                            <i class="bi bi-cloud-upload me-2"></i>Añadir nuevas imágenes
-                        </h6>
-
-                        <!-- Área de dropzone -->
-                        <div class="upload-area border border-2 border-dashed rounded-4 p-4 mb-3 text-center"
-                             id="dropzone"
-                             style="border-color: #dee2e6; cursor: pointer; transition: all 0.3s ease; background: #f8f9fa;">
-                            <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
-                            <h6 class="fw-semibold mb-1">Arrastra nuevas imágenes aquí</h6>
-                            <p class="small text-muted mb-3">o haz clic para seleccionar archivos</p>
-                            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" />
-                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="selectFilesBtn">
-                                <i class="bi bi-folder2-open me-2"></i>Seleccionar archivos
-                            </button>
-                            <p class="small text-muted mt-3 mb-0">Formatos: JPG, PNG, GIF (Máx. 5MB por imagen)</p>
-                        </div>
-
-                        <!-- Previsualización de nuevas imágenes -->
-                        <div class="image-preview-container mb-4">
-                            <h6 class="fw-semibold mb-3">
-                                <i class="bi bi-eye me-2"></i>Nuevas imágenes
-                                <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
+                        <!-- Consejos para imágenes -->
+                        <div class="bg-light rounded-3 p-3">
+                            <h6 class="fw-semibold small text-uppercase text-muted mb-2">
+                                <i class="bi bi-lightbulb me-2"></i>Consejos
                             </h6>
-                            <div class="row g-2" id="imagePreview">
-                                <!-- Las nuevas imágenes se añadirán aquí -->
-                            </div>
+                            <ul class="small text-muted ps-3 mb-0">
+                                <li>La primera imagen será la portada principal</li>
+                                <li>Puedes eliminar imágenes existentes</li>
+                                <li>Las imágenes se optimizarán automáticamente</li>
+                            </ul>
                         </div>
-                    </div>
-
-                    <!-- Consejos para imágenes -->
-                    <div class="bg-light rounded-3 p-3">
-                        <h6 class="fw-semibold small text-uppercase text-muted mb-2">
-                            <i class="bi bi-lightbulb me-2"></i>Consejos
-                        </h6>
-                        <ul class="small text-muted ps-3 mb-0">
-                            <li>La primera imagen será la portada principal</li>
-                            <li>Puedes eliminar imágenes existentes</li>
-                            <li>Las imágenes se optimizarán automáticamente</li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form> <!-- CIERRE DEL FORMULARIO -->
 </div>
+
 
 <style>
     /* Estilos para el área de subida */
@@ -505,37 +507,22 @@
                 imageCount.textContent = `${filesArray.length}/${maxFiles}`;
             }
 
+
+
             // Enviar formulario con imágenes
-            const form = document.getElementById('editComicForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+         const form = document.getElementById('editComicForm');
 
-                const formData = new FormData(this);
+        form.addEventListener('submit', function () {
+            const dataTransfer = new DataTransfer();
 
-                // Añadir nuevas imágenes al FormData
-                filesArray.forEach((file, index) => {
-                    formData.append('NewImages', file);
-                });
-
-                // Enviar mediante fetch
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        return response.json();
-                    }
-                })
-                .then(data => {
-                    if (data && data.success) {
-                        window.location.href = '@Url.Action("Index")';
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            filesArray.forEach(file => {
+                dataTransfer.items.add(file);
             });
+
+            fileInput.files = dataTransfer.files;
+        });
+
+
         });
     </script>
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DualBid.Infraestructure.Repository.Interfaces
 {
     public interface IRepositoryComic
@@ -14,5 +15,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<int> AddAsync(Comic entity, string[] selectedCategorias);
 
         Task<bool> UpdateAvailabilityAsync(int id, bool availability);
+        Task<bool> UpdateAsync(Comic entity,string[] selectedCategorias,List<ImgComic> newImages,int[] imagesToDelete
+);
     }
 }

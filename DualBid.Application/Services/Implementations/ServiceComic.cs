@@ -64,5 +64,23 @@ namespace DualBid.Application.Services.Implementations
             }
         }
 
+        public async Task<bool> UpdateAsync(ComicDTO dto,string[] selectedCategorias,List<ImgComicDTO> newImages,int[] imagesToDelete)
+        {
+            var entity = _mapper.Map<Comic>(dto);
+
+            var entityImages = newImages?
+                .Select(x => new ImgComic
+                {
+                    Img = x.Img
+                })
+                .ToList() ?? new List<ImgComic>();
+
+            return await _repositoryComic.UpdateAsync(
+                entity,
+                selectedCategorias,
+                entityImages,
+                imagesToDelete
+            );
+        }
     }
 }

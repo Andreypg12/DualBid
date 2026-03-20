@@ -1,6 +1,7 @@
 ﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -72,6 +73,8 @@ namespace DualBid.Controllers
                 selectedValues: selectedCategoriaIds
             );
         }
+
+
 
         // GET: LibroController/Create
         public async Task<IActionResult> Create()
@@ -169,6 +172,8 @@ namespace DualBid.Controllers
         }
 
 
+
+
         //Este es el metodo que carga todo los datos necesarios dentro de la vista de edición, como el publisher, las categorias, etc
         public async Task<IActionResult> Edit(int id)
         {
@@ -183,6 +188,59 @@ namespace DualBid.Controllers
 
             return View(dto);
         }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
+        {
+            selectedCategorias ??= Array.Empty<string>();
+            ImagesToDelete ??= Array.Empty<int>();
+
+            var nuevasImagenes = new List<ImgComicDTO>();
+
+            if (newImages != null && newImages.Count > 0)
+            {
+                foreach (var file in newImages)
+                {
+                    if (file == null || file.Length == 0) continue;
+
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+
+                    nuevasImagenes.Add(new ImgComicDTO
+                    {
+                        Img = ms.ToArray()
+                    });
+                }
+            }
+
+            ModelState.Remove("Publisher.Description");
+            ModelState.Remove("StateConservation.Description");
+            if (!ModelState.IsValid)
+            {
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
+
+            await _serviceComic.UpdateAsync(
+                dto,
+                selectedCategorias,
+                nuevasImagenes,
+                ImagesToDelete
+            );
+
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                "Comic actualizado",
+                $"El cómic {dto.Title} fue actualizado correctamente.",
+                SweetAlertMessageType.success
+            );
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
 
 
         [HttpPost]
