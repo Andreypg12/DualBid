@@ -12,6 +12,7 @@ namespace DualBid.Controllers
 {
     public class ComicController : Controller
     {
+        /*Son a todas las tablas a las cuales debo acceder*/
         private readonly IServiceComic _serviceComic;
         private readonly IServicePublisher _servicePublisher;
         private readonly IServiceCategory _serviceCategoria;
@@ -26,6 +27,7 @@ namespace DualBid.Controllers
 
         }
 
+        //Esta por decirlo asi es la página principal donde mustran la lista de comics
         [HttpGet]
         public async Task<IActionResult> Index(string availability = "available")
         {
@@ -39,7 +41,7 @@ namespace DualBid.Controllers
             return View(filtered);
         }
 
-        //Esto es lo que hace la comunicacion entre una vista y la otra
+        //Esto es para mostrar el detalle de un comic
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -50,20 +52,18 @@ namespace DualBid.Controllers
         }
 
 
+        //Esto es para cargar todos los componentes con los datos correspondientes.
         private async Task LoadCombosAsync(IEnumerable<string>? selectedCategoriaIds = null)
         {
             // Publisher
             var publishers = await _servicePublisher.ListAsync();
-            ViewBag.ListPublisher = new SelectList(publishers, "Id", "Description"); // ← AHORA SÍ
+            ViewBag.ListPublisher = new SelectList(publishers, "Id", "Description");
 
             // StateConservation 
             var states = await _serviceStateConservation.ListAsync();
-            ViewBag.ListStateConservation = new SelectList(states, "Id", "Description"); // ← AHORA SÍ
+            ViewBag.ListStateConservation = new SelectList(states, "Id", "Description");
 
-
-
-
-            // Categorías (many-to-many)
+            // Categorías
             var categorias = await _serviceCategoria.ListAsync();
 
             ViewBag.ListCategorias = new MultiSelectList(
@@ -83,6 +83,7 @@ namespace DualBid.Controllers
             return View(new ComicDTO());
         }
 
+
         // POST: LibroController/Create
         // Cuando se aplica el POST llena el Dto con los datos del formulario y hace validaciones en base a las validaciones del DTO y guarda los errores en ModelState
         [HttpPost]
@@ -93,17 +94,8 @@ namespace DualBid.Controllers
 
 
 
-            // Validación de categorías 
-            if (selectedCategorias.Length == 0)
-            {
-                ModelState.AddModelError("Category", "You must select at least one category.");
-            }
-
-            // Imagen requerida en Create
-            if (dto.ImgComic == null && imageFile == null)
-            {
-                ModelState.AddModelError("Imagen", "Debe seleccionar una imagen.");
-            }
+            //AGREGAR LAS VALIDACIONES
+           
 
             // Si se envia imagen, convertirla a byte[]
             if (imageFile != null && imageFile.Count > 0)
