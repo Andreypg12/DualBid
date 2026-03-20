@@ -51,5 +51,14 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .ToListAsync();
             return collection;
         }
+
+        public async Task<int> AddAsync(Auction entity)
+        {
+            await _context.Set<Auction>().AddAsync(entity);
+
+            await _context.SaveChangesAsync();
+
+            return entity.Id;
+        }
     }
 }

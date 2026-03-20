@@ -51,7 +51,6 @@ namespace DualBid.Application.Services.Implementations
                 var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
                 throw;
             }
-
         }
     }
 }

@@ -11,5 +11,6 @@ namespace DualBid.Infraestructure.Repository.Interfaces
     {
         Task<ICollection<User>> ListAsync();
         Task<User> FindByIdAsync(int id);
+        Task UpdateAsync(User entity);
     }
 }

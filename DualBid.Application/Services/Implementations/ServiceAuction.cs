@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Interfaces;
 
 namespace DualBid.Application.Services.Implementations
@@ -32,6 +33,21 @@ namespace DualBid.Application.Services.Implementations
         {
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<AuctionDTO>>(list);
+        }
+        public async Task<int> AddAsync(AuctionDTO dto)
+        {
+            try
+            {
+                var entity = _mapper.Map<Auction>(dto);
+
+                return await _repository.AddAsync(entity);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
+                throw;
+            }
+
         }
     }
 }
