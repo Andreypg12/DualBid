@@ -1,9 +1,11 @@
 ﻿using DualBid.Application.DTOs;
+using DualBid.Infraestructure.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace DualBid.Application.Services.Interfaces
 {
@@ -13,5 +15,8 @@ namespace DualBid.Application.Services.Interfaces
         Task<ComicDTO?> FindByIdAsync(int id);
        
         Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias);
+        Task<bool> UpdateAvailabilityAsync(int id, bool availability);
+
+        Task<bool> UpdateAsync(ComicDTO dto, string[] selectedCategorias,List<ImgComicDTO> newImages,int[] imagesToDelete);
     }
 }

@@ -17,6 +17,8 @@
     @*Sweetalert *@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+   
+
     <!-- Multi-select CSS -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/css/bootstrap-multiselect.css"
@@ -53,6 +55,23 @@
 
     @* Esto es de signalR *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+
+    <!-- Notificaciones SweetAlert -->
+    @if (TempData["SwalMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: '',
+                    text: '@Html.Raw(TempData["SwalMessage"])',
+                    icon: '@(TempData["SwalIcon"] ?? "success")', 
+                    confirmButtonColor: 'rgb(176, 212, 247)',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 

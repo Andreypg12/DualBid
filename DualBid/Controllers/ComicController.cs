@@ -1,10 +1,12 @@
-﻿using System.Security.Claims;
-using DualBid.Application.DTOs;
+﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
@@ -72,6 +74,8 @@ namespace DualBid.Controllers
             );
         }
 
+
+
         // GET: LibroController/Create
         public async Task<IActionResult> Create()
         {
@@ -119,7 +123,7 @@ namespace DualBid.Controllers
                     });
                 }
 
-                // Si tenías un error duplicado por "Imagen", elimínalo usando la key correcta
+
                 ModelState.Remove("imageFile");
                 ModelState.Remove("ImgComic");
             }
@@ -168,6 +172,8 @@ namespace DualBid.Controllers
         }
 
 
+
+
         //Este es el metodo que carga todo los datos necesarios dentro de la vista de edición, como el publisher, las categorias, etc
         public async Task<IActionResult> Edit(int id)
         {
@@ -184,7 +190,103 @@ namespace DualBid.Controllers
         }
 
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
+        {
+            selectedCategorias ??= Array.Empty<string>();
+            ImagesToDelete ??= Array.Empty<int>();
+
+            var nuevasImagenes = new List<ImgComicDTO>();
+
+            if (newImages != null && newImages.Count > 0)
+            {
+                foreach (var file in newImages)
+                {
+                    if (file == null || file.Length == 0) continue;
+
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+
+                    nuevasImagenes.Add(new ImgComicDTO
+                    {
+                        Img = ms.ToArray()
+                    });
+                }
+            }
+
+            ModelState.Remove("Publisher.Description");
+            ModelState.Remove("StateConservation.Description");
+            if (!ModelState.IsValid)
+            {
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
+
+            await _serviceComic.UpdateAsync(
+                dto,
+                selectedCategorias,
+                nuevasImagenes,
+                ImagesToDelete
+            );
+
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                "Comic actualizado",
+                $"El cómic {dto.Title} fue actualizado correctamente.",
+                SweetAlertMessageType.success
+            );
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var comic = await _serviceComic.FindByIdAsync(id);
+            if (comic == null)
+            {
+                TempData["SwalMessage"] = "Comic not found";
+                TempData["SwalIcon"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _serviceComic.UpdateAvailabilityAsync(id, false);
+
+            TempData["SwalMessage"] = "Comic deleted successfully";
+            TempData["SwalIcon"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var comic = await _serviceComic.FindByIdAsync(id);
+            if (comic == null)
+            {
+                TempData["SwalMessage"] = "Comic not found";
+                TempData["SwalIcon"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _serviceComic.UpdateAvailabilityAsync(id, true);
+
+            TempData["SwalMessage"] = "Comic restored successfully";
+            TempData["SwalIcon"] = "success";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+    }
     }
 
+    
 
-}
+
+
