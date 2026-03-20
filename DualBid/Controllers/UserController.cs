@@ -18,15 +18,30 @@ namespace Libreria.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(string filter = "all", int? page = 1)
         {
             var collection = await _serviceUser.ListAsync();
 
-            int pageNumber = page ?? 1;
+            // Aplicar filtro según la opción seleccionada
+            IEnumerable<UserDTO> filtered;
 
+            if (filter == "blocked")
+            {
+                // Solo bloqueados (ID 3)
+                filtered = collection.Where(u => u.State.Id == 3);
+            }
+            else // "all" - muestra activos (1) e inactivos (2) juntos
+            {
+                filtered = collection.Where(u => u.State.Id == 1 || u.State.Id == 2);
+            }
+
+            int pageNumber = page ?? 1;
             int pageSize = 5;
 
-            return View(collection.ToPagedList(pageNumber, pageSize));
+            // Pasar el filtro actual a la vista usando ViewBag
+            ViewBag.CurrentFilter = filter;
+
+            return View(filtered.ToPagedList(pageNumber, pageSize));
         }
 
         public async Task<ActionResult> Details(int? id)
