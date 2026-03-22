@@ -2,6 +2,7 @@
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Infraestructure.Models;
+using Humanizer;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,15 +18,13 @@ namespace DualBid.Controllers
         private readonly IServicePublisher _servicePublisher;
         private readonly IServiceCategory _serviceCategoria;
         private readonly IServiceStateConservation _serviceStateConservation;
-        private readonly ICurrentUserService _serviceCurrentUser;
 
-        public ComicController(IServiceComic serviceComic, ICurrentUserService currentUserService, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
+        public ComicController(IServiceComic serviceComic, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
         {
             _serviceComic = serviceComic;
             _servicePublisher = servicePublisher;
             _serviceCategoria = serviceCategory;
             _serviceStateConservation = serviceStateConservation;
-            _serviceCurrentUser = currentUserService;
 
         }
 
@@ -90,11 +89,12 @@ namespace DualBid.Controllers
         // Cuando se aplica el POST llena el Dto con los datos del formulario y hace validaciones en base a las validaciones del DTO y guarda los errores en ModelState
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ComicDTO dto, List<IFormFile> imageFile, string[] selectedCategorias)
+        public async Task<IActionResult> Create(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias)
         {
             selectedCategorias ??= Array.Empty<string>();
 
-            dto.SellerId = _serviceCurrentUser.GetCurrentUserId() ?? 0;
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            dto.SellerId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
 
             //AGREGAR LAS VALIDACIONES
@@ -125,7 +125,7 @@ namespace DualBid.Controllers
             }
 
             //Imagenes no puede estar vacío.
-            if (imageFile == null || !imageFile.Any())
+            if (newImages == null || !newImages.Any())
             {
                 //ModelState.AddModelError("ImageFiles", "You must upload at least one image.");
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -142,11 +142,11 @@ namespace DualBid.Controllers
 
 
             // Si se envia imagen, convertirla a byte[]
-            if (imageFile != null && imageFile.Count > 0)
+            if (newImages != null && newImages.Count > 0)
             {
                 dto.ImgComic = new List<ImgComicDTO>();
 
-                foreach (var file in imageFile)
+                foreach (var file in newImages)
                 {
                     if (file == null || file.Length == 0) continue;
 
@@ -228,6 +228,18 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
         {
+
+            if (dto.AuctionCount < 0)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "¡You need to log in!",
+                   "You must be logged in to create a comic",
+                   SweetAlertMessageType.error
+                   );
+                await LoadCombosAsync();
+                return View(dto);
+            }
+
             selectedCategorias ??= Array.Empty<string>();
             ImagesToDelete ??= Array.Empty<int>();
 
@@ -280,18 +292,39 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+
+
             var comic = await _serviceComic.FindByIdAsync(id);
             if (comic == null)
             {
-                TempData["SwalMessage"] = "Comic not found";
-                TempData["SwalIcon"] = "error";
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "¡Comic not available!",
+                   "Was an error with this comic",
+                   SweetAlertMessageType.error
+                   );
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (comic.AuctionCount > 0)
+            {
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "¡Error deleting the comic!",
+                   "The comic has been auctione or is part of an active auction.",
+                   SweetAlertMessageType.error
+                   );
+
                 return RedirectToAction(nameof(Index));
             }
 
             await _serviceComic.UpdateAvailabilityAsync(id, false);
 
-            TempData["SwalMessage"] = "Comic deleted successfully";
-            TempData["SwalIcon"] = "success";
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "Process complete",
+                   "Comic deleted successfully",
+                   SweetAlertMessageType.success
+                   );
 
             return RedirectToAction(nameof(Index));
         }
