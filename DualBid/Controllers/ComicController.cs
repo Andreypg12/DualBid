@@ -12,20 +12,24 @@ namespace DualBid.Controllers
 {
     public class ComicController : Controller
     {
+        /*Son a todas las tablas a las cuales debo acceder*/
         private readonly IServiceComic _serviceComic;
         private readonly IServicePublisher _servicePublisher;
         private readonly IServiceCategory _serviceCategoria;
         private readonly IServiceStateConservation _serviceStateConservation;
+        private readonly ICurrentUserService _serviceCurrentUser;
 
-        public ComicController(IServiceComic serviceComic, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
+        public ComicController(IServiceComic serviceComic, ICurrentUserService currentUserService, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
         {
             _serviceComic = serviceComic;
             _servicePublisher = servicePublisher;
             _serviceCategoria = serviceCategory;
             _serviceStateConservation = serviceStateConservation;
+            _serviceCurrentUser = currentUserService;
 
         }
 
+        //Esta por decirlo asi es la página principal donde mustran la lista de comics
         [HttpGet]
         public async Task<IActionResult> Index(string availability = "available")
         {
@@ -39,7 +43,7 @@ namespace DualBid.Controllers
             return View(filtered);
         }
 
-        //Esto es lo que hace la comunicacion entre una vista y la otra
+        //Esto es para mostrar el detalle de un comic
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -50,20 +54,18 @@ namespace DualBid.Controllers
         }
 
 
+        //Esto es para cargar todos los componentes con los datos correspondientes.
         private async Task LoadCombosAsync(IEnumerable<string>? selectedCategoriaIds = null)
         {
             // Publisher
             var publishers = await _servicePublisher.ListAsync();
-            ViewBag.ListPublisher = new SelectList(publishers, "Id", "Description"); // ← AHORA SÍ
+            ViewBag.ListPublisher = new SelectList(publishers, "Id", "Description");
 
             // StateConservation 
             var states = await _serviceStateConservation.ListAsync();
-            ViewBag.ListStateConservation = new SelectList(states, "Id", "Description"); // ← AHORA SÍ
+            ViewBag.ListStateConservation = new SelectList(states, "Id", "Description");
 
-
-
-
-            // Categorías (many-to-many)
+            // Categorías
             var categorias = await _serviceCategoria.ListAsync();
 
             ViewBag.ListCategorias = new MultiSelectList(
@@ -83,6 +85,7 @@ namespace DualBid.Controllers
             return View(new ComicDTO());
         }
 
+
         // POST: LibroController/Create
         // Cuando se aplica el POST llena el Dto con los datos del formulario y hace validaciones en base a las validaciones del DTO y guarda los errores en ModelState
         [HttpPost]
@@ -91,19 +94,52 @@ namespace DualBid.Controllers
         {
             selectedCategorias ??= Array.Empty<string>();
 
+            dto.SellerId = _serviceCurrentUser.GetCurrentUserId() ?? 0;
 
 
-            // Validación de categorías 
-            if (selectedCategorias.Length == 0)
+            //AGREGAR LAS VALIDACIONES
+
+            //Valida si hay un usuario seleccionado
+            if (dto.SellerId == 0)
             {
-                ModelState.AddModelError("Category", "You must select at least one category.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡You need to log in!",
+                    "You must be logged in to create a comic",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
             }
 
-            // Imagen requerida en Create
-            if (dto.ImgComic == null && imageFile == null)
+            //Categoria no puede estar vacío.
+            if (!selectedCategorias.Any())
             {
-                ModelState.AddModelError("Imagen", "Debe seleccionar una imagen.");
+                //ModelState.AddModelError("SelectedCategorias", "You must select at least one category.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Categories is not enough!",
+                    "You must select at least one Category",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
             }
+
+            //Imagenes no puede estar vacío.
+            if (imageFile == null || !imageFile.Any())
+            {
+                //ModelState.AddModelError("ImageFiles", "You must upload at least one image.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Images is not enough!",
+                    "You must upload at least one Image",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
+            }
+
+            //Terminan las validaciones
+
+
 
             // Si se envia imagen, convertirla a byte[]
             if (imageFile != null && imageFile.Count > 0)
@@ -153,9 +189,6 @@ namespace DualBid.Controllers
                 await LoadCombosAsync(selectedCategorias);
                 return View(dto);
             }
-
-
-
 
 
             await _serviceComic.AddAsync(dto, selectedCategorias);

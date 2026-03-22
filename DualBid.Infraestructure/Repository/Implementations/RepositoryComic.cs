@@ -20,24 +20,6 @@ namespace DualBid.Infraestructure.Repository.Implementations
             _context = context;
         }
 
-        public async Task<Comic> FindByIdAsync(int id)
-        {
-            //Incluimos el publisher y el estado de conservación para que no nos de error al mostrar la vista de detalles
-
-            var @object = await _context.Set<Comic>().
-                        Where(comic => comic.Id == id)
-                        .Include(x => x.Publisher)
-                        .Include(x => x.StateConservation)
-                        .Include(x => x.ImgComic)
-                        .Include(x => x.Category)
-                        .Include(x => x.Seller)
-                        .Include(x => x.Auction)
-                            .ThenInclude(a => a.State)
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync();
-            return @object!;
-        }
-
         public async Task<ICollection<Comic>> ListAsync()
         {
             var collection = await _context.Set<Comic>()
@@ -53,92 +35,64 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return collection;
         }
 
-        public async Task<ICollection<Comic>> ListAsyncCategoria()
+        public async Task<Comic> FindByIdAsync(int id)
         {
-            var collection = await _context.Set<Comic>()
-                .Include(x => x.Publisher)
-                .Include(x => x.StateConservation)
-                .Include(x => x.ImgComic)
-                .Include(x => x.Category)
-                .Include(x => x.Auction)
-                .Include(x => x.Seller)
-                .AsNoTracking()
-                .ToListAsync();
-
-            return collection;
+            var @object = await _context.Set<Comic>().
+                        Where(comic => comic.Id == id)
+                        .Include(x => x.Publisher)
+                        .Include(x => x.StateConservation)
+                        .Include(x => x.ImgComic)
+                        .Include(x => x.Category)
+                        .Include(x => x.Seller)
+                        .Include(x => x.Auction)
+                            .ThenInclude(a => a.State)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
+            return @object!;
         }
-
 
         public async Task<int> AddAsync(Comic entity, string[] selectedCategorias)
         {
-            try
-            {
-                // Autor: si solo llega IdAutor, no es necesario setear navigation;
-                await ApplyCategoriasAsync(entity, selectedCategorias);
+
+            //Trae todas las categorías seleccionadas y las asigna al cómic
+            await ApplyCategoriasAsync(entity, selectedCategorias);
 
                 await _context.Set<Comic>().AddAsync(entity);
+
+                //DEBO AGREGAR ESTO PARA QUE SEA CON EL ID DEL USUARIO LOGUEADO
                 entity.SellerId = 13;
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                var sqlEx = ex.GetBaseException() as Microsoft.Data.SqlClient.SqlException;
-
-                if (sqlEx != null)
-                {
-                    Console.WriteLine($"SQL Error #{sqlEx.Number}: {sqlEx.Message}");
-
-                    foreach (Microsoft.Data.SqlClient.SqlError err in sqlEx.Errors)
-                        Console.WriteLine($"  - #{err.Number}: {err.Message}");
-                }
-                else
-                {
-                    Console.WriteLine(ex.GetBaseException().Message);
-                }
-
-                throw;
-            }
+            
 
             return entity.Id;
         }
 
 
-        private async Task ApplyCategoriasAsync(Comic libroToUpdate, string[] selectedCategorias)
+        private async Task ApplyCategoriasAsync(Comic comicToUpdate, string[] selectedCategorias)
         {
-            // Si no enviaron categorías, se establece vacío
-            if (selectedCategorias == null || selectedCategorias.Length == 0)
-            {
-                libroToUpdate.Category = new List<Category>();
-                return;
-            }
 
-            // Parse seguro
+            // Esto contierte los seleccionados a enteros, elimina duplicados y convierte a lista
             var ids = selectedCategorias
-                .Select(x => int.TryParse(x, out var n) ? n : (int?)null)
-                .Where(x => x.HasValue)
-                .Select(x => x!.Value)
+                .Select(int.Parse)
                 .Distinct()
                 .ToList();
 
-            if (ids.Count == 0)
-            {
-                libroToUpdate.Category = new List<Category>();
-                return;
-            }
-
-            // Trae SOLO las categorías requeridas
+            // Trae las categorías requeridas
             var categorias = await _context.Category
                 .Where(c => ids.Contains(c.Id))
                 .ToListAsync();
 
-            libroToUpdate.Category = categorias;
+            comicToUpdate.Category = categorias;
         }
+
+
+
 
         public async Task<bool> UpdateAvailabilityAsync(int id, bool availability)
         {
             try
             {
-                var comic = await _context.Set<Comic>().FindAsync(id);
+                var comic = await _context.Comic.FindAsync(id);
                 if (comic == null)
                     return false;
 
@@ -149,11 +103,12 @@ namespace DualBid.Infraestructure.Repository.Implementations
             }
             catch (Exception ex)
             {
-                // Loggear el error si tienes un sistema de logging
                 Console.WriteLine($"Error updating comic availability: {ex.Message}");
                 throw;
             }
         }
+
+
 
         public async Task<bool> UpdateAsync(Comic entity,string[] selectedCategorias,List<ImgComic> newImages,int[] imagesToDelete)
         {
@@ -176,7 +131,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
             await ApplyCategoriasAsync(comic, selectedCategorias);
 
-            // eliminar imágenes
+
+            // eliminar imágenes si es necesario
             if (imagesToDelete != null && imagesToDelete.Length > 0)
             {
                 var imgs = comic.ImgComic

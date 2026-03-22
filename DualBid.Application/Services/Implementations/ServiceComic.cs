@@ -23,6 +23,19 @@ namespace DualBid.Application.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task<ICollection<ComicDTO>> ListAsync()
+        {
+            var list = await _repositoryComic.ListAsync();
+            return _mapper.Map<ICollection<ComicDTO>>(list);
+        }
+
+        public async Task<ComicDTO?> FindByIdAsync(int id)
+        {
+            var comic = await _repositoryComic.FindByIdAsync(id);
+            var objetoMapeado = _mapper.Map<ComicDTO>(comic);
+            return objetoMapeado;
+        }
+
         public async Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias)
         {
             try
@@ -32,24 +45,11 @@ namespace DualBid.Application.Services.Implementations
             }
             catch (AutoMapperMappingException ex)
             {
-                var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
+                Console.WriteLine($"Error in service creating a comic : {ex.Message}");
                 throw;
             }
         }
 
-        public async Task<ComicDTO?> FindByIdAsync(int id)
-        {
-            var @objeto = await _repositoryComic.FindByIdAsync(id);
-            var objetoMapeado = _mapper.Map<ComicDTO>(@objeto);
-            return objetoMapeado;
-        }
-
-        public async Task<ICollection<ComicDTO>> ListAsync()
-        {
-            var list = await _repositoryComic.ListAsync();
-
-            return _mapper.Map<ICollection<ComicDTO>>(list);
-        }
 
         public async Task<bool> UpdateAvailabilityAsync(int id, bool availability)
         {
@@ -64,7 +64,7 @@ namespace DualBid.Application.Services.Implementations
             }
         }
 
-        public async Task<bool> UpdateAsync(ComicDTO dto,string[] selectedCategorias,List<ImgComicDTO> newImages,int[] imagesToDelete)
+        public async Task<bool> UpdateAsync(ComicDTO dto, string[] selectedCategorias, List<ImgComicDTO> newImages, int[] imagesToDelete)
         {
             var entity = _mapper.Map<Comic>(dto);
 
@@ -75,12 +75,7 @@ namespace DualBid.Application.Services.Implementations
                 })
                 .ToList() ?? new List<ImgComic>();
 
-            return await _repositoryComic.UpdateAsync(
-                entity,
-                selectedCategorias,
-                entityImages,
-                imagesToDelete
-            );
+            return await _repositoryComic.UpdateAsync(entity, selectedCategorias, entityImages,imagesToDelete);
         }
     }
 }
