@@ -1,5 +1,6 @@
 ﻿@model DualBid.Application.DTOs.AuctionDTO
 @using System.Globalization
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = "Auction Details";
@@ -426,13 +427,19 @@
     }
 </style>
 
+
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
 @section Scripts {
     <script>
         window.auctionDetailsRealtimeConfig = {
             auctionId: "@Model.Id",
-            userId: "@(ViewBag.CurrentUserId ?? 0)"
+            userId: "@(userId ?? "0")"
         };
     </script>
 
     <script src="~/js/auctionDetailsRealtime.js"></script>
 }
+

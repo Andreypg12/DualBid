@@ -100,7 +100,26 @@
 
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    @await Component.InvokeAsync("CurrentUserSelector")
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="rounded-circle me-2"
+                             src="~/images/profile.png"
+                             alt="Perfil"
+                             width="32" height="32" />
+                        <span class="d-none d-sm-inline">
+                            @User.Identity!.Name
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <li><a class="dropdown-item" asp-controller="Login" asp-action="LogOff">Salir</a></li>
+                        }
+                        else
+                        {
+                            <li><a class="dropdown-item" asp-controller="Login" asp-action="Index">Ingresar</a></li>
+                        }
+                    </ul>
                 </li>
             </ul>
         </div>

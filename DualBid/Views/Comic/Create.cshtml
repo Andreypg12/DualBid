@@ -419,12 +419,3 @@
       }
     });
 </script>
-
-    @*  SweetAlert desde el Controller al volver con errores *@
-    @if (ViewBag.Notificacion != null)
-    {
-        <script>
-            Swal.fire(@Html.Raw(ViewBag.Notificacion));
-        </script>
-    }
-    }

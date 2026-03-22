@@ -40,10 +40,6 @@ namespace DualBid.Application.DTOs
         [DataType(DataType.Currency)]
         public decimal MinimunIncrease { get; set; }
 
-        // State properties
-        [DisplayName("State")]
-        [Required(ErrorMessage = "Please select a {0}")]
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid {0}")]
         public int StateId { get; set; }
 
         public AuctionStateDTO State { get; set; } = new();
@@ -56,10 +52,6 @@ namespace DualBid.Application.DTOs
 
         public ComicDTO Comic { get; set; } = new();
 
-        // Creator user properties
-        [DisplayName("Creator")]
-        [Required(ErrorMessage = "Please select a {0}")]
-        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid {0}")]
         public int CreatorUserId { get; set; }
 
         public UserDTO CreatorUser { get; set; } = new();

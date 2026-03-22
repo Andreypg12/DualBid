@@ -58,18 +58,16 @@
 
 
     <!-- Notificaciones SweetAlert -->
-    @if (TempData["SwalMessage"] != null)
+    @if (TempData["Notificacion"] != null || ViewBag.Notificacion != null)
     {
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: '',
-                    text: '@Html.Raw(TempData["SwalMessage"])',
-                    icon: '@(TempData["SwalIcon"] ?? "success")', 
-                    confirmButtonColor: 'rgb(176, 212, 247)',
-                    confirmButtonText: 'OK'
-                });
-            });
+        var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
+        <script type="text/javascript">
+
+            const payload = @Html.Raw(notificacion);
+
+            if (payload) {
+                Swal.fire(payload);
+            }
         </script>
     }
 
