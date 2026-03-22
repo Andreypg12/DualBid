@@ -1,21 +1,21 @@
+using DualBid.Application.Config;
 using DualBid.Application.Profiles;
-using DualBid.Application.Services.Interfaces;
 using DualBid.Application.Services.Implementations;
-using DualBid.Infraestructure.Data;
-using DualBid.Infraestructure.Repository.Implementations;
-using DualBid.Infraestructure.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Serilog.Events;
-using Serilog;
-
-using DualBid.Services;
+using DualBid.Application.Services.Interfaces;
 //NUEVO SIGNALR
 using DualBid.Hubs;
-
+using DualBid.Infraestructure.Data;
+using DualBid.Infraestructure.Models;
+using DualBid.Infraestructure.Repository.Implementations;
+using DualBid.Infraestructure.Repository.Interfaces;
+using DualBid.Middleware;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 //Sin este using no se puede usar Encoding.UTF8 en la configuración de Serilog para los archivos de log.
 using System.Text;
-using DualBid.Middleware;
-using DualBid.Infraestructure.Models;
 
 // =======================
 // Configurar Serilog 
@@ -80,6 +80,10 @@ Log.Logger = logger;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Mapeo de la clase AppConfig para leer appsettings.json
+builder.Services.Configure<AppConfig>(builder.Configuration);
+
+
 // Integrar Serilog al host 
 builder.Host.UseSerilog( Log.Logger);
 
@@ -133,8 +137,6 @@ builder.Services.AddTransient<IRepositoryImgComic, RepositoryImgComic>();
 //*** Services
 builder.Services.AddTransient<IserviceUser, ServiceUser>();
 
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
 builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
 
 builder.Services.AddTransient<IServiceRole, ServiceRole>();
@@ -185,6 +187,25 @@ builder.Services.AddAutoMapper(config =>
 
 
 });
+
+//Seguridad
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => {
+        options.LoginPath = "/Login/Index";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.AccessDeniedPath = "/Login/Forbidden";
+    });
+
+builder.Services.AddControllersWithViews(options => {
+    options.Filters.Add(
+        new ResponseCacheAttribute
+        {
+            NoStore = true,
+            Location = ResponseCacheLocation.None,
+        });
+});
+
+
 
 // Configurar SQL Server DbContext
 var connectionString = builder.Configuration.GetConnectionString("SqlServerDataBase");

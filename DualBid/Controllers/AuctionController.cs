@@ -13,14 +13,12 @@ namespace DualBid.Controllers
     public class AuctionController : Controller
     {
         private readonly IServiceAuction _serviceAuction;
-        private readonly ICurrentUserService _currentUserService;
         private readonly IServiceComic _serviceComic;
         private readonly IServiceAuctionState _serviceAuctionState;
 
-        public AuctionController(IServiceAuction serviceAuction, ICurrentUserService currentUserService, IServiceComic serviceComic, IServiceAuctionState serviceAuctionState)
+        public AuctionController(IServiceAuction serviceAuction, IServiceComic serviceComic, IServiceAuctionState serviceAuctionState)
         {
             _serviceAuction = serviceAuction;
-            _currentUserService = currentUserService;
             _serviceComic = serviceComic;
             _serviceAuctionState = serviceAuctionState;
         }
@@ -31,7 +29,7 @@ namespace DualBid.Controllers
             var all = await _serviceAuction.ListAsync();
             bool showActive = state != "inactive";
 
-            var filtered = all.Where(a => showActive ? a.State.Id == 1 : a.State.Id != 1);
+            var filtered = all.Where(a => showActive ? a.State.Id == 1 || a.State.Id == 2 : a.State.Id == 3 || a.State.Id == 4);
 
             var vm = new AuctionIndexViewModel
             {
@@ -48,28 +46,15 @@ namespace DualBid.Controllers
             {
                 if (id == null)
                 {
-                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                       "Libro No encontrado",
-                       $"No existe un Libro sin ID",
-                       SweetAlertMessageType.error
-                   );
-                    return RedirectToAction("IndexAdmin");
+                    throw new Exception("No comic ID provided");
+
                 }
                 var @object = await _serviceAuction.FindByIdAsync(id.Value);
+
                 if (@object == null)
                 {
-                    throw new Exception("Libro no existente");
-
+                    throw new Exception("No comic found with the provided ID");
                 }
-
-                var currentUserId = _currentUserService.GetCurrentUserId();
-                ViewBag.CurrentUserId = currentUserId;
-
-                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                   "Detalle del Libro",
-                   $"Mostrando información del Libro: {@object.Comic.Title}",
-                   SweetAlertMessageType.info
-                );
 
                 return View(@object);
 
@@ -93,15 +78,24 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(AuctionDTO dto)
         {
-            // IMPORTANTE: Asignar el CreatorUserId antes de validar
-            dto.CreatorUserId = _currentUserService.GetCurrentUserId() ?? 0;
+            var keysToRemove = ModelState.Keys
+            .Where(k => k.StartsWith("Comic.") || k == "Comic")
+            .ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                ModelState.Remove(key);
+            }
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            dto.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
             dto.StateId = (dto.StartDate < DateTime.Now) ? 1 : 2;
 
             // Verificar si el usuario está logueado
             if (dto.CreatorUserId == 0)
             {
-                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                     "¡You need to log in!",
                     "You must be logged in to create an auction",
                     SweetAlertMessageType.error
@@ -122,12 +116,11 @@ namespace DualBid.Controllers
 
                 // Notificación SweetAlert con el detalle de errores
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Validation errors",
-                    $"The form contains errors:<br>{errores}",
+                    "Errores de validación",
+                    $"El formulario contiene errores:<br>{errores}",
                     SweetAlertMessageType.warning
                 );
-
-                // Recargar combos antes de retornar vista
+                // Importante: Recargar combos antes de retornar vista
                 await LoadCombosAsync();
                 return View(dto);
             }
@@ -138,7 +131,7 @@ namespace DualBid.Controllers
             // Notificar creación
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                 "Auction created successfully",
-                $"The auction for {dto.Comic?.Title ?? "comic"} was registered successfully.",
+                $"The auction was registered successfully.",
                 SweetAlertMessageType.success
             );
 

@@ -470,10 +470,31 @@
 
 }
 
-@* SweetAlert from Controller when returning with errors *@
-@if (ViewBag.Notificacion != null)
-{
-    <script>
-        Swal.fire(@Html.Raw(ViewBag.Notificacion));
-    </script>
-}
+          wrap.appendChild(img);
+          wrap.appendChild(badge);
+          col.appendChild(wrap);
+          imagePreview?.appendChild(col);
+        });
+      });
+
+      
+      form?.addEventListener('submit', function () {
+        console.log("Cantidad de archivos:", fileInput?.files?.length ?? 0);
+      });
+
+      //Multiselect
+      if (window.$ && $.fn.multiselect) {
+        $('#selectedCategorias').multiselect({
+          buttonClass: 'form-select',
+          templates: {
+            button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+          },
+          includeSelectAllOption: true,
+          selectAllText: 'Seleccionar todas',
+          allSelectedText: 'Todas las opciones',
+          nonSelectedText: 'Seleccione una opción',
+          nSelectedText: ' - seleccionadas',
+        });
+      }
+    });
+</script>

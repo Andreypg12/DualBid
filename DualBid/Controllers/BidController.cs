@@ -1,11 +1,11 @@
 ﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Hubs;
-using DualBid.Services;
 using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
@@ -13,14 +13,12 @@ namespace DualBid.Controllers
     {
         private readonly IServiceBid _serviceBid;
         private readonly IHubContext<AuctionHub> _hubContext;
-        private readonly ICurrentUserService _currentUserService;
         private readonly IServiceAuction _serviceAuction;
 
-        public BidController(IServiceBid serviceBid, IHubContext<AuctionHub> hubContext, ICurrentUserService currentUserService, IServiceAuction serviceAuction)
+        public BidController(IServiceBid serviceBid, IHubContext<AuctionHub> hubContext, IServiceAuction serviceAuction)
         {
             _serviceBid = serviceBid;
             _hubContext = hubContext;
-            _currentUserService = currentUserService;
             _serviceAuction = serviceAuction;
         }
 
@@ -252,7 +250,8 @@ namespace DualBid.Controllers
                     return View(viewModel);
                 }
 
-                viewModel.UserId = _currentUserService.GetCurrentUserId() ?? 0;
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                viewModel.UserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
                 if (viewModel.UserId == 0)
                 {
