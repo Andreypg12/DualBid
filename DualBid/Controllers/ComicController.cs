@@ -17,13 +17,15 @@ namespace DualBid.Controllers
         private readonly IServicePublisher _servicePublisher;
         private readonly IServiceCategory _serviceCategoria;
         private readonly IServiceStateConservation _serviceStateConservation;
+        private readonly ICurrentUserService _serviceCurrentUser;
 
-        public ComicController(IServiceComic serviceComic, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
+        public ComicController(IServiceComic serviceComic, ICurrentUserService currentUserService, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
         {
             _serviceComic = serviceComic;
             _servicePublisher = servicePublisher;
             _serviceCategoria = serviceCategory;
             _serviceStateConservation = serviceStateConservation;
+            _serviceCurrentUser = currentUserService;
 
         }
 
@@ -92,10 +94,52 @@ namespace DualBid.Controllers
         {
             selectedCategorias ??= Array.Empty<string>();
 
+            dto.SellerId = _serviceCurrentUser.GetCurrentUserId() ?? 0;
 
 
             //AGREGAR LAS VALIDACIONES
-           
+
+            //Valida si hay un usuario seleccionado
+            if (dto.SellerId == 0)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡You need to log in!",
+                    "You must be logged in to create a comic",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
+            }
+
+            //Categoria no puede estar vacío.
+            if (!selectedCategorias.Any())
+            {
+                //ModelState.AddModelError("SelectedCategorias", "You must select at least one category.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Categories is not enough!",
+                    "You must select at least one Category",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
+            }
+
+            //Imagenes no puede estar vacío.
+            if (imageFile == null || !imageFile.Any())
+            {
+                //ModelState.AddModelError("ImageFiles", "You must upload at least one image.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Images is not enough!",
+                    "You must upload at least one Image",
+                    SweetAlertMessageType.error
+                    );
+                await LoadCombosAsync();
+                return View(dto);
+            }
+
+            //Terminan las validaciones
+
+
 
             // Si se envia imagen, convertirla a byte[]
             if (imageFile != null && imageFile.Count > 0)
@@ -145,9 +189,6 @@ namespace DualBid.Controllers
                 await LoadCombosAsync(selectedCategorias);
                 return View(dto);
             }
-
-
-
 
 
             await _serviceComic.AddAsync(dto, selectedCategorias);
