@@ -26,6 +26,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .AsSplitQuery()
                 .Where(a => a.Id == id)
                 .Include(a => a.State)
+                .Include(a => a.CreatorUser)
                 .Include(a => a.Comic)
                     .ThenInclude(c => c.ImgComic)
                 .Include(a => a.Comic)
@@ -59,6 +60,21 @@ namespace DualBid.Infraestructure.Repository.Implementations
             await _context.SaveChangesAsync();
 
             return entity.Id;
+        }
+
+        public async Task UpdateAsync(Auction entity)
+        {
+            // entity DEBE venir trackeado
+            // Igual se reestablece
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                _context.Attach(entity);
+            }
+
+            // Si el mapping ya actualizó propiedades escalares, esto garantiza update
+            _context.Entry(entity).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

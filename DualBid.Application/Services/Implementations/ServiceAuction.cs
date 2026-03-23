@@ -47,7 +47,17 @@ namespace DualBid.Application.Services.Implementations
                 var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
                 throw;
             }
+        }
 
+        public async Task UpdateAsync(int id, AuctionDTO dto)
+        {
+            // Traer entity (idealmente trackeado) antes de mapear encima
+            var entity = await _repository.FindByIdAsync(id);
+
+
+            _mapper.Map(dto, entity);
+
+            await _repository.UpdateAsync(entity);
         }
     }
 }

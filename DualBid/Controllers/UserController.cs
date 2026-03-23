@@ -51,23 +51,19 @@ namespace Libreria.Web.Controllers
                 if (id == null)
                 {
                     TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                       "Libro No encontrado",
-                       $"No existe un Libro sin ID",
+                       "User not found",
+                       $"There is no user without an ID",
                        SweetAlertMessageType.error
                    );
-                    return RedirectToAction("IndexAdmin");
+                    return RedirectToAction("Index");
                 }
                 var @object = await _serviceUser.FindByIdAsync(id.Value);
+
                 if (@object == null)
                 {
-                    throw new Exception("Libro no existente");
+                    throw new Exception("User does not exist");
 
                 }
-                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                   "Detalle del Libro",
-                   $"Mostrando información del Libro: {@object.CompleteName}",
-                   SweetAlertMessageType.info
-               );
 
                 ViewBag.States = await _serviceUserStatus.ListAsync();
 

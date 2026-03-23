@@ -13,5 +13,6 @@ namespace DualBid.Application.Services.Interfaces
         Task<ICollection<AuctionDTO>> ListAsync();
         Task<AuctionDTO?> FindByIdAsync(int id);
         Task<int> AddAsync(AuctionDTO dto);
+        Task UpdateAsync(int id, AuctionDTO dto);
     }
 }

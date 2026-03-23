@@ -17,16 +17,13 @@ namespace DualBid.Controllers
         private readonly IServicePublisher _servicePublisher;
         private readonly IServiceCategory _serviceCategoria;
         private readonly IServiceStateConservation _serviceStateConservation;
-        private readonly ICurrentUserService _serviceCurrentUser;
 
-        public ComicController(IServiceComic serviceComic, ICurrentUserService currentUserService, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
+        public ComicController(IServiceComic serviceComic, IServicePublisher servicePublisher, IServiceCategory serviceCategory, IServiceStateConservation serviceStateConservation)
         {
             _serviceComic = serviceComic;
             _servicePublisher = servicePublisher;
             _serviceCategoria = serviceCategory;
             _serviceStateConservation = serviceStateConservation;
-            _serviceCurrentUser = currentUserService;
-
         }
 
         //Esta por decirlo asi es la página principal donde mustran la lista de comics
@@ -94,7 +91,8 @@ namespace DualBid.Controllers
         {
             selectedCategorias ??= Array.Empty<string>();
 
-            dto.SellerId = _serviceCurrentUser.GetCurrentUserId() ?? 0;
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            dto.SellerId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
 
             //AGREGAR LAS VALIDACIONES

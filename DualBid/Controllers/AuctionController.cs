@@ -68,18 +68,21 @@ namespace DualBid.Controllers
         [HttpGet]
         public async Task<ActionResult> Create()
         {
-            await LoadCombosAsync();
 
-            return View(new AuctionDTO());
+            CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
+            return View(vm);
         }
 
         // POST: LibroController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(AuctionDTO dto)
+        public async Task<ActionResult> Create(CreateAuctionViewModel pvm)
         {
             var keysToRemove = ModelState.Keys
-            .Where(k => k.StartsWith("Comic.") || k == "Comic")
+                .Where(k => k.StartsWith("Comics.") ||
+                k == "Comics" ||
+                k.Contains(".Comic.")) // Para propiedades anidadas
             .ToList();
 
             foreach (var key in keysToRemove)
@@ -88,21 +91,24 @@ namespace DualBid.Controllers
             }
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            dto.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
+            pvm.Auction.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
-            dto.StateId = (dto.StartDate < DateTime.Now) ? 1 : 2;
+            pvm.Auction.StateId = 1;
 
             // Verificar si el usuario está logueado
-            if (dto.CreatorUserId == 0)
+            if (pvm.Auction.CreatorUserId == 0)
             {
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                     "¡You need to log in!",
                     "You must be logged in to create an auction",
                     SweetAlertMessageType.error
                 );
-                await LoadCombosAsync();
-                return View(dto);
+                CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
+                return View(vm);
             }
+
+
 
             // Verificar si el modelo es válido (esto ejecuta las validaciones del DTO automáticamente)
             if (!ModelState.IsValid)
@@ -121,12 +127,13 @@ namespace DualBid.Controllers
                     SweetAlertMessageType.warning
                 );
                 // Importante: Recargar combos antes de retornar vista
-                await LoadCombosAsync();
-                return View(dto);
+                CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
+                return View(vm);
             }
 
             // Si todo está bien, guardar
-            await _serviceAuction.AddAsync(dto);
+            await _serviceAuction.AddAsync(pvm.Auction);
 
             // Notificar creación
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -138,9 +145,89 @@ namespace DualBid.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task LoadCombosAsync()
+        private async Task<CreateAuctionViewModel> CreateAuctionCreateVM()
         {
-            ViewBag.ListComics = await _serviceComic.ListAsync();
+            return new CreateAuctionViewModel
+            {
+
+                Auction = new AuctionDTO(),
+
+                Comics = await _serviceComic.ListAsync()
+            };
+        }
+
+        // POST: Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(int id, EditAuctionViewModel viewModel)
+        {
+            string errorMessage;
+
+            if (!validateAuctionDates(viewModel.StartDate, viewModel.ExpectedEndDate, out errorMessage))
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Errors with the dates",
+                    errorMessage,
+                    SweetAlertMessageType.warning
+                );
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errores = string.Join("<br>",
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                );
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Errors in the data",
+                    errores,
+                    SweetAlertMessageType.warning
+                );
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+                
+            // Obtener el DTO existente
+            var existingDto = await _serviceAuction.FindByIdAsync(id);
+
+            // Actualizar solo los campos editables
+            existingDto.StartDate = viewModel.StartDate;
+            existingDto.ExpectedEndDate = viewModel.ExpectedEndDate;
+            existingDto.BasePrice = viewModel.BasePrice;
+            existingDto.MinimunIncrease = viewModel.MinimunIncrease;
+
+            await _serviceAuction.UpdateAsync(id, existingDto);
+
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                "Subasta actualizada",
+                $"La subasta ha sido modificada exitosamente.",
+                SweetAlertMessageType.success
+            );
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        private bool validateAuctionDates(DateTime startDate, DateTime expectedEndDate, out String errorMessage)
+        {
+            if (startDate >= expectedEndDate)
+            {
+                errorMessage = "The star date must be earlier than the en date";
+                return false;
+            }
+            else if (startDate < DateTime.Now || expectedEndDate < DateTime.Now)
+            {
+                errorMessage = "The start date and expected end date must be in the future";
+                return false;
+            }
+            else
+            {
+                errorMessage = "";
+                return true;
+            }
         }
     }
 }
