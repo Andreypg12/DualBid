@@ -229,11 +229,11 @@ namespace DualBid.Controllers
         public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
         {
 
-            if (dto.AuctionCount < 0)
+            if (dto.AuctionCount < 0 || dto.availability==false)
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                   "¡You need to log in!",
-                   "You must be logged in to create a comic",
+                   "¡The comic cannot be edited!",
+                   "The comic is already in an active auction or has already been auctioned.",
                    SweetAlertMessageType.error
                    );
                 await LoadCombosAsync();
@@ -292,9 +292,12 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-
-
             var comic = await _serviceComic.FindByIdAsync(id);
+            bool hasBlockedAuction = comic.Auction != null &&
+                          comic.Auction.Any(a =>
+                              a.StateId == 2 || a.StateId == 3);
+
+
             if (comic == null)
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -306,12 +309,12 @@ namespace DualBid.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (comic.AuctionCount > 0)
+            if (hasBlockedAuction)
             {
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                    "¡Error deleting the comic!",
-                   "The comic has been auctione or is part of an active auction.",
+                   "The comic has been auctioned or is part of an active auction.",
                    SweetAlertMessageType.error
                    );
 
@@ -327,6 +330,7 @@ namespace DualBid.Controllers
                    );
 
             return RedirectToAction(nameof(Index));
+
         }
 
         [HttpPost]
@@ -334,10 +338,25 @@ namespace DualBid.Controllers
         public async Task<IActionResult> Restore(int id)
         {
             var comic = await _serviceComic.FindByIdAsync(id);
+            bool hasBlockedAuction = comic.Auction != null &&
+                          comic.Auction.Any(a =>
+                              a.StateId == 2 || a.StateId == 3);
+
             if (comic == null)
             {
                 TempData["SwalMessage"] = "Comic not found";
                 TempData["SwalIcon"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+            if (hasBlockedAuction)
+            {
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "¡Error restoring the comic!",
+                   "The comic has been auctioned or is part of an active auction.",
+                   SweetAlertMessageType.error
+                   );
+
                 return RedirectToAction(nameof(Index));
             }
 
