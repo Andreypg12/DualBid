@@ -168,6 +168,8 @@ else
                                 @* Boton de editar *@
                                 <a asp-controller="Comic" asp-action="Edit" asp-route-id="@item.Id"
                                    class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center btn-edit"
+                                   data-auctions="@item.AuctionCount"
+                                   data-availability="@item.availability"
                                    style="width: 36px; height: 36px; background-color: rgb(179, 216, 252)">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -207,21 +209,20 @@ else
 
 @section Scripts {
 
-    <script>
-        // Confirmación con SweetAlert antes de enviar el formulario
-        document.querySelectorAll('.delete-form, .restore-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
+     <script>
+        
+        //BORRAR
+                document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
 
-                const action = this.classList.contains('delete-form') ? 'Delete' : 'Restore';
-                const comicTitle = this.closest('.card')?.querySelector('h3')?.innerText || 'this comic';
+                const comicTitle =
+                    this.closest('.card')?.querySelector('h3')?.innerText || 'this comic';
 
                 Swal.fire({
-                    title: action === 'Delete' ? 'Delete comic?' : 'Restore comic?',
-                    text: action === 'Delete'
-                        ? `Are you sure you want to delete "${comicTitle}"?`
-                        : `Are you sure you want to restore "${comicTitle}"?`,
-                    icon: action === 'Delete' ? 'warning' : 'question',
+                    title: 'Delete comic?',
+                    text: `Are you sure you want to delete "${comicTitle}"?`,
+                    icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: 'rgb(176, 212, 247)',
                     cancelButtonColor: 'rgb(215, 75, 72)',
@@ -229,18 +230,66 @@ else
                     cancelButtonText: 'No'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Enviar el formulario
                         form.submit();
                     }
                 });
             });
         });
+        //TERMINA BORRAR
 
-        // Para el botón de editar (opcional)
-        document.querySelectorAll('.btn-edit').forEach(button => {
-            button.addEventListener('click', function(e) {
+
+        //RESTORE
+                document.querySelectorAll('.restore-form').forEach(form => {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
 
+                const comicTitle =
+                    this.closest('.card')?.querySelector('h3')?.innerText || 'this comic';
+
+                Swal.fire({
+                    title: 'Restore comic?',
+                    text: `Are you sure you want to restore "${comicTitle}"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'rgb(176, 212, 247)',
+                    cancelButtonColor: 'rgb(215, 75, 72)',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+        //TERMINA RESTORE
+
+
+
+        // EDITAR
+            document.querySelectorAll('.btn-edit').forEach(button => {
+
+            button.addEventListener('click', function (e) {
+
+                e.preventDefault();;
+
+                let auctions = button.getAttribute('data-auctions');
+                let availabilityTest = button.getAttribute('data-availability')
+
+                // Tiene subasta Entonces no funciona
+                if (auctions > 0 || availabilityTest == false) {
+
+                    Swal.fire({
+                        title: "Cannot edit comic",
+                        text: "The comic is already in an active auction or has already been auctioned.",
+                        icon: "error",
+                        confirmButtonColor: "rgb(215, 75, 72)"
+                    });
+
+                    return;
+                }
+
+                //  No tiene subasta entonces preguntar si quiere editar
                 Swal.fire({
                     title: 'Edit comic?',
                     text: 'You will be redirected to the edit form',
@@ -251,13 +300,18 @@ else
                     confirmButtonText: 'Yes',
                     cancelButtonText: 'No'
                 }).then((result) => {
+
                     if (result.isConfirmed) {
                         window.location.href = this.href;
                     }
+
                 });
+
             });
+
         });
-    </script>
+        // Termina EDITAR
+    </script> 
 
     <!-- Tus estilos existentes -->
     <style>

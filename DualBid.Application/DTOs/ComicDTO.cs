@@ -28,7 +28,7 @@ namespace DualBid.Application.DTOs
         public String Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Description is required.")]
-        [StringLength(100, MinimumLength = 20, ErrorMessage = "Description must have between 5 and 100 characters.")]
+        [StringLength(100, MinimumLength = 20, ErrorMessage = "Description must have between 20 and 100 characters.")]
         public string Description { get; set; } = string.Empty;
 
 

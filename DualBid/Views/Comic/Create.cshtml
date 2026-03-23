@@ -106,6 +106,8 @@
 
                         <!-- Publisher and categories -->
                         <div class="mb-4">
+
+                            <!-- Primera fila -->
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="PublisherId" class="form-label">Publisher</label>
@@ -128,19 +130,39 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 mt-3">
-                                <label class="form-label">Categories</label>
-                                <select id="selectedCategorias"
-                                        name="selectedCategorias"
-                                        class="form-select"
-                                        asp-items="ViewBag.ListCategorias"
-                                        multiple>
-                                </select>
-                                <div class="form-text">You can select multiple categories.</div>
 
-                                @* This is for category validation *@
-                                <span id="selectedCategorias-error" class="text-danger small"></span>
+                            <!-- Segunda fila -->
+                            <div class="row">
+
+                                <div class="col-6 mt-3">
+                                    <label class="form-label">Categories</label>
+
+                                    <select id="selectedCategorias"
+                                            name="selectedCategorias"
+                                            class="form-select"
+                                            asp-items="ViewBag.ListCategorias"
+                                            multiple>
+                                    </select>
+
+                                    <div class="form-text">You can select multiple categories.</div>
+
+                                    <span id="selectedCategorias-error" class="text-danger small"></span>
+                                </div>
+
+
+                                <div class="col-6 mt-3">
+                                    <label class="form-label ms-2">Status</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-2">
+                                            <i class="bi bi-check-lg text-success"></i>
+                                        </div>
+                                        <span class="text-muted">State:</span>
+                                        <span class="fw-bold text-success">Available</span>
+                                    </div>
+                                </div>
+
                             </div>
+
                         </div>
 
                         <!-- Action buttons -->
@@ -183,6 +205,8 @@
                                 <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
                                 <h6 class="fw-semibold mb-1">Drag images here</h6>
                                 <p class="small text-muted mb-3">or click to select files</p>
+                                
+                                @* Datos importantes de la carga de imagen *@
                                 <input type="file" name="newImages" id="fileInput" multiple accept="image/*" style="display: none;" />
                                 <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="selectFilesBtn">
                                     <i class="bi bi-folder2-open me-2"></i>Select Files
@@ -205,6 +229,14 @@
 
                     </div>
                 </div>
+
+                <div class="text-center mt-3">
+                    <span class="badge fw-normal px-4 py-2 rounded-pill fs-6" style="background-color: #1e3a8a; color: white;">
+                        <i class="bi bi-person me-1"></i>
+                        User creator: @User.Identity?.Name
+                    </span>
+                </div>
+
             </div>
         </div>
     </form>
@@ -469,32 +501,3 @@
     </script>
 
 }
-
-          wrap.appendChild(img);
-          wrap.appendChild(badge);
-          col.appendChild(wrap);
-          imagePreview?.appendChild(col);
-        });
-      });
-
-      
-      form?.addEventListener('submit', function () {
-        console.log("Cantidad de archivos:", fileInput?.files?.length ?? 0);
-      });
-
-      //Multiselect
-      if (window.$ && $.fn.multiselect) {
-        $('#selectedCategorias').multiselect({
-          buttonClass: 'form-select',
-          templates: {
-            button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
-          },
-          includeSelectAllOption: true,
-          selectAllText: 'Seleccionar todas',
-          allSelectedText: 'Todas las opciones',
-          nonSelectedText: 'Seleccione una opción',
-          nSelectedText: ' - seleccionadas',
-        });
-      }
-    });
-</script>

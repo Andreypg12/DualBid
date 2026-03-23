@@ -57,10 +57,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
             //Trae todas las categorías seleccionadas y las asigna al cómic
             await ApplyCategoriasAsync(entity, selectedCategorias);
 
+                entity.Availability = true; // Por defecto, el cómic está disponible
                 await _context.Set<Comic>().AddAsync(entity);
-
-                //DEBO AGREGAR ESTO PARA QUE SEA CON EL ID DEL USUARIO LOGUEADO
-                entity.SellerId = 13;
                 await _context.SaveChangesAsync();
             
 
