@@ -25,7 +25,6 @@ namespace DualBid.Controllers
             _servicePublisher = servicePublisher;
             _serviceCategoria = serviceCategory;
             _serviceStateConservation = serviceStateConservation;
-
         }
 
         //Esta por decirlo asi es la página principal donde mustran la lista de comics

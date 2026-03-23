@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.DTOs
 {
-    public class AuctionDTO : IValidatableObject
+    public class AuctionDTO
     {
         public int Id { get; set; }
 
@@ -65,45 +65,5 @@ namespace DualBid.Application.DTOs
             .FirstOrDefault() ?? new BidDTO();
 
         public int NumberOfBids => Bids?.Count ?? 0;
-
-        // Additional validation method
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            var results = new List<ValidationResult>();
-
-            // Validar que StartDate no sea en el pasado
-            if (StartDate < DateTime.Now)
-            {
-                results.Add(new ValidationResult(
-                    "Start Date cannot be in the past",
-                    new[] { nameof(StartDate) }));
-            }
-
-            // Validar que ExpectedEndDate sea después de StartDate
-            if (ExpectedEndDate <= StartDate)
-            {
-                results.Add(new ValidationResult(
-                    "Expected End Date must be greater than Start Date",
-                    new[] { nameof(ExpectedEndDate) }));
-            }
-
-            // Validar que ExpectedEndDate no sea en el pasado
-            if (ExpectedEndDate < DateTime.Now)
-            {
-                results.Add(new ValidationResult(
-                    "Expected End Date cannot be in the past",
-                    new[] { nameof(ExpectedEndDate) }));
-            }
-
-            // Validar que MinimumIncrease sea menor que BasePrice (opcional)
-            if (MinimunIncrease >= BasePrice)
-            {
-                results.Add(new ValidationResult(
-                    "Minimum Increase should be less than Base Price",
-                    new[] { nameof(MinimunIncrease) }));
-            }
-
-            return results;
-        }
     }
 }

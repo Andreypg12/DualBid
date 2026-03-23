@@ -4,6 +4,8 @@
 
 @{
     ViewData["Title"] = "Auction Details";
+
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 @* Header *@
@@ -325,14 +327,17 @@
 
         @if (Model.ActualEndDate == null)
         {
-            <a asp-controller="Bid"
-               asp-action="Create"
-               asp-route-auctionId="@Model.Id"
-               asp-route-titleComicAuction="@Model.Comic?.Title"
-               class="btn btn-primary btn-lg px-5 shadow-sm">
-                <i class="bi bi-cash-stack me-2"></i>
-                Place Your Bid
-            </a>
+            @if (int.Parse(userId ?? "0") != Model.CreatorUser.Id)
+            {
+                <a asp-controller="Bid"
+                   asp-action="Create"
+                   asp-route-auctionId="@Model.Id"
+                   asp-route-titleComicAuction="@Model.Comic?.Title"
+                   class="btn btn-primary btn-lg px-5 shadow-sm">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    Place Your Bid
+                </a>
+            }
         }
         else
         {
@@ -341,96 +346,100 @@
                 Auction Ended
             </button>
         }
+
+        @if (int.Parse(userId ?? "0") == Model.CreatorUser.Id)
+        {
+            <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm" data-bs-toggle="modal" data-bs-target="#editAuctionModal">
+                <i class="bi bi-pencil-square me-2"></i>
+                Edit Auction
+            </button>
+        }
     </div>
-</section>
 
-<style>
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
+@await Html.PartialAsync("_EditAuctionModal", Model)
 
-    .bg-gradient-success {
-        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-    }
-
-    .bg-gradient-info {
-        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-    }
-
-    .timeline {
-        position: relative;
-        padding-left: 23px;
-    }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 20px;
-            bottom: 20px;
-            width: 2px;
-            background: #e9ecef;
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-    .text-white-50 {
-        color: rgba(255, 255, 255, 0.5) !important;
-    }
-
-    .card {
-        transition: transform 0.2s;
-    }
-
-        .card:hover {
-            transform: translateY(-2px);
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
         }
 
-    /* Clases para imágenes */
-    .comic-carousel-img {
-        height: 500px;
-        object-fit: cover;
-    }
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
 
-    .comic-placeholder-img {
-        height: 500px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f8f9fa;
-    }
+        .timeline {
+            position: relative;
+            padding-left: 23px;
+        }
 
-    /* Clases para timeline icons */
-    .timeline-icon-base {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        color: white;
-    }
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 20px;
+                top: 20px;
+                bottom: 20px;
+                width: 2px;
+                background: #e9ecef;
+            }
 
-    .timeline-icon-success {
-        background-color: #198754;
-    }
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
 
-    .timeline-icon-warning {
-        background-color: #ffc107;
-    }
+        .card {
+            transition: transform 0.2s;
+        }
 
-    .timeline-icon-danger {
-        background-color: #dc3545;
-    }
+            .card:hover {
+                transform: translateY(-2px);
+            }
 
-    /* Clase para descripción */
-    .comic-description {
-        line-height: 1.6;
-    }
-</style>
+        /* Clases para imágenes */
+        .comic-carousel-img {
+            height: 500px;
+            object-fit: cover;
+        }
 
+        .comic-placeholder-img {
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
 
-@{
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-}
+        /* Clases para timeline icons */
+        .timeline-icon-base {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+        }
+
+        .timeline-icon-success {
+            background-color: #198754;
+        }
+
+        .timeline-icon-warning {
+            background-color: #ffc107;
+        }
+
+        .timeline-icon-danger {
+            background-color: #dc3545;
+        }
+
+        /* Clase para descripción */
+        .comic-description {
+            line-height: 1.6;
+        }
+    </style>
 
 @section Scripts {
     <script>
@@ -441,5 +450,5 @@
     </script>
 
     <script src="~/js/auctionDetailsRealtime.js"></script>
-}
 
+}
