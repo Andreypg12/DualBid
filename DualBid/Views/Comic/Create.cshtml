@@ -97,7 +97,7 @@
                                     <label asp-for="CreationDate" class="form-label fw-medium">Registration Date</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-plus text-primary"></i></span>
-                                        <input asp-for="CreationDate" class="form-control border-0 bg-light" type="date" />
+                                        <input asp-for="CreationDate"class="form-control border-0 bg-light" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                                     </div>
                                     <span asp-validation-for="CreationDate" class="text-danger small"></span>
                                 </div>
@@ -157,8 +157,9 @@
                                             <i class="bi bi-check-lg text-success"></i>
                                         </div>
                                         <span class="text-muted">State:</span>
-                                        <span class="fw-bold text-success">Available</span>
+                                        <span class="fw-bold text-success" title="The comic always starts as available">Available</span>
                                     </div>
+                                    <input type="hidden" asp-for="availability" value="true" />
                                 </div>
 
                             </div>
@@ -179,9 +180,11 @@
             </div>
 
             <!-- RIGHT COLUMN: Image gallery -->
+            <!-- RIGHT COLUMN: Image gallery -->
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
+
                         <div class="d-flex align-items-center gap-2 mb-4">
                             <div class="bg-primary bg-opacity-10 p-3 rounded-3">
                                 <i class="bi bi-images text-primary fs-4"></i>
@@ -194,44 +197,67 @@
 
                         <!-- Area for new images -->
                         <div class="mb-4">
+
                             <h6 class="fw-semibold mb-3">
                                 <i class="bi bi-cloud-upload me-2"></i>Add Images
                             </h6>
 
-                            <!-- Dropzone area -->
-                            <div class="upload-area border border-2 border-dashed rounded-4 p-4 mb-3 text-center"
-                                 id="dropzone"
-                                 style="border-color: #dee2e6; cursor: pointer; transition: all 0.3s ease; background: #f8f9fa;">
+                            <!-- SIMPLE UPLOAD AREA -->
+                            <div class="border rounded-4 p-4 mb-3 text-center bg-light">
+
                                 <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
-                                <h6 class="fw-semibold mb-1">Drag images here</h6>
-                                <p class="small text-muted mb-3">or click to select files</p>
-                                
-                                @* Datos importantes de la carga de imagen *@
-                                <input type="file" name="newImages" id="fileInput" multiple accept="image/*" style="display: none;" />
-                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4" id="selectFilesBtn">
-                                    <i class="bi bi-folder2-open me-2"></i>Select Files
+
+                                <p class="small text-muted mb-3">
+                                    Click the button to select images
+                                </p>
+
+                                <!-- Input file -->
+                                <input type="file"
+                                       name="newImages"
+                                       id="fileInput"
+                                       multiple
+                                       accept="image/*"
+                                       style="display: none;" />
+
+                                <!-- Button -->
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm rounded-pill px-4"
+                                        id="selectFilesBtn">
+                                    <i class="bi bi-folder2-open me-2"></i>
+                                    Select Files
                                 </button>
-                                <p class="small text-muted mt-3 mb-0">Formats: JPG, PNG, GIF, WEBP (Max. 5MB per image)</p>
+
+                                <p class="small text-muted mt-3 mb-0">
+                                    Formats: JPG, PNG, GIF, WEBP (Max. 5MB per image)
+                                </p>
+
                                 <span id="imageFile-error" class="text-danger small"></span>
+
                             </div>
 
                             <!-- Image preview -->
                             <div class="image-preview-container mb-4">
+
                                 <h6 class="fw-semibold mb-3">
-                                    <i class="bi bi-eye me-2"></i>Preview
+                                    <i class="bi bi-eye me-2"></i>
+                                    Preview
                                     <span class="badge bg-primary rounded-pill ms-2" id="imageCount">0/5</span>
                                 </h6>
+
                                 <div class="row g-2" id="imagePreview">
-                                    <!-- Images will be added here dynamically -->
+                                    @* Images added dynamically *@
                                 </div>
+
                             </div>
+
                         </div>
 
                     </div>
                 </div>
 
                 <div class="text-center mt-3">
-                    <span class="badge fw-normal px-4 py-2 rounded-pill fs-6" style="background-color: #1e3a8a; color: white;">
+                    <span class="badge fw-normal px-4 py-2 rounded-pill fs-6"
+                          style="background-color: #1e3a8a; color: white;">
                         <i class="bi bi-person me-1"></i>
                         User creator: @User.Identity?.Name
                     </span>
@@ -249,14 +275,6 @@
         background: #e7f1ff !important;
     }
 
-    .upload-area.highlight {
-        border-color: #0d6efd !important;
-        background: #e7f1ff !important;
-    }
-
-    .border-dashed {
-        border-style: dashed !important;
-    }
 
     /* Styles for image preview */
     .preview-item {
@@ -297,21 +315,8 @@
             opacity: 1;
         }
 
-        .preview-item .order-badge {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(13, 110, 253, 0.9);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
+        
+
 </style>
 
 @section Scripts {
@@ -321,159 +326,99 @@
 
     @* This script is for the image section *@
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements for images
-            const dropzone = document.getElementById('dropzone');
+        document.addEventListener('DOMContentLoaded', function () {
             const fileInput = document.getElementById('fileInput');
             const selectFilesBtn = document.getElementById('selectFilesBtn');
             const imagePreview = document.getElementById('imagePreview');
             const imageCount = document.getElementById('imageCount');
+            const form = document.getElementById('createComicForm');
+
             const maxFiles = 5;
             let filesArray = [];
 
             // Open file selector
-            selectFilesBtn.addEventListener('click', function() {
+            selectFilesBtn.addEventListener('click', function () {
                 fileInput.click();
             });
 
-            // Click on dropzone
-            dropzone.addEventListener('click', function(e) {
-                if (e.target !== selectFilesBtn && !selectFilesBtn.contains(e.target)) {
-                    fileInput.click();
-                }
-            });
-
-            // Prevent default drag & drop behavior
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            // Highlight dropzone on drag
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropzone.addEventListener(eventName, () => {
-                    dropzone.classList.add('highlight');
-                }, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, () => {
-                    dropzone.classList.remove('highlight');
-                }, false);
-            });
-
-            // Handle file drop
-            dropzone.addEventListener('drop', function(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(files);
-            }, false);
-
-            // Handle file selection
-            fileInput.addEventListener('change', function() {
+            // When user selects images
+            fileInput.addEventListener('change', function () {
                 handleFiles(this.files);
             });
 
-            // Process selected files
             function handleFiles(files) {
                 const fileList = Array.from(files);
 
-                // Check limit
                 if (filesArray.length + fileList.length > maxFiles) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Image Limit',
-                        text: `You can only upload up to ${maxFiles} images`
-                    });
+                            Swal.fire({
+                            icon: 'error',
+                            title: 'Limit exceeded',
+                            text: `You can only upload up to ${maxFiles} images`
+                            });
+                    
                     return;
                 }
 
-                // Validate each file
                 fileList.forEach(file => {
                     if (validateFile(file)) {
                         filesArray.push(file);
-                        previewFile(file, filesArray.length);
+                        previewFile(file);
                     }
                 });
 
                 updateImageCount();
             }
 
-            // Validate file
             function validateFile(file) {
                 const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 const maxSize = 5 * 1024 * 1024; // 5MB
 
                 if (!validTypes.includes(file.type)) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid Format',
-                        text: `${file.name}: Use JPG, PNG, GIF or WEBP.`
-                    });
+                    alert(`${file.name}: Use JPG, PNG, GIF or WEBP.`);
                     return false;
                 }
 
                 if (file.size > maxSize) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'File Too Large',
-                        text: `${file.name}: Maximum 5MB.`
-                    });
+                    alert(`${file.name}: Maximum 5MB.`);
                     return false;
                 }
 
                 return true;
             }
 
-            // Preview file
-            function previewFile(file, index) {
+            function previewFile(file) {
                 const reader = new FileReader();
                 const col = document.createElement('div');
                 col.className = 'col-4';
 
                 reader.readAsDataURL(file);
-                reader.onloadend = function() {
+                reader.onloadend = function () {
                     const previewItem = document.createElement('div');
                     previewItem.className = 'preview-item';
                     previewItem.innerHTML = `
                         <img src="${reader.result}" alt="Preview">
-                        <button class="remove-image" data-filename="${file.name}">
+                        <button type="button" class="remove-image" data-filename="${file.name}">
                             <i class="bi bi-x"></i>
                         </button>
-                        <div class="order-badge">${index}</div>
                     `;
+
                     col.appendChild(previewItem);
                     imagePreview.appendChild(col);
 
-                    // Remove button
-                    previewItem.querySelector('.remove-image').addEventListener('click', function(e) {
-                        e.stopPropagation();
+                    previewItem.querySelector('.remove-image').addEventListener('click', function () {
                         const filename = this.dataset.filename;
                         filesArray = filesArray.filter(f => f.name !== filename);
                         col.remove();
-
-                        // Reorder badges
-                        document.querySelectorAll('.preview-item .order-badge').forEach((badge, idx) => {
-                            badge.textContent = idx + 1;
-                        });
-
                         updateImageCount();
                     });
                 };
             }
 
-            // Update counter
             function updateImageCount() {
                 imageCount.textContent = `${filesArray.length}/${maxFiles}`;
             }
 
-            // Submit form with images
-            const form = document.getElementById('createComicForm');
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function () {
                 const dataTransfer = new DataTransfer();
 
                 filesArray.forEach(file => {
@@ -482,8 +427,14 @@
 
                 fileInput.files = dataTransfer.files;
             });
+        });
 
-            // Multiselect configuration
+    </script>
+
+    @* Este es el cógido del multiselect *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if plugin is available
             if (typeof $.fn.multiselect !== 'undefined') {
                 $('#selectedCategorias').multiselect({
                     buttonClass: 'form-select',
