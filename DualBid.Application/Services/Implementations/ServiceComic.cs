@@ -3,6 +3,7 @@ using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,6 +77,13 @@ namespace DualBid.Application.Services.Implementations
                 .ToList() ?? new List<ImgComic>();
 
             return await _repositoryComic.UpdateAsync(entity, selectedCategorias, entityImages,imagesToDelete);
+        }
+
+        public async Task<ICollection<ComicDTO>> ListComicsForAuctionByUserAsync(int userId)
+        {
+            var list = await _repositoryComic.ListComicsForAuctionByUserAsync(userId);
+
+            return _mapper.Map<ICollection<ComicDTO>>(list);
         }
     }
 }

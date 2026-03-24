@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DualBid.Infraestructure.Repository.Implementations
 {
@@ -57,10 +58,10 @@ namespace DualBid.Infraestructure.Repository.Implementations
             //Trae todas las categorías seleccionadas y las asigna al cómic
             await ApplyCategoriasAsync(entity, selectedCategorias);
 
-                entity.Availability = true; // Por defecto, el cómic está disponible
-                await _context.Set<Comic>().AddAsync(entity);
-                await _context.SaveChangesAsync();
-            
+            entity.Availability = true; // Por defecto, el cómic está disponible
+            await _context.Set<Comic>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+
 
             return entity.Id;
         }
@@ -90,25 +91,24 @@ namespace DualBid.Infraestructure.Repository.Implementations
         {
             try
             {
-                var comic = await _context.Comic.FindAsync(id);
-                if (comic == null)
-                    return false;
+                var query = _context.Comic
+                    .Where(a => a.Id == id);
+                int rowsAffected;
 
-                comic.Availability = availability;
+                rowsAffected = await query.ExecuteUpdateAsync(setters => setters
+                    .SetProperty(a => a.Availability, availability)
+                            );
 
-                await _context.SaveChangesAsync();
-                return true;
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating comic availability: {ex.Message}");
-                throw;
+                return false;
             }
         }
 
-
-
-        public async Task<bool> UpdateAsync(Comic entity,string[] selectedCategorias,List<ImgComic> newImages,int[] imagesToDelete)
+        public async Task<bool> UpdateAsync(Comic entity, string[] selectedCategorias, List<ImgComic> newImages, int[] imagesToDelete)
         {
             var comic = await _context.Comic
                 .Include(x => x.Category)
@@ -155,6 +155,18 @@ namespace DualBid.Infraestructure.Repository.Implementations
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<ICollection<Comic>> ListComicsForAuctionByUserAsync(int userId)
+        {
+            var collection = await _context.Set<Comic>()
+                .Where(c => c.Seller.Id == userId && c.Availability)
+                .Include(x => x.Publisher)
+                .Include(x => x.ImgComic)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return collection;
         }
     }
 }

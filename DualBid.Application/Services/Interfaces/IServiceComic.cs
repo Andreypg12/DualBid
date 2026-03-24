@@ -16,5 +16,6 @@ namespace DualBid.Application.Services.Interfaces
         Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias);
         Task<bool> UpdateAvailabilityAsync(int id, bool availability);
         Task<bool> UpdateAsync(ComicDTO dto, string[] selectedCategorias,List<ImgComicDTO> newImages,int[] imagesToDelete);
+        Task<ICollection<ComicDTO>> ListComicsForAuctionByUserAsync(int userId);
     }
 }

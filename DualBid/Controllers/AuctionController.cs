@@ -132,6 +132,8 @@ namespace DualBid.Controllers
                 return View(vm);
             }
 
+            await _serviceComic.UpdateAvailabilityAsync(pvm.Auction.ComicId, false);
+            
             // Si todo está bien, guardar
             await _serviceAuction.AddAsync(pvm.Auction);
 
@@ -147,12 +149,14 @@ namespace DualBid.Controllers
 
         private async Task<CreateAuctionViewModel> CreateAuctionCreateVM()
         {
+            int userIdClaim = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
             return new CreateAuctionViewModel
             {
 
                 Auction = new AuctionDTO(),
 
-                Comics = await _serviceComic.ListAsync()
+                Comics = await _serviceComic.ListComicsForAuctionByUserAsync(userIdClaim)
             };
         }
 
@@ -356,6 +360,9 @@ namespace DualBid.Controllers
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
+                await _serviceComic.UpdateAvailabilityAsync(auction.Comic.Id, true);
+
+                // Aqui se hace el update
                 await _serviceAuction.UpdateStateAsync(id, 4);
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
