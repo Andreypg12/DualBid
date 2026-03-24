@@ -13,5 +13,6 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<Auction> FindByIdAsync(int id);
         Task<int> AddAsync(Auction entity);
         Task UpdateAsync(Auction entity);
+        Task<bool> UpdateStateAsync(int auctionId, int newStateId);
     }
 }

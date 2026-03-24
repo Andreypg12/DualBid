@@ -18,6 +18,7 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.CreatorUser, orig => orig.MapFrom(o => o.CreatorUser))
                 .ForMember(dest => dest.State, orig => orig.MapFrom(o => o.State))
                 .ForMember(dest => dest.Bids, orig => orig.MapFrom(o => o.Bid))
+                .ForMember(dest => dest.StateId, orig => orig.MapFrom(o => o.StateId))
                 .ReverseMap()
 
                 // BLOQUEAR la navegación en dirección DTO → Entidad

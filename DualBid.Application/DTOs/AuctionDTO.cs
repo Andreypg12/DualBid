@@ -40,6 +40,10 @@ namespace DualBid.Application.DTOs
         [DataType(DataType.Currency)]
         public decimal MinimunIncrease { get; set; }
 
+        [DisplayName("State id")]
+        [Required(ErrorMessage = "{0} is required")]
+        [Range(1, 4, ErrorMessage = "{0} must be greater than 0")]
+        [DataType(DataType.Currency)]
         public int StateId { get; set; }
 
         public AuctionStateDTO State { get; set; } = new();

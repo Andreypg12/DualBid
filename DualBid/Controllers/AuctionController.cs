@@ -166,7 +166,7 @@ namespace DualBid.Controllers
             if (!validateAuctionDates(viewModel.StartDate, viewModel.ExpectedEndDate, out errorMessage))
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                    "Errors with the dates",
+                    "Date validation errors",
                     errorMessage,
                     SweetAlertMessageType.warning
                 );
@@ -203,8 +203,8 @@ namespace DualBid.Controllers
             await _serviceAuction.UpdateAsync(id, existingDto);
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                "Subasta actualizada",
-                $"La subasta ha sido modificada exitosamente.",
+                "Auction updated",
+                $"The auction {existingDto.Comic.Title} has been successfully modified",
                 SweetAlertMessageType.success
             );
 
@@ -227,6 +227,153 @@ namespace DualBid.Controllers
             {
                 errorMessage = "";
                 return true;
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ActivateAuction(int id)
+        {
+            try
+            {
+                var auction = await _serviceAuction.FindByIdAsync(id);
+
+                if (auction == null)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Error",
+                        "Auction not found",
+                        SweetAlertMessageType.error
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que el usuario sea el creador
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+                if (auction.CreatorUser.Id != userId)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Unauthorized",
+                        "You are not authorized to activate this auction",
+                        SweetAlertMessageType.error
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que la subasta esté en estado 1 (pendiente)
+                if (auction.State.Id != 1)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Invalid Action",
+                        "This auction cannot be activated in its current state",
+                        SweetAlertMessageType.warning
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que la fecha de inicio no haya pasado
+                if (auction.StartDate > DateTime.Now)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Cannot Activate",
+                        "The auction start date is in the future. You can only activate it when the start date arrives.",
+                        SweetAlertMessageType.warning
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                await _serviceAuction.UpdateStateAsync(id, 2);
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction Activated",
+                    "The auction has been successfully activated",
+                    SweetAlertMessageType.success
+                );
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Error",
+                    $"An error occurred while activating the auction: {ex.Message}",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CloseAuction(int id)
+        {
+            try
+            {
+                var auction = await _serviceAuction.FindByIdAsync(id);
+
+                if (auction == null)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Error",
+                        "Auction not found",
+                        SweetAlertMessageType.error
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que el usuario sea el creador
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+                if (auction.CreatorUser.Id != userId)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Unauthorized",
+                        "You are not authorized to close this auction",
+                        SweetAlertMessageType.error
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que la subasta esté en estado 1 o 2
+                if (auction.State.Id != 1 && auction.State.Id != 2)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Invalid Action",
+                        "This auction cannot be closed in its current state",
+                        SweetAlertMessageType.warning
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Verificar que no tenga pujas (cancelar solo si no hay pujas)
+                if (auction.Bids != null && auction.Bids.Any())
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Cannot Close",
+                        "This auction cannot be closed because it already has bids",
+                        SweetAlertMessageType.warning
+                    );
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                await _serviceAuction.UpdateStateAsync(id, 4);
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction Closed",
+                    "The auction has been successfully closed/cancelled",
+                    SweetAlertMessageType.success
+                );
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Error",
+                    $"An error occurred while closing the auction: {ex.Message}",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction(nameof(Details), new { id });
             }
         }
     }

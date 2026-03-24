@@ -325,9 +325,28 @@
             Back to Auctions
         </a>
 
-        @if (Model.ActualEndDate == null)
-        {
-            @if (int.Parse(userId ?? "0") != Model.CreatorUser.Id)
+        <div class="d-flex gap-3">
+            @{
+                var currentUserId = int.Parse(userId ?? "0");
+                bool isAuctionActive = Model.ActualEndDate == null;
+                bool isCurrentUserCreator = currentUserId == Model.CreatorUser.Id;
+                bool canPlaceBid = isAuctionActive && !isCurrentUserCreator;
+
+                bool canEditAuction = isCurrentUserCreator &&
+                (Model.State.Id == 1 || (Model.State.Id == 2 && !Model.Bids.Any()));
+
+                bool canActivateAuction = isCurrentUserCreator &&
+                Model.StartDate <= DateTime.Now &&
+                Model.State.Id == 1;
+
+
+                bool canCloseAuction = isCurrentUserCreator &&
+                (Model.State.Id == 1 || Model.State.Id == 2) &&
+                !Model.Bids.Any();
+            }
+
+            @* Botón para pujar *@
+            @if (canPlaceBid)
             {
                 <a asp-controller="Bid"
                    asp-action="Create"
@@ -338,22 +357,60 @@
                     Place Your Bid
                 </a>
             }
-        }
-        else
-        {
-            <button class="btn btn-secondary btn-lg px-5" disabled>
-                <i class="bi bi-lock-fill me-2"></i>
-                Auction Ended
-            </button>
-        }
+            else if (!isAuctionActive)
+            {
+                <button class="btn btn-secondary btn-lg px-5" disabled>
+                    <i class="bi bi-lock-fill me-2"></i>
+                    Auction Ended
+                </button>
+            }
 
-        @if (int.Parse(userId ?? "0") == Model.CreatorUser.Id)
-        {
-            <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm" data-bs-toggle="modal" data-bs-target="#editAuctionModal">
-                <i class="bi bi-pencil-square me-2"></i>
-                Edit Auction
-            </button>
-        }
+            @* Botones para el creador *@
+            @if (isCurrentUserCreator)
+            {
+
+                @* Botón para cerrar subasta *@
+                @if (canCloseAuction)
+                {
+                    <form asp-action="CloseAuction" asp-controller="Auction" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit"
+                                class="btn btn-warning btn-lg px-5 shadow-sm"
+                                onclick="return confirm('Are you sure you want to close this auction? This action cannot be undone.');">
+                            <i class="bi bi-stop-fill me-2"></i>
+                            Close Auction
+                        </button>
+                    </form>
+                }
+                @* Botón para activar subasta *@
+                @if (canActivateAuction)
+                {
+                    <form asp-action="ActivateAuction" asp-controller="Auction" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit"
+                                class="btn btn-success btn-lg px-5 shadow-sm"
+                                onclick="return confirm('Are you sure you want to activate this auction? Once activated, users will be able to place bids.');">
+                            <i class="bi bi-play-fill me-2"></i>
+                            Activate Auction
+                        </button>
+                    </form>
+                }
+
+                @* Botón de edición general *@
+                @if (canEditAuction)
+                {
+                    <button type="button"
+                            class="btn btn-outline-primary btn-lg px-4 shadow-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editAuctionModal">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit Auction
+                    </button>
+                }
+            }
+        </div>
     </div>
 
 @await Html.PartialAsync("_EditAuctionModal", Model)
@@ -442,13 +499,13 @@
     </style>
 
 @section Scripts {
-    <script>
-        window.auctionDetailsRealtimeConfig = {
-            auctionId: "@Model.Id",
-            userId: "@(userId ?? "0")"
-        };
-    </script>
+        <script>
+                window.auctionDetailsRealtimeConfig = {
+                    auctionId: "@Model.Id",
+                    userId: "@(userId ?? "0")"
+                };
+        </script>
 
-    <script src="~/js/auctionDetailsRealtime.js"></script>
+        <script src="~/js/auctionDetailsRealtime.js"></script>
 
 }

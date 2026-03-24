@@ -74,7 +74,31 @@ namespace DualBid.Infraestructure.Repository.Implementations
             // Si el mapping ya actualizó propiedades escalares, esto garantiza update
             _context.Entry(entity).State = EntityState.Modified;
 
+            Console.WriteLine($"entity repository {entity.StateId}");
+
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> UpdateStateAsync(int auctionId, int newStateId)
+        {
+            try
+            {
+                // Actualización directa con ExecuteUpdateAsync (más eficiente)
+                var rowsAffected = await _context.Auction
+                    .Where(a => a.Id == auctionId)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(a => a.StateId, newStateId)
+                    );
+
+                Console.WriteLine($"Cambiando estado de subasta {auctionId} a {newStateId}. Filas afectadas: {rowsAffected}");
+
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cambiando estado: {ex.Message}");
+                return false;
+            }
         }
     }
 }
