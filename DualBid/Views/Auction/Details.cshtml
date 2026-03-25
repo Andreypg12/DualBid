@@ -344,7 +344,7 @@
                 bool canPlaceBid = isAuctionActive && !isCurrentUserCreator && Model.State.Id == 2;
 
                 bool canEditAuction = isCurrentUserCreator &&
-                (Model.State.Id == 1 || (Model.State.Id == 2 && !Model.Bids.Any()));
+                (Model.State.Id == 1  && !Model.Bids.Any());
 
                 bool canActivateAuction = isCurrentUserCreator &&
                 Model.StartDate <= DateTime.Now &&
