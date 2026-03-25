@@ -250,12 +250,18 @@ namespace DualBid.Controllers
         public async Task<IActionResult> Edit(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias, int[] ImagesToDelete)
 
         {
+            var original = await _serviceComic.FindByIdAsync(dto.Id);
+
+            int existingImagesCount = original?.ImgComic?.Count(i => i.Img != null && i.Img.Length > 0) ?? 0;
+            int totalImagenes = existingImagesCount + newImages.Count() - ImagesToDelete.Count() ;
 
             bool BloqueoSubasta = dto.Auction != null &&
                           dto.Auction.Any(a =>
                               a.StateId == 2 || a.StateId == 3);
 
+            //VALIDACIONES
 
+            //Valida si el comic pertenece a una subasta activa antes de entrar a la pantalla de editar
             if (BloqueoSubasta || dto.availability == false)
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -263,9 +269,59 @@ namespace DualBid.Controllers
                    "The comic is already in an active auction or has already been auctioned.",
                    SweetAlertMessageType.error
                    );
+
+
                 await LoadCombosAsync();
                 return View(dto);
             }
+
+            //Valida si hay un usuario seleccionado
+            if (dto.SellerId == 0)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡You need to log in!",
+                    "You must be logged in to create a comic",
+                    SweetAlertMessageType.error
+                    );
+
+                dto.Seller = original?.Seller;
+                dto.ImgComic = original?.ImgComic ?? new List<ImgComicDTO>();
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
+
+            //Categoria no puede estar vacío.
+            if (!selectedCategorias.Any())
+            {
+                //ModelState.AddModelError("SelectedCategorias", "You must select at least one category.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Categories is not enough!",
+                    "You must select at least one Category",
+                    SweetAlertMessageType.error
+                    );
+
+                dto.Seller = original?.Seller;
+                dto.ImgComic = original?.ImgComic ?? new List<ImgComicDTO>();
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
+
+            //Imagenes no puede estar vacío.
+            if (totalImagenes <= 0)
+            {
+                //ModelState.AddModelError("ImageFiles", "You must upload at least one image.");
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "¡Images is not enough!",
+                    "You must upload at least one Image",
+                    SweetAlertMessageType.error
+                    );
+
+                dto.Seller = original?.Seller;
+                dto.ImgComic = original?.ImgComic ?? new List<ImgComicDTO>();
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
+
 
             selectedCategorias ??= Array.Empty<string>();
             ImagesToDelete ??= Array.Empty<int>();

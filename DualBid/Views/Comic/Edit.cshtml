@@ -34,8 +34,9 @@
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
 
-                        @* ID del comic para enviarlo al controlador *@
+                        @* ID del comic para enviarlo al controlador y  sellerId*@
                         <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="SellerId" />
 
                         @* Informacion básica  title y drescription*@
                         <div class="mb-4">
@@ -217,6 +218,8 @@
                                 <div class="row g-2" id="existingImages">
                                     @foreach (var img in Model.ImgComic.Where(i => i.Img != null && i.Img.Length > 0))
                                     {
+                                        <input type="hidden" name="currentImages" value="@img.Id" />
+
                                         <div class="col-4">
                                             <div class="existing-image-item position-relative">
                                                 <img src="data:image/jpeg;base64,@Convert.ToBase64String(img.Img)"
@@ -373,21 +376,41 @@
             document.querySelectorAll('.remove-existing').forEach(btn => {
                 btn.addEventListener('click', function() {
 
-                    if (confirm('Are you sure you want to delete this image?')) {
+                            Swal.fire({
+                            title: 'Are you sure?',
+                            text: "This image will be removed",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes, delete',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
 
-                        const imageId = this.dataset.imageId;
-                        const item = this.closest('.col-4');
+                if (result.isConfirmed) {
 
-                        const hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = 'ImagesToDelete';
-                        hiddenInput.value = imageId;
+                    const imageId = this.dataset.imageId;
+                    const item = this.closest('.col-4');
 
-                        document.getElementById('editComicForm')
-                                .appendChild(hiddenInput);
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'ImagesToDelete';
+                    hiddenInput.value = imageId;
 
-                        item.remove();
-                    }
+                    document.getElementById('editComicForm')
+                            .appendChild(hiddenInput);
+
+                    item.remove();
+
+                    Swal.fire(
+                        'Deleted',
+                        'The image was removed',
+                        'success'
+                );
+            }
+
+        });
+
                 });
             });
 
