@@ -1,24 +1,26 @@
 ﻿@model IEnumerable<DualBid.Application.DTOs.ComicDTO>
 
 @{
-	ViewData["Title"] = "Catálogo de libros";
-	var total = Model?.Count() ?? 0;
+    ViewData["Title"] = "Catálogo de libros";
+    var total = Model?.Count() ?? 0;
 }
 
 <div class="container-fluid px-3 px-lg-4 mt-3">
-    <!-- Header principal sin tarjeta -->
+
+    @* Header principal con todas las tarjetas *@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 border-bottom">
 
-        <!-- LADO IZQUIERDO: Título y Filtros de estado -->
+        @* Lado izquierdo con título, contador y filtros *@
         <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 gap-sm-4">
-            <!-- Título y contador -->
+
+            @* Titulo y contador *@
             <div class="d-flex align-items-center gap-3">
                 <div class="bg-primary bg-opacity-10 p-3 rounded-3 d-none d-sm-block">
                     <i class="bi bi-collection-fill text-primary fs-4"></i>
                 </div>
                 <div>
                     <h1 class="h3 fw-semibold text-dark mb-1">Comic Catalog</h1>
-                    <p class="text-secondary small mb-0 d-flex align-items-center flex-wrap"> 
+                    <p class="text-secondary small mb-0 d-flex align-items-center flex-wrap">
                         <span class="fw-semibold text-dark ms-1">Total items: @total</span>
                     </p>
                 </div>
@@ -28,7 +30,7 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="text-secondary small fw-medium me-1">Status:</span>
                 <div class="d-flex gap-2">
-                    
+
                     @* Boton available *@
                     <a asp-action="Index" asp-route-availability="available"
                        class="text-decoration-none px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2"
@@ -37,7 +39,7 @@
                         <span class="rounded-circle" style="width: 8px; height: 8px; @(ViewBag.SelectedAvailability == "available" ? "background-color: #2e7d32;" : "background-color: #999;")"></span>
                         <span>Available</span>
                     </a>
-                    
+
                     @* Boton Unvailable *@
                     <a asp-action="Index" asp-route-availability="unavailable"
                        class="text-decoration-none px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2"
@@ -50,7 +52,7 @@
             </div>
         </div>
 
-       @*  Lado derecho *@
+        @*  Lado derecho *@
         <div class="d-flex gap-2">
 
             @* Boton de crear *@
@@ -74,10 +76,10 @@
 
 @if (Model == null || !Model.Any())
 {
-	<div class="alert alert-info d-flex align-items-center" role="alert">
-		<i class="bi bi-info-circle me-2"></i>
-		<div>There is not Comics Available yet.</div>
-	</div>
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        <div>There is not Comics Available yet.</div>
+    </div>
 }
 else
 {
@@ -131,7 +133,7 @@ else
                             </div>
 
                             @* Categorias *@ 
-                            @if (item.Category != null && item.Category.Any())
+                                    @if (item.Category != null && item.Category.Any())
                             {
                                 <div class="mb-3">
                                     <div class="d-flex align-items-center gap-2 mb-2 text-dark">
@@ -204,13 +206,14 @@ else
                     </article>
                 </div>
             }
+        </div>
     </section>
 }
 
 @section Scripts {
 
-     <script>
-        
+    <script>
+
         //BORRAR
                 document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function (e) {
@@ -311,9 +314,9 @@ else
 
         });
         // Termina EDITAR
-    </script> 
+    </script>
 
-    <!-- Tus estilos existentes -->
+
     <style>
         .card:hover {
             transform: translateY(-3px);

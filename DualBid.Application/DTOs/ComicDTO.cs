@@ -83,6 +83,6 @@ namespace DualBid.Application.DTOs
         [Required(ErrorMessage = "State of conservation is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "State of conservation is required.")]
         public int? StateConservationId { get; set; }
-
+        // ? permite que sea null
     }
 }

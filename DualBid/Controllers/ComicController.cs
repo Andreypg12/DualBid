@@ -288,6 +288,7 @@ namespace DualBid.Controllers
                 }
             }
 
+            // Estas 2 desactivan el problema sin cambiar DTO ni vista 
             ModelState.Remove("Publisher.Description");
             ModelState.Remove("StateConservation.Description");
             if (!ModelState.IsValid)

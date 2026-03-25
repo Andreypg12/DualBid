@@ -5,7 +5,8 @@
 }
 
 <div class="container py-4">
-    <!-- Header with attractive design -->
+    
+    @* Parte superior de la pagina, no hay cosas muy relevantes. *@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -23,16 +24,19 @@
         </div>
     </div>
 
-    <!-- MAIN FORM - TWO COLUMN STRUCTURE -->
+    @* Contenedor Principal *@
     <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
         <div class="row g-4">
-            <!-- LEFT COLUMN: Main form -->
+
+            @* Columna izquierda, la Información principal *@
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
-                        <!-- Basic information -->
+
+
+                        @* Informacion basica, titulo y descripcion *@
                         <div class="mb-4">
                             <h5 class="fw-semibold mb-3">
                                 <i class="bi bi-info-circle-fill text-primary me-2"></i>
@@ -58,8 +62,11 @@
                                 </div>
                             </div>
                         </div>
+                        @* Informacion basica, titulo y descripcion CIERRE*@
 
-                        <!-- Publication details -->
+
+
+                        @* Detalles de publicacion *@
                         <div class="mb-4">
                             <h5 class="fw-semibold mb-3">
                                 <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>
@@ -103,12 +110,17 @@
                                 </div>
                             </div>
                         </div>
+                        @* Detalles de publicacion CIERRE*@
 
-                        <!-- Publisher and categories -->
+
+
+                        @* Publisher, conservation state, categories, status *@
                         <div class="mb-4">
 
-                            <!-- Primera fila -->
+                            @* Primera Fila *@
                             <div class="row">
+
+                                @* Publisher combo *@
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="PublisherId" class="form-label">Publisher</label>
                                     <select asp-for="PublisherId"
@@ -119,6 +131,7 @@
                                     <span asp-validation-for="PublisherId" class="text-danger small"></span>
                                 </div>
 
+                                @* State Conservation combo *@
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="StateConservationId" class="form-label">Conservation State</label>
                                     <select asp-for="StateConservationId"
@@ -128,12 +141,15 @@
                                     </select>
                                     <span asp-validation-for="StateConservationId" class="text-danger small"></span>
                                 </div>
+
                             </div>
 
 
-                            <!-- Segunda fila -->
+                            @* Segunda fila *@
                             <div class="row">
 
+
+                                @* Categorias multiselect *@
                                 <div class="col-6 mt-3">
                                     <label class="form-label">Categories</label>
 
@@ -150,6 +166,7 @@
                                 </div>
 
 
+                                @* Componente para mostar el estado *@
                                 <div class="col-6 mt-3">
                                     <label class="form-label ms-2">Status</label>
                                     <div class="d-flex align-items-center gap-2">
@@ -165,8 +182,10 @@
                             </div>
 
                         </div>
+                        @* Publisher, conservation state, categories, status  CIERRE*@
 
-                        <!-- Action buttons -->
+
+                        @* Botones de accion: cancer y create *@
                         <div class="d-flex gap-3 justify-content-end mt-4">
                             <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2" style="background-color: rgb(215, 75, 72); color: white;">
                                 <i class="bi bi-x-lg me-2"></i>Cancel
@@ -179,8 +198,8 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Image gallery -->
-            <!-- RIGHT COLUMN: Image gallery -->
+
+            @* Columna derecha, todo lo relacionado a la imagen *@
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
@@ -195,23 +214,23 @@
                             </div>
                         </div>
 
-                        <!-- Area for new images -->
+                        @* Area para la nueva imagen *@
                         <div class="mb-4">
 
                             <h6 class="fw-semibold mb-3">
                                 <i class="bi bi-cloud-upload me-2"></i>Add Images
                             </h6>
 
-                            <!-- SIMPLE UPLOAD AREA -->
+                            @* Cuadro blanco, donde van las imagenes *@
                             <div class="border rounded-4 p-4 mb-3 text-center bg-light">
 
+                                
                                 <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
-
                                 <p class="small text-muted mb-3">
                                     Click the button to select images
                                 </p>
 
-                                <!-- Input file -->
+                                @* Pestaña para seleccionar archivos *@
                                 <input type="file"
                                        name="newImages"
                                        id="fileInput"
@@ -219,7 +238,7 @@
                                        accept="image/*"
                                        style="display: none;" />
 
-                                <!-- Button -->
+                                @* Boton para acceder a los archivos *@
                                 <button type="button"
                                         class="btn btn-outline-primary btn-sm rounded-pill px-4"
                                         id="selectFilesBtn">
@@ -235,7 +254,7 @@
 
                             </div>
 
-                            <!-- Image preview -->
+                            @* Imagenes agregadas *@
                             <div class="image-preview-container mb-4">
 
                                 <h6 class="fw-semibold mb-3">
@@ -255,6 +274,8 @@
                     </div>
                 </div>
 
+
+                @* Usuario creador *@
                 <div class="text-center mt-3">
                     <span class="badge fw-normal px-4 py-2 rounded-pill fs-6"
                           style="background-color: #1e3a8a; color: white;">
@@ -324,7 +345,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    @* This script is for the image section *@
+    @* Este script esta hecho para la zona de carga de imagenes *@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const fileInput = document.getElementById('fileInput');
@@ -336,16 +357,17 @@
             const maxFiles = 5;
             let filesArray = [];
 
-            // Open file selector
+            // Abre el selector de archivos
             selectFilesBtn.addEventListener('click', function () {
                 fileInput.click();
             });
 
-            // When user selects images
+            // Cuando el usaurio selecciona una imagen
             fileInput.addEventListener('change', function () {
                 handleFiles(this.files);
             });
 
+            //Valida que las imagenes no sobrepasen las 5 imagenes
             function handleFiles(files) {
                 const fileList = Array.from(files);
 
@@ -359,6 +381,7 @@
                     return;
                 }
 
+                //Valida los archivos con el metodo que esta abajo.
                 fileList.forEach(file => {
                     if (validateFile(file)) {
                         filesArray.push(file);
@@ -366,12 +389,14 @@
                     }
                 });
 
+                //Actualiza contador
                 updateImageCount();
             }
 
+            //Valida el tipo de archivo
             function validateFile(file) {
                 const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxSize = 5 * 1024 * 1024;
 
                 if (!validTypes.includes(file.type)) {
                     alert(`${file.name}: Use JPG, PNG, GIF or WEBP.`);
@@ -386,6 +411,7 @@
                 return true;
             }
 
+            //Esto es lo que permite cargar más imagenes para la prevista.
             function previewFile(file) {
                 const reader = new FileReader();
                 const col = document.createElement('div');
@@ -414,10 +440,12 @@
                 };
             }
 
+            //Actualiza la cuenta de imagenes agregadas
             function updateImageCount() {
                 imageCount.textContent = `${filesArray.length}/${maxFiles}`;
             }
 
+            //Codigo para transferir la informacion
             form.addEventListener('submit', function () {
                 const dataTransfer = new DataTransfer();
 
