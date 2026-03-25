@@ -107,12 +107,12 @@
 
                         <!-- Form buttons -->
                         <div class="d-flex gap-3 pt-2">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-3 px-2">
+                                <i class="bi bi-arrow-left me-2"></i> Back
+                            </a>
                             <button type="submit" class="btn btn-primary btn-lg flex-grow-1 rounded-3" id="submitBtn">
                                 <i class="bi bi-check2-circle me-2"></i> Create Auction
                             </button>
-                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-3 px-4">
-                                <i class="bi bi-arrow-left me-2"></i> Back
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -302,6 +302,13 @@
     .container-fluid {
         max-width: 1900px;
         margin: 0 auto;
+    }
+
+    #submitBtn {
+        background-color: #20c997;
+        color: white;
+        transition: all 0.3s ease;
+        font-weight: 500;
     }
 </style>
 

@@ -73,8 +73,8 @@ namespace DualBid.Controllers
 
             ViewBag.ListCategorias = new MultiSelectList(
                 items: categorias,
-                dataValueField: nameof(CategoryDTO.Id),    
-                dataTextField: nameof(CategoryDTO.Description), 
+                dataValueField: nameof(CategoryDTO.Id),
+                dataTextField: nameof(CategoryDTO.Description),
                 selectedValues: selectedIds
             );
         }
@@ -156,7 +156,7 @@ namespace DualBid.Controllers
                 return View(dto);
             }
 
-            
+
 
             //Terminan las validaciones
 
@@ -202,8 +202,8 @@ namespace DualBid.Controllers
 
                 // Notificación SweetAlert con el detalle de errores
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Errores de validación",
-                    $"El formulario contiene errores:<br>{errores}",
+                    "Validation errors",
+                    $"The form has some errors:<br>{errores}",
                     SweetAlertMessageType.warning
                 );
                 // Importante: Recargar combos antes de retornar vista
@@ -216,8 +216,8 @@ namespace DualBid.Controllers
 
             //Notificar creación
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-               "Libro creado correctamente",
-               $"El libro {dto.Title} fue registrado exitosamente.",
+               "Comic created succesfully",
+               $"The comic {dto.Title} was created succesfully.",
                SweetAlertMessageType.success
            );
 
@@ -247,10 +247,10 @@ namespace DualBid.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
-        
+        public async Task<IActionResult> Edit(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias, int[] ImagesToDelete)
+
         {
-            
+
             bool BloqueoSubasta = dto.Auction != null &&
                           dto.Auction.Any(a =>
                               a.StateId == 2 || a.StateId == 3);
@@ -305,8 +305,8 @@ namespace DualBid.Controllers
             );
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                "Comic actualizado",
-                $"El cómic {dto.Title} fue actualizado correctamente.",
+                "Comic updated",
+                $"The comic {dto.Title} was updated succesfully.",
                 SweetAlertMessageType.success
             );
 
@@ -401,11 +401,10 @@ namespace DualBid.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
     }
-    }
+}
 
-    
+
 
 
 

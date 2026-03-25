@@ -104,7 +104,10 @@
                                     <label asp-for="CreationDate" class="form-label fw-medium">Registration Date</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-plus text-primary"></i></span>
-                                        <input asp-for="CreationDate"class="form-control border-0 bg-light" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                        <input asp-for="CreationDate"class="form-control border-0 bg-light"
+                                        type="date"
+                                        value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                        readonly />
                                     </div>
                                     <span asp-validation-for="CreationDate" class="text-danger small"></span>
                                 </div>

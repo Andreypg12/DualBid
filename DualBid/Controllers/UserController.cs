@@ -104,8 +104,8 @@ namespace Libreria.Web.Controllers
                     );
 
                     ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                        "Errores de validación",
-                        $"El formulario contiene errores:<br>{errores}",
+                        "Validation errors",
+                        $"The form has errors: {errores}",
                         SweetAlertMessageType.warning
                     );
 
@@ -144,8 +144,8 @@ namespace Libreria.Web.Controllers
                 await _serviceUser.UpdateAsync(id, dto);
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                    "Usuario actualizado",
-                    $"El usuario {dto.CompleteName} ha sido modificado exitosamente.",
+                    "User updated",
+                    $"The user {dto.CompleteName} was updated succesfully.",
                     SweetAlertMessageType.success
                 );
 
@@ -155,7 +155,7 @@ namespace Libreria.Web.Controllers
             {
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
                     "Error",
-                    $"Ocurrió un error: {ex.Message}",
+                    $"unknow error: {ex.Message}",
                     SweetAlertMessageType.error
                 );
 
