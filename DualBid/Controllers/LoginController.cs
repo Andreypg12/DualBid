@@ -35,16 +35,16 @@ namespace DualBid.Controllers
                 string errores = string.Join("<br>", ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)
-                        ? "Error de validación no especificado"
+                        ? "Unspecified validation error"
                         : e.ErrorMessage));
 
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Errores de validación",
-                    $"El formulario contiene los siguientes errores:<br>{errores}",
+                    "Validation errors",
+                    $"The form contains the following errors: {errores}",
                     SweetAlertMessageType.warning
                 );
 
-                _logger.LogWarning("Error de validación en login para usuario {Usuario}. Detalle: {Errores}",
+                _logger.LogWarning("Login validation error for user {User}. Details: {Errors}",
                     viewModelLogin.User, errores);
 
                 return View("Index", viewModelLogin);
@@ -55,12 +55,12 @@ namespace DualBid.Controllers
             if (usuarioLog == null)
             {
                 ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Acceso denegado",
-                    "Usuario o contraseña incorrectos.",
+                    "Access denied",
+                    "Invalid username or password.",
                     SweetAlertMessageType.warning
                 );
 
-                _logger.LogWarning("Intento de acceso fallido para usuario {Usuario}", viewModelLogin.User);
+                _logger.LogWarning("Failed login attempt for user {User}", viewModelLogin.User);
 
                 return View("Index", viewModelLogin);
             }
@@ -87,11 +87,11 @@ namespace DualBid.Controllers
                 properties
             );
 
-            _logger.LogInformation("Inicio de sesión correcto para usuario {Usuario}", viewModelLogin.User);
+            _logger.LogInformation("Successful login for user {User}", viewModelLogin.User);
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                "Bienvenido",
-                $"Inicio de sesión correcto. Hola, {usuarioLog.Name}.",
+                "Welcome",
+                $"Login successful. Hello, {usuarioLog.Name}.",
                 SweetAlertMessageType.success
             );
 
@@ -101,13 +101,13 @@ namespace DualBid.Controllers
         [Authorize]
         public async Task<IActionResult> LogOff()
         {
-            _logger.LogInformation("Cierre de sesión correcto de {Usuario}", User.Identity?.Name);
+            _logger.LogInformation("Successful logout for {User}", User.Identity?.Name);
 
             await HttpContext.SignOutAsync();
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                "Sesión finalizada",
-                "Has cerrado sesión correctamente.",
+                "Session ended",
+                "You have successfully logged out.",
                 SweetAlertMessageType.success
             );
 

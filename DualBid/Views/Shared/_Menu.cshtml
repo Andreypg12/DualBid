@@ -113,11 +113,11 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            <li><a class="dropdown-item" asp-controller="Login" asp-action="LogOff">Salir</a></li>
+                            <li><a class="dropdown-item" asp-controller="Login" asp-action="LogOff">Logout</a></li>
                         }
                         else
                         {
-                            <li><a class="dropdown-item" asp-controller="Login" asp-action="Index">Ingresar</a></li>
+                            <li><a class="dropdown-item" asp-controller="Login" asp-action="Index">Login</a></li>
                         }
                     </ul>
                 </li>

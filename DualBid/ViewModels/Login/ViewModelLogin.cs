@@ -4,15 +4,15 @@ namespace DualBid.ViewModels.Login
 {
     public record ViewModelLogin
     {
-        [Display(Name = "Email Usuario")]
-        [Required(ErrorMessage = "{0} es requerido")]
+        [Display(Name = "User email")]
+        [Required(ErrorMessage = "{0} is required")]
         [DataType(DataType.EmailAddress)]
         public string User { get; set; } = default!;
 
-        [StringLength(15, MinimumLength = 6, ErrorMessage = "Error en política de largo de contraseña")]
-        [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "Solamente números y letras")]
-        [Required(ErrorMessage = "{0} es requerido")]
-        [Display(Name = "Contraseña")]
+        [StringLength(15, MinimumLength = 6, ErrorMessage = "Password must be between {2} and {1} characters")]
+        [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "Only letters and numbers are allowed")]
+        [Required(ErrorMessage = "{0} is required")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = default!;
     }
 }

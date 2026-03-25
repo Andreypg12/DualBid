@@ -1,7 +1,7 @@
 ﻿@model DualBid.ViewModels.Login.ViewModelLogin
 @{
     Layout = null;
-    ViewData["Title"] = "Iniciar sesión";
+    ViewData["Title"] = "Login";
 }
 
 <!DOCTYPE html>
@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Libreria.Web</title>
+    <title>@ViewData["Title"]</title>
     <!-- Bootstrap 5.3.8 -->
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css"
@@ -35,16 +35,16 @@
                         <div class="mb-3">
                             <i class="bi bi-person-circle display-4"></i>
                         </div>
-                        <h2 class="h3 mb-1">Iniciar sesión</h2>
+                        <h2 class="h3 mb-1">Login</h2>
                         <p class="text-light-emphasis mb-0">
-                            Ingrese sus credenciales para acceder al sistema
+                            Enter your credentials to access the system
                         </p>
                     </div>
 
                     <div class="card-body p-4 p-md-5">
                         <form id="loginForm" asp-controller="Login" asp-action="LogIn" method="post" asp-antiforgery="true">
                             <div class="mb-3">
-                                <label asp-for="User" class="form-label fw-semibold">Usuario</label>
+                                <label asp-for="User" class="form-label fw-semibold">User</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-person-fill"></i>
@@ -52,14 +52,14 @@
                                     <input asp-for="User"
                                            class="form-control"
                                            type="text"
-                                           placeholder="Digite su usuario"
+                                           placeholder="Enter your email"
                                            autocomplete="username" />
                                 </div>
                                 <span asp-validation-for="User" class="text-danger small"></span>
                             </div>
 
                             <div class="mb-3">
-                                <label asp-for="Password" class="form-label fw-semibold">Contraseña</label>
+                                <label asp-for="Password" class="form-label fw-semibold">Password</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-lock-fill"></i>
@@ -68,13 +68,13 @@
                                            id="Password"
                                            class="form-control"
                                            type="password"
-                                           placeholder="Digite su contraseña"
+                                           placeholder="Enter your password"
                                            autocomplete="current-password" />
-                                    <button class="btn btn-outline-light"
+                                    <button class="btn btn-outline-light border"
                                             type="button"
                                             id="togglePassword"
-                                            title="Mostrar u ocultar contraseña">
-                                        <i class="bi bi-eye"></i>
+                                            title="Show or hide password">
+                                        <i class="bi bi-eye text-black"></i>
                                     </button>
                                 </div>
                                 <span asp-validation-for="Password" class="text-danger small"></span>
@@ -91,25 +91,25 @@
                             <div class="d-grid mt-4">
                                 <button id="btnLogin" class="btn btn-primary btn-lg" type="submit">
                                     <span id="btnText">
-                                        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
                                     </span>
                                     <span id="btnSpinner" class="d-none">
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Validando...
+                                        Validating...
                                     </span>
                                 </button>
                             </div>
 
                             <div class="text-center mt-3">
                                 <small class="text-muted">
-                                    Verifique que su usuario y contraseña sean correctos.
+                                    Please verify that your username and password are correct.
                                 </small>
                             </div>
                         </form>
                     </div>
 
                     <div class="card-footer text-center border-0 py-3">
-                        <small class="text-muted">Sistema Librería Web</small>
+                        <small class="text-muted">DualBid System</small>
                     </div>
                 </div>
             </div>
