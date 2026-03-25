@@ -66,11 +66,16 @@ namespace DualBid.Controllers
             // Categorías
             var categorias = await _serviceCategoria.ListAsync();
 
+
+            var selectedIds = selectedCategoriaIds?
+            .Select(id => int.Parse(id))
+            .ToList();
+
             ViewBag.ListCategorias = new MultiSelectList(
                 items: categorias,
                 dataValueField: nameof(CategoryDTO.Id),    
                 dataTextField: nameof(CategoryDTO.Description), 
-                selectedValues: selectedCategoriaIds
+                selectedValues: selectedIds
             );
         }
 
@@ -88,15 +93,30 @@ namespace DualBid.Controllers
         // Cuando se aplica el POST llena el Dto con los datos del formulario y hace validaciones en base a las validaciones del DTO y guarda los errores en ModelState
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias)
+        public async Task<IActionResult> Create(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias, bool availability)
         {
+            var hoy = System.DateTime.Now.Date;
             selectedCategorias ??= Array.Empty<string>();
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             dto.SellerId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
+            //Agrega la disponibilidad al DTO
+            dto.availability = availability;
 
             //AGREGAR LAS VALIDACIONES
+
+            //Valida que la fecha propuesta no sea ni mayor ni menor a la de hoy
+            if (dto.CreationDate.Date != hoy || dto.CreationDate.Date != hoy)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                   "¡Date incorrect!",
+                   "You should choose the correct date",
+                   SweetAlertMessageType.error
+                   );
+                await LoadCombosAsync(selectedCategorias);
+                return View(dto);
+            }
 
             //Valida si hay un usuario seleccionado
             if (dto.SellerId == 0)
@@ -106,7 +126,7 @@ namespace DualBid.Controllers
                     "You must be logged in to create a comic",
                     SweetAlertMessageType.error
                     );
-                await LoadCombosAsync();
+                await LoadCombosAsync(selectedCategorias);
                 return View(dto);
             }
 
@@ -119,7 +139,7 @@ namespace DualBid.Controllers
                     "You must select at least one Category",
                     SweetAlertMessageType.error
                     );
-                await LoadCombosAsync();
+                await LoadCombosAsync(selectedCategorias);
                 return View(dto);
             }
 
@@ -132,9 +152,11 @@ namespace DualBid.Controllers
                     "You must upload at least one Image",
                     SweetAlertMessageType.error
                     );
-                await LoadCombosAsync();
+                await LoadCombosAsync(selectedCategorias);
                 return View(dto);
             }
+
+            
 
             //Terminan las validaciones
 
@@ -226,9 +248,15 @@ namespace DualBid.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ComicDTO dto,List<IFormFile> newImages,string[] selectedCategorias,int[] ImagesToDelete)
+        
         {
+            
+            bool BloqueoSubasta = dto.Auction != null &&
+                          dto.Auction.Any(a =>
+                              a.StateId == 2 || a.StateId == 3);
 
-            if (dto.AuctionCount < 0 || dto.availability==false)
+
+            if (BloqueoSubasta || dto.availability == false)
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                    "¡The comic cannot be edited!",
@@ -260,6 +288,7 @@ namespace DualBid.Controllers
                 }
             }
 
+            // Estas 2 desactivan el problema sin cambiar DTO ni vista 
             ModelState.Remove("Publisher.Description");
             ModelState.Remove("StateConservation.Description");
             if (!ModelState.IsValid)
@@ -308,7 +337,7 @@ namespace DualBid.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (hasBlockedAuction)
+            if (hasBlockedAuction || comic.availability == false)
             {
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -343,8 +372,11 @@ namespace DualBid.Controllers
 
             if (comic == null)
             {
-                TempData["SwalMessage"] = "Comic not found";
-                TempData["SwalIcon"] = "error";
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+               "Error",
+               $"The cómic was not found",
+               SweetAlertMessageType.success
+           );
                 return RedirectToAction(nameof(Index));
             }
             if (hasBlockedAuction)
@@ -361,8 +393,11 @@ namespace DualBid.Controllers
 
             await _serviceComic.UpdateAvailabilityAsync(id, true);
 
-            TempData["SwalMessage"] = "Comic restored successfully";
-            TempData["SwalIcon"] = "success";
+            TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+               "Comic restored",
+               $"The cómic {comic.Title} was restored succesfully.",
+               SweetAlertMessageType.success
+           );
 
             return RedirectToAction(nameof(Index));
         }
