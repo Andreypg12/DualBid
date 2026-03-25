@@ -5,21 +5,27 @@
 
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h1 class="h4 mb-0">Auctions</h1>
-    <form method="get" asp-action="Index" class="d-flex align-items-center gap-2">
-        <label class="small text-muted mb-0" for="state">Show:</label>
-        <select id="state" name="state" class="form-select form-select-sm" onchange="this.form.submit()">
-            @if (Model.SelectedState == "active")
-            {
-                <option value="active" selected>Active</option>
-                <option value="inactive">Inactive</option>
-            }
-            else
-            {
-                <option value="active">Active</option>
-                <option value="inactive" selected>Inactive</option>
-            }
-        </select>
-    </form>
+    <div class="d-flex gap-4">
+        <form method="get" asp-action="Index" class="d-flex align-items-center gap-2">
+            <label class="small text-muted mb-0" for="state">Show:</label>
+            <select id="state" name="state" class="form-select form-select-sm" onchange="this.form.submit()">
+                @if (Model.SelectedState == "active")
+                {
+                    <option value="active" selected>Active</option>
+                    <option value="inactive">Inactive</option>
+                }
+                else
+                {
+                    <option value="active">Active</option>
+                    <option value="inactive" selected>Inactive</option>
+                }
+            </select>
+        </form>
+
+        <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus"></i> Create Auction
+        </a>
+    </div>
 </div>
 
 @if (!Model.Auctions.Any())
@@ -80,7 +86,7 @@ else
                                     <span class="badge text-bg-light border">
                                         <i class="bi bi-cash-coin me-1"></i>
                                         @(Model.SelectedState == "inactive" ? "Last bid" : "Current Bid")<br />
-                                        $@item.CurrentBid
+                                        $@item.CurrentBid.AmountOffered
                                     </span>
 
                                     <span class="badge text-bg-light border">

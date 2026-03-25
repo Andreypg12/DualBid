@@ -20,28 +20,56 @@ namespace DualBid.Infraestructure.Repository.Implementations
         }
 
         public async Task<User> FindByIdAsync(int id)
-        {
+        { 
             var @object = await _context.Set<User>()
-                .Where(l => l.Id == id)
+                .AsNoTracking()
                 .Include(x => x.Role)
                 .Include(x => x.State)
                 .Include(x => x.Auction)
                 .Include(x => x.Bid)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(u => u.Id == id);
             return @object!;
         }
-
         public async Task<ICollection<User>> ListAsync()
         {
             var collection = await _context.Set<User>()
+                .AsNoTracking()
                 .Include(x => x.Role)
                 .Include(x => x.State)
                 .Include(x => x.Auction)
                 .Include(x => x.Bid)
                 .OrderBy(x => x.Id)
-                .AsNoTracking()
                 .ToListAsync();
             return collection;
+        }
+
+        public async Task UpdateAsync(User entity)
+        {
+            // Obtén la entidad existente primero
+            var existingEntity = await _context.User
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == entity.Id);
+
+            if (existingEntity != null)
+            {
+                // Actualiza las propiedades necesarias
+                existingEntity.Name = entity.Name;
+                existingEntity.LastNames = entity.LastNames;
+                existingEntity.Email = entity.Email;
+                existingEntity.StateId = entity.StateId; // Asegura que StateId se actualice
+
+                _context.User.Update(existingEntity);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<User> LoginAsync(string id, string password)
+        {
+            var @object = await _context.Set<User>()
+                                        .Include(b => b.Role)
+                                        .Where(p => p.Email == id && p.Password == password)
+                                        .FirstOrDefaultAsync();
+            return @object!;
         }
     }
 }

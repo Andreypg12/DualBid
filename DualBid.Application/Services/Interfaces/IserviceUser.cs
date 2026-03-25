@@ -12,5 +12,7 @@ namespace DualBid.Application.Services.Interfaces
     {
         Task<ICollection<UserDTO>> ListAsync();
         Task<UserDTO?> FindByIdAsync(int id);
+        Task UpdateAsync(int id, UserDTO dto);
+        Task<UserDTO> LoginAsync(string id, string password);
     }
 }

@@ -13,5 +13,7 @@ namespace DualBid.Application.DTOs
         public decimal AmountOffered { get; set; }
         public DateTime Date { get; set; }
         public UserDTO User { get; set; } = new();
+        public int UserId { get; set; }
+        public int AuctionId { get; set; }
     }
 }

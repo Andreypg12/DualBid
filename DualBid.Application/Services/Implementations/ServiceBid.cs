@@ -38,6 +38,20 @@ namespace DualBid.Application.Services.Implementations
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<BidDTO>>(list);
         }
+
+        public async Task<int> AddAsync(BidDTO dto)
+        {
+            try
+            {
+                var entity = _mapper.Map<Bid>(dto);
+                return await _repository.AddAsync(entity);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                var msg = ex.ToString(); // incluye tipos origen/destino y qué miembro falló
+                throw;
+            }
+        }
     }
 }
 

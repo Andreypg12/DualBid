@@ -13,6 +13,11 @@ namespace DualBid.Application.Profiles
     {
         public ComicProfile()
         {
+
+            //ReverseMap() crea el mapeo en ambos sentidos.
+            CreateMap<ImgComic, ImgComicDTO>().ReverseMap();
+
+            // Mapeo específico para Comic y ComicDTO.
             CreateMap<Comic, ComicDTO>()
                 .ForMember(dest => dest.Id, orig => orig.MapFrom(o => o.Id))
                 .ForMember(dest => dest.Title, orig => orig.MapFrom(o => o.Title))
@@ -27,15 +32,13 @@ namespace DualBid.Application.Profiles
                 .ForMember(dest => dest.Category, orig => orig.MapFrom(o => o.Category))
                 .ForMember(dest => dest.availability, orig => orig.MapFrom(o => o.Availability));
 
-
+            // Mapeo específico para ComicDTO a Comic, ignorando las propiedades de navegación.
+            // Esto es importante para evitar problemas de mapeo cuando se crean o actualizan entidades porque puede romper EF.
             CreateMap<ComicDTO, Comic>()
-            .ForMember(dest => dest.Publisher, opt => opt.Ignore())
-            .ForMember(dest => dest.StateConservation, opt => opt.Ignore())
-            .ForMember(dest => dest.Category, opt => opt.Ignore())
-            .ForMember(dest => dest.ImgComic, opt => opt.Ignore())
-            .ForMember(dest => dest.Seller, opt => opt.Ignore()); 
-
-
+                .ForMember(dest => dest.Publisher, opt => opt.Ignore())
+                .ForMember(dest => dest.StateConservation, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Seller, opt => opt.Ignore());
         }
     }
 }

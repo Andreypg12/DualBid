@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Users";
+    string currentFilter = ViewBag.CurrentFilter ?? "all";
 }
 
 <div class="container py-4">
@@ -16,10 +17,34 @@
             </h1>
             <p class="text-muted small mb-0">Manages user roles and states</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary shadow-sm">
-            <i class="bi bi-person-plus"></i> Create user
-        </a>
+        
+        <div class="d-flex gap-2">
+            <!-- Filtro por estado -->
+            <form method="get" asp-action="Index" class="d-flex align-items-center gap-2">
+                <label class="small text-muted mb-0" for="filter">Show:</label>
+                <select id="filter" name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="all" selected="@(currentFilter == "all")">All Users</option>
+                    <option value="blocked" selected="@(currentFilter == "blocked")">Blocked Users</option>
+                </select>
+            </form>
+            
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-person-plus"></i> Create user
+            </a>
+        </div>
     </div>
+
+    <!-- Info contextual según el filtro -->
+    @if (currentFilter == "blocked")
+    {
+        <div class="alert alert-warning d-flex align-items-center mb-4 py-2" role="alert">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <span>Showing <strong>blocked users</strong> - Accounts with restricted access</span>
+            <a asp-action="Index" asp-route-filter="all" class="btn btn-sm btn-outline-warning ms-auto">
+                <i class="bi bi-people"></i> View all users
+            </a>
+        </div>
+    }
 
     <div class="row g-3">
         @if (Model != null && Model.Any())
@@ -31,17 +56,51 @@
                        asp-action="Details"
                        asp-route-id="@item.Id"
                        class="card h-100 user-card text-decoration-none border-0 shadow-sm position-relative">
-                        <!-- Status arriba a la derecha -->
+                        
+                        <!-- Status badge con color según el estado -->
                         <div class="position-absolute top-0 end-0 m-3"
                              title="User status"
                              data-bs-toggle="tooltip"
                              data-bs-placement="left">
-                            @await Html.PartialAsync("_UserStatusBadge", item.State)
+                            
+                            @{
+                                string badgeClass = item.State?.Id switch
+                                {
+                                    1 => "bg-success",        // Activo
+                                    2 => "bg-black",      // Inactivo (gris)
+                                    3 => "bg-danger",         // Bloqueado
+                                    _ => "bg-secondary"
+                                };
+                                
+                                string iconClass = item.State?.Id switch
+                                {
+                                    1 => "bi-check-circle-fill",
+                                    2 => "bi-pause-circle-fill",
+                                    3 => "bi-shield-lock-fill",
+                                    _ => "bi-question-circle-fill"
+                                };
+                            }
+                            
+                            <span class="badge @badgeClass rounded-pill">
+                                <i class="bi @iconClass me-1"></i>@item.State?.Description
+                            </span>
                         </div>
 
                         <div class="card-body d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="avatar-bubble bg-primary bg-opacity-10 text-primary">
+                                <span class="avatar-bubble @(item.State?.Id switch
+                                {
+                                    1 => "bg-success",
+                                    2 => "bg-secondary",
+                                    3 => "bg-danger",
+                                    _ => "bg-primary"
+                                }) bg-opacity-10 text-@(item.State?.Id switch
+                                {
+                                    1 => "success",
+                                    2 => "secondary",
+                                    3 => "danger",
+                                    _ => "primary"
+                                })">
                                     <i class="bi bi-person-circle"></i>
                                 </span>
                                 <div>
@@ -74,41 +133,54 @@
         {
             <div class="col-12">
                 <div class="alert alert-light border text-muted text-center mb-0">
-                    <i class="bi bi-inbox-fill me-2"></i> No registered users.
+                    <i class="bi bi-inbox-fill me-2"></i> 
+                    @if (currentFilter == "blocked")
+                    {
+                        <span>No blocked users found.</span>
+                    }
+                    else
+                    {
+                        <span>No active or inactive users found.</span>
+                    }
                 </div>
             </div>
         }
     </div>
 
-    @* Paginación *@
+    @* Paginación con el filtro actual *@
     @if (Model != null && Model.PageCount > 1)
     {
         <div class="card-footer bg-body d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 mt-3 shadow-sm border-0">
             <div class="small text-muted">
                 Página <strong>@Model.PageNumber</strong> de <strong>@Model.PageCount</strong>
+                @if (currentFilter == "blocked")
+                {
+                    <span class="ms-2">| Showing blocked users</span>
+                }
             </div>
 
             <nav aria-label="User pagination">
                 @Html.PagedListPager(
-                Model,
-                        page => Url.Action("Index", new { page }),
-                        new PagedListRenderOptions
-                        {
-                            UlElementClasses = new[] { "pagination", "mb-0" },
-                            LiElementClasses = new[] { "page-item" },
-                            PageClasses = new[] { "page-link" },
-
-                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
-                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
-                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
-                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
-
-                            MaximumPageNumbersToDisplay = 5
-                        }
-                        )
-        </nav>
-    </div>
-        }
+                    Model,
+                    page => Url.Action("Index", new { 
+                        filter = currentFilter,
+                        page = page 
+                    }),
+                    new PagedListRenderOptions
+                    {
+                        UlElementClasses = new[] { "pagination", "mb-0" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" },
+                        DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                        DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                        DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                        DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                        MaximumPageNumbersToDisplay = 5
+                    }
+                )
+            </nav>
+        </div>
+    }
 </div>
 
 <style>
@@ -121,10 +193,10 @@
         border-radius: 12px;
     }
 
-        .user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.08);
-        }
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.08);
+    }
 
     .avatar-bubble {
         display: inline-flex;
@@ -135,4 +207,53 @@
         border-radius: 50%;
         font-size: 1.3rem;
     }
+    
+    /* Estilos para los badges de estado */
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+    
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #868e96 100%) !important;
+    }
+    
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+    
+    .bg-success.bg-opacity-10 {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+    }
+    
+    .bg-secondary.bg-opacity-10 {
+        background-color: rgba(108, 117, 125, 0.1) !important;
+    }
+    
+    .bg-danger.bg-opacity-10 {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+    }
+    
+    .text-secondary {
+        color: #6c757d !important;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+    }
 </style>
+
+@section Scripts {
+    <script>
+        // Inicializar tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+    </script>
+}

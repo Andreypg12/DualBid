@@ -12,5 +12,6 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<ICollection<Bid>> ListAsync();
         Task<ICollection<Bid>> AuctionBiddingHistory(int auctionId);
         Task<Bid> FindByIdAsync(int id);
+        Task<int> AddAsync(Bid entity);
     }
 }

@@ -1,8 +1,13 @@
 ﻿using AutoMapper;
+using DualBid.Application.Config;
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
+using Libreria.Application.Utils;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +20,13 @@ namespace DualBid.Application.Services.Implementations
     {
         private readonly IRepositoryUser _repository;
         private readonly IMapper _mapper;
+        private readonly IOptions<AppConfig> _options;
 
-        public ServiceUser(IRepositoryUser repository, IMapper mapper)
+        public ServiceUser(IRepositoryUser repository, IMapper mapper, IOptions<AppConfig> options)
         {
             _repository = repository;
             _mapper = mapper;
+            _options = options;
         }
 
         public async Task<UserDTO?> FindByIdAsync(int id)
@@ -33,6 +40,35 @@ namespace DualBid.Application.Services.Implementations
         {
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<UserDTO>>(list);
+        }
+
+        public async Task UpdateAsync(int id, UserDTO dto)
+        {
+
+            var entity = await _repository.FindByIdAsync(id);
+
+            _mapper.Map(dto, entity);
+
+            await _repository.UpdateAsync(entity);
+        }
+
+        public async Task<UserDTO> LoginAsync(string id, string password)
+        {
+            UserDTO usuarioDTO = null!;
+
+            // Llave secreta
+            string secret = _options.Value.Crypto.Secret;
+            // Password encriptado
+            string passwordEncrypted = Cryptography.Encrypt(password, secret);
+
+            var @object = await _repository.LoginAsync(id, passwordEncrypted);
+
+            if (@object != null)
+            {
+                usuarioDTO = _mapper.Map<UserDTO>(@object);
+            }
+
+            return usuarioDTO;
         }
     }
 }

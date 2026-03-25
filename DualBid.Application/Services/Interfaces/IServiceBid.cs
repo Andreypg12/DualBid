@@ -13,5 +13,6 @@ namespace DualBid.Application.Services.Interfaces
         Task<ICollection<BidDTO>> AuctionBiddingHistory(int auctionId);
         Task<ICollection<BidDTO>> ListAsync();
         Task<BidDTO?> FindByIdAsync(int id);
+        Task<int> AddAsync(BidDTO dto);
     }
 }

@@ -1,7 +1,11 @@
 ﻿@model DualBid.Application.DTOs.AuctionDTO
+@using System.Globalization
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = "Auction Details";
+
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 @* Header *@
@@ -16,9 +20,10 @@
                 var stateId = Model.State.Id;
                 var (stateClass, stateIcon) = stateId switch
                 {
-                    1 => ("bg-success", "bi-play-circle-fill"),
-                    2 => ("bg-warning", "bi-pause-circle-fill"),
-                    3 => ("bg-danger", "bi-stop-circle-fill"),
+                    1 => ("bg-warning", "bi-pause-circle-fill"),
+                    2 => ("bg-success", "bi-play-circle-fill"),
+                    3 => ("bg-primary", "bi-stop-circle-fill"),
+                    4 => ("bg-danger", "bi-stop-circle-fill"),
                     _ => ("bg-secondary", "bi-question-circle-fill")
                 };
             }
@@ -30,9 +35,11 @@
 </div>
 
 <section class="container py-4">
+
     <div class="row g-4">
 
         <div class="col-lg-4">
+
             @* imagen del comic *@
             <div class="card border-0 shadow-sm mb-4 overflow-hidden">
                 <div class="position-relative">
@@ -71,7 +78,7 @@
                                 </button>
                             }
                         </div>
-                        
+
                         @* Carousel flechas *@
                         @if (validImages.Count > 1)
                         {
@@ -134,7 +141,7 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                        @if (@Model.Comic.Category != null && @Model.Comic.Category.Any())
+                            @if (@Model.Comic.Category != null && @Model.Comic.Category.Any())
                             {
                                 <div class="mb-3">
                                     <div class="d-flex align-items-center gap-2 mb-2 text-dark">
@@ -152,7 +159,7 @@
                                     </div>
                                 </div>
                             }
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,7 +183,7 @@
                                 <span class="small opacity-75">Current Bid</span>
                                 <i class="bi bi-cash-stack fs-4 opacity-75"></i>
                             </div>
-                            <div class="h2 fw-bold mb-0">$@Model.CurrentBid.ToString("N0")</div>
+                            <div class="h2 fw-bold mb-0" id="currentBidLabel">$@Model.CurrentBid.AmountOffered.ToString("N0")</div>
                             <small class="opacity-75">USD</small>
                         </div>
                     </div>
@@ -213,14 +220,14 @@
                             <div class="d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <span class="text-muted small d-block">Total bids</span>
-                                    <div class="fw-bold display-6 mb-0">@Model.NumberOfBids</div>
+                                    <div class="fw-bold display-6 mb-0" id="totalBidsLabel">@Model.NumberOfBids</div>
                                 </div>
 
                                 <a asp-controller="Bid"
-                                asp-action="AuctionBiddingHistory"
-                                asp-route-auctionId="@Model.Id"
-                                asp-route-comicTitle="@Model.Comic?.Title"
-                                class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
+                                   asp-action="AuctionBiddingHistory"
+                                   asp-route-auctionId="@Model.Id"
+                                   asp-route-comicTitle="@Model.Comic?.Title"
+                                   class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
                                    title="Go to bid history">
                                     <i class="bi bi-clock-history fs-4 mb-1"></i>
                                     <span class="small fw-semibold">History</span>
@@ -320,62 +327,153 @@
             Back to Auctions
         </a>
 
-        @if (Model.ActualEndDate == null)
-        {
-            <a asp-action="CreateBid" asp-route-auctionId="@Model.Id" class="btn btn-primary btn-lg px-5 shadow-sm">
-                <i class="bi bi-cash-stack me-2"></i>
-                Place Your Bid
-            </a>
-        }
-        else
-        {
-            <button class="btn btn-secondary btn-lg px-5" disabled>
-                <i class="bi bi-lock-fill me-2"></i>
-                Auction Ended
-            </button>
-        }
+        <div class="d-flex gap-3">
+            @{
+                var currentUserId = int.Parse(userId ?? "0");
+                bool isAuctionActive = Model.ActualEndDate == null && Model.State.Id == 2;
+                bool isAuctionClosed = Model.State.Id == 3 || Model.State.Id == 4;
+                bool isCurrentUserCreator = currentUserId == Model.CreatorUser.Id;
+                bool canPlaceBid = isAuctionActive && !isCurrentUserCreator && Model.State.Id == 2;
+
+                bool canEditAuction = isCurrentUserCreator &&
+                (Model.State.Id == 1 || (Model.State.Id == 2 && !Model.Bids.Any()));
+
+                bool canActivateAuction = isCurrentUserCreator &&
+                Model.StartDate <= DateTime.Now &&
+                Model.State.Id == 1;
+
+
+                bool canCloseAuction = isCurrentUserCreator &&
+                (Model.State.Id == 1 || Model.State.Id == 2) &&
+                !Model.Bids.Any();
+            }
+
+            @* Botón para pujar *@
+            @if (canPlaceBid)
+            {
+                <a asp-controller="Bid"
+                   asp-action="Create"
+                   asp-route-auctionId="@Model.Id"
+                   asp-route-titleComicAuction="@Model.Comic?.Title"
+                   class="btn btn-primary btn-lg px-5 shadow-sm">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    Place Your Bid
+                </a>
+            }
+            
+            else if (!canPlaceBid && !isCurrentUserCreator && !isAuctionClosed)
+            {
+                <div class="alert alert-info d-flex align-items-center gap-3 mb-0 py-3 px-4 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdef5 100%); border: none;">
+                    <i class="bi bi-clock-history fs-2 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-primary">
+                            <i class="bi bi-hourglass-split me-1"></i>
+                            Auction Not Started Yet
+                        </h6>
+                        <p class="mb-0 text-dark">
+                            This auction will begin on <strong>@Model.StartDate.ToString("dd/MM/yyyy HH:mm")</strong>.
+                            Come back then to place your bid.
+                        </p>
+                    </div>
+                </div>
+            }
+            else if (isAuctionClosed)
+            {
+                <button class="btn btn-secondary btn-lg px-5" disabled>
+                    <i class="bi bi-lock-fill me-2"></i>
+                    Auction Ended
+                </button>
+            }
+
+            @* Botones para el creador *@
+            @if (isCurrentUserCreator)
+            {
+
+                @if (canCloseAuction)
+                {
+                    <form asp-action="CloseAuction" asp-controller="Auction" method="post" style="display: inline;" id="closeAuctionForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="button"
+                                class="btn btn-custom-close btn-lg px-5 shadow-sm"
+                                onclick="confirmAction('closeAuctionForm', 'Close Auction', 'Are you sure you want to close this auction?', 'warning')">
+                            <i class="bi bi-stop-fill me-2"></i>
+                            Close Auction
+                        </button>
+                    </form>
+                }
+
+                @if (canActivateAuction)
+                {
+                    <form asp-action="ActivateAuction" asp-controller="Auction" method="post" style="display: inline;" id="activateAuctionForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="button"
+                                class="btn btn-custom-activate btn-lg px-5 shadow-sm"
+                                onclick="confirmAction('activateAuctionForm', 'Activate Auction', 'Are you sure you want to activate this auction?', 'success')">
+                            <i class="bi bi-play-fill me-2"></i>
+                            Activate Auction
+                        </button>
+                    </form>
+                }
+
+                @* Botón de edición general *@
+                @if (canEditAuction)
+                {
+                    <button type="button"
+                            class="btn btn-outline-primary btn-lg px-4 shadow-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editAuctionModal">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit Auction
+                    </button>
+                }
+            }
+        </div>
     </div>
+
+    @await Html.PartialAsync("_EditAuctionModal", Model)
 </section>
 
 <style>
     .bg-gradient-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    
+
     .bg-gradient-success {
         background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
     }
-    
+
     .bg-gradient-info {
         background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
     }
-    
+
     .timeline {
         position: relative;
         padding-left: 23px;
     }
-    
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 20px;
-        top: 20px;
-        bottom: 20px;
-        width: 2px;
-        background: #e9ecef;
-    }
-    
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            bottom: 20px;
+            width: 2px;
+            background: #e9ecef;
+        }
+
     .text-white-50 {
         color: rgba(255, 255, 255, 0.5) !important;
     }
-    
+
     .card {
         transition: transform 0.2s;
     }
-    
-    .card:hover {
-        transform: translateY(-2px);
-    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
 
     /* Clases para imágenes */
     .comic-carousel-img {
@@ -418,4 +516,77 @@
     .comic-description {
         line-height: 1.6;
     }
+
+    .btn-custom-close {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .btn-custom-close:hover {
+            background-color: #bb2d3b;
+            border-color: #bb2d3b;
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-custom-close:active {
+            transform: translateY(0);
+        }
+
+    .btn-custom-activate {
+        background-color: #20c997;
+        color: white;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .btn-custom-activate:hover {
+            background-color: #1ba87e;
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-custom-activate:active {
+            transform: translateY(0);
+        }
 </style>
+
+@section Scripts {
+    <script>
+        window.auctionDetailsRealtimeConfig = {
+            auctionId: "@Model.Id",
+            userId: "@(userId ?? "0")"
+        };
+    </script>
+
+    <script>
+        function confirmAction(formId, title, message, iconType) {
+            const iconMap = {
+                'success': 'question',
+                'warning': 'warning',
+                'info': 'info'
+            };
+
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: iconMap[iconType] || 'question',
+                showCancelButton: true,
+                confirmButtonColor: iconType === 'success' ? '#28a745' : '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, proceed',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
+    </script>
+
+    <script src="~/js/auctionDetailsRealtime.js"></script>
+
+}

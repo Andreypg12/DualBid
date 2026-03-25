@@ -6,7 +6,8 @@
     <title>@ViewData["Title"] - DualBid</title>
     <script type="importmap"></script>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/morph/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DualBid.styles.css" asp-append-version="true" />
 
@@ -19,6 +20,13 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/css/bootstrap-multiselect.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+
+    @*Sweetalert *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/DualBid.styles.css" asp-append-version="true" />
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -35,8 +43,6 @@
     <footer class="mt-auto">
         @await Html.PartialAsync("_Footer")
     </footer>
-     
-        
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -46,7 +52,29 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
+    @* Esto es de signalR *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+
+    <!-- Notificaciones SweetAlert -->
+    @if (TempData["Notificacion"] != null || ViewBag.Notificacion != null)
+    {
+        var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
+        <script type="text/javascript">
+
+            const payload = @Html.Raw(notificacion);
+
+            if (payload) {
+                Swal.fire(payload);
+            }
+        </script>
+    }
+
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
+
+
 </body>
 </html>

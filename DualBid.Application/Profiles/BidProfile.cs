@@ -14,6 +14,13 @@ namespace DualBid.Application.Profiles
         public BidProfile()
         {
             CreateMap<Bid, BidDTO>();
+
+            // DTO → ENTIDAD (CREAR / EDITAR)
+            CreateMap<BidDTO, Bid>()
+
+                // BLOQUEAR la navegación en dirección DTO → Entidad
+                .ForMember(d => d.User, o => o.Ignore())
+                .ForMember(d => d.Date, o => o.Ignore());
         }
     }
 }

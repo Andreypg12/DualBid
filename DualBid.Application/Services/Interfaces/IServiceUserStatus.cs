@@ -10,8 +10,6 @@ namespace DualBid.Application.Services.Interfaces
 {
     public interface IServiceUserStatus
     {
-        //Icollection es una interfaz que representa una colección de objetos
-        //significa: Este método devolverá muchos AuctionState, no uno solo
         Task<ICollection<UserStateDTO>> ListAsync();
         Task<UserStateDTO> FindByIdAsync(int id);
     }
