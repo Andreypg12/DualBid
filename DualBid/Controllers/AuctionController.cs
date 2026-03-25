@@ -79,6 +79,51 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CreateAuctionViewModel pvm)
         {
+            //agarro el comic
+            var comic = await _serviceComic.FindByIdAsync(pvm.Auction.ComicId);
+
+            //Valido que exista
+            if (comic == null)
+            {
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                    "Comic Not Found",
+                    "The selected comic does not exist or has been deleted.",
+                    SweetAlertMessageType.error
+                );
+                CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+                return View(vm);
+            }
+
+            //Verifico que no tenga ninguna subasta activa ligada
+            bool hasActiveAuction = comic.Auction.Any(a => a.State.Id == 1 || a.State.Id == 2);
+
+            //Si tiene me tira error
+            if (hasActiveAuction)
+            {
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                    "¡Comic with active auction!",
+                    "This comic alredy has an active or waiting auction",
+                    SweetAlertMessageType.error
+                );
+                CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
+                return View(vm);
+            }
+
+            //Verifico que el comic este disponible para subastar y si no tiro error
+            if (!comic.availability)
+            {
+                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                    "¡Comic isn't avaible!",
+                    "The comic isn't avaible for auction",
+                    SweetAlertMessageType.error
+                );
+                CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
+                return View(vm);
+            }
+
+            //Le quito lo de los comics para que no me de error
             var keysToRemove = ModelState.Keys
                 .Where(k => k.StartsWith("Comics.") ||
                 k == "Comics" ||
@@ -90,6 +135,7 @@ namespace DualBid.Controllers
                 ModelState.Remove(key);
             }
 
+            //Verifico que la persona que lo crea este logueada
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             pvm.Auction.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
 
@@ -132,6 +178,7 @@ namespace DualBid.Controllers
                 return View(vm);
             }
 
+            //Le cambio la disponibilidad al objeto a no disponible
             await _serviceComic.UpdateAvailabilityAsync(pvm.Auction.ComicId, false);
             
             // Si todo está bien, guardar
@@ -165,8 +212,10 @@ namespace DualBid.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, EditAuctionViewModel viewModel)
         {
-            string errorMessage;
 
+
+
+            String errorMessage;
             if (!validateAuctionDates(viewModel.StartDate, viewModel.ExpectedEndDate, out errorMessage))
             {
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
@@ -197,6 +246,36 @@ namespace DualBid.Controllers
                 
             // Obtener el DTO existente
             var existingDto = await _serviceAuction.FindByIdAsync(id);
+
+            if (existingDto == null) {
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction Not Found",
+                    "The Auction does not exist or has been deleted.",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction(nameof(Index));
+            }
+            else if (existingDto.State.Id != 1)
+            {
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction not editable",
+                    "The Auction must be waiting if you want it edited",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            else if (existingDto.Bids.Count >= 1)
+            {
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction with bids",
+                    "The Auction cannot be edited because it has bids",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction(nameof(Details), new { id });
+            }
 
             // Actualizar solo los campos editables
             existingDto.StartDate = viewModel.StartDate;
