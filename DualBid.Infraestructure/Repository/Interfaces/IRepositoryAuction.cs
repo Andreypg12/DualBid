@@ -10,6 +10,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
     public interface IRepositoryAuction
     {
         Task<ICollection<Auction>> ListAsync();
+        Task<ICollection<Auction>> ListActiveAsync();
         Task<Auction> FindByIdAsync(int id);
         Task<int> AddAsync(Auction entity);
         Task UpdateAsync(Auction entity);

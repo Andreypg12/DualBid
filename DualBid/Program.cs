@@ -9,6 +9,7 @@ using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
 using DualBid.Middleware;
+using DualBid.Services.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -158,6 +159,8 @@ builder.Services.AddTransient<IServiceStateConservation, ServiceStateConservatio
 builder.Services.AddTransient<IServiceImgComic, ServiceImgComic>();
 
 builder.Services.AddSignalR();
+
+builder.Services.AddHostedService<AuctionMonitorService>();
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>

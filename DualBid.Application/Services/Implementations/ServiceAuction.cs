@@ -35,6 +35,13 @@ namespace DualBid.Application.Services.Implementations
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<AuctionDTO>>(list);
         }
+
+        public async Task<ICollection<AuctionDTO>> ListActiveAsync()
+        {
+            var list = await _repository.ListActiveAsync();
+            return _mapper.Map<ICollection<AuctionDTO>>(list);
+        }
+
         public async Task<int> AddAsync(AuctionDTO dto)
         {
             try
@@ -66,5 +73,7 @@ namespace DualBid.Application.Services.Implementations
         {
             return await _repository.UpdateStateAsync(auctionId, newStateId);
         }
+
+        
     }
 }

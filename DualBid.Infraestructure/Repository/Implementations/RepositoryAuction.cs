@@ -53,6 +53,20 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return collection;
         }
 
+        public async Task<ICollection<Auction>> ListActiveAsync()
+        {
+            var collection = await _context.Set<Auction>()
+                .Include(a => a.State)
+                .Include(a => a.Comic)
+                    .ThenInclude(c => c.ImgComic)
+                .Include(a => a.CreatorUser)
+                .Include(a => a.Bid)
+                .Where(a=> a.StateId == 1 || a.StateId == 2) // Solo subastas activas
+                .AsNoTracking()
+                .ToListAsync();
+            return collection;
+        }
+
         public async Task<int> AddAsync(Auction entity)
         {
             await _context.Set<Auction>().AddAsync(entity);
@@ -109,5 +123,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 return false;
             }
         }
+
+        
     }
 }

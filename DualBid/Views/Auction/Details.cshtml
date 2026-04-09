@@ -234,16 +234,27 @@
                                     <span class="text-muted small d-block">Total bids</span>
                                     <div class="fw-bold display-6 mb-0" id="totalBidsLabel">@Model.NumberOfBids</div>
                                 </div>
-
-                                <a asp-controller="Bid"
-                                   asp-action="AuctionBiddingHistory"
-                                   asp-route-auctionId="@Model.Id"
-                                   asp-route-comicTitle="@Model.Comic?.Title"
-                                   class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
-                                   title="Go to bid history">
-                                    <i class="bi bi-clock-history fs-4 mb-1"></i>
-                                    <span class="small fw-semibold">History</span>
-                                </a>
+                                @if (Model.NumberOfBids == 0)
+                                {
+                                    <div class="d-flex flex-column align-items-center justify-content-center ps-3 ms-3 border-start text-muted"
+                                         style="cursor: not-allowed; opacity: 0.6;"
+                                         title="No bids available yet">
+                                        <i class="bi bi-clock-history fs-4 mb-1"></i>
+                                        <span class="small fw-semibold">History</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Bid"
+                                       asp-action="AuctionBiddingHistory"
+                                       asp-route-auctionId="@Model.Id"
+                                       asp-route-comicTitle="@Model.Comic?.Title"
+                                       class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
+                                       title="Go to bid history">
+                                        <i class="bi bi-clock-history fs-4 mb-1"></i>
+                                        <span class="small fw-semibold">History</span>
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>
@@ -281,6 +292,11 @@
                                 {
                                     <span class="text-danger">Ended</span>
                                 }
+                            </div>
+                            @* Después del contador de tiempo, agrega esto *@
+                            <div class="alert alert-info mt-3" id="timeStatusAlert" style="display: none;">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                <span id="timeStatusMessage"></span>
                             </div>
                         </div>
                     </div>

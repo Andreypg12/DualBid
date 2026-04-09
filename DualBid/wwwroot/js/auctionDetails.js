@@ -1,6 +1,6 @@
-﻿// Lógica específica para la página de detalles de subasta
+﻿"use strict";
+
 (async () => {
-    // Obtener configuración de la vista
     const config = window.auctionDetailsConfig;
 
     if (!config || !config.auctionId) {
@@ -11,40 +11,34 @@
     console.log('AuctionDetails: Inicializando para subasta', config.auctionId);
 
     try {
-        // Inicializar conexión SignalR
         await SignalRAuction.initialize(config.auctionId, config.userId);
 
-        // Escuchar nuevas pujas
+        // ✅ DEL ORIGINAL - Nuevas pujas
         SignalRAuction.onNewBid((bidData) => {
             if (bidData.auctionId != config.auctionId) return;
 
             console.log('AuctionDetails: Nueva puja recibida', bidData);
 
-            // Actualizar el monto actual
             const currentBidLabel = document.getElementById('currentBidLabel');
             if (currentBidLabel) {
                 currentBidLabel.innerText = `$${bidData.nuevoMonto.toFixed(2)}`;
-                // Agregar animación de actualización
                 currentBidLabel.classList.add('highlight-update');
                 setTimeout(() => currentBidLabel.classList.remove('highlight-update'), 500);
             }
 
-            // Actualizar total de bids
             const totalBidsLabel = document.getElementById('totalBidsLabel');
             if (totalBidsLabel) {
                 const currentTotal = parseInt(totalBidsLabel.innerText) || 0;
                 totalBidsLabel.innerText = currentTotal + 1;
             }
 
-            // Mostrar notificación tipo toast
             showNotificationToast(`💸 New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
         });
 
-        // Escuchar cuando superan al usuario
+        // ✅ DEL ORIGINAL - Usuario superado
         SignalRAuction.onUserOutbid((data) => {
             console.log('AuctionDetails: Usuario superado', data);
 
-            // Mostrar SweetAlert si está disponible
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'warning',
@@ -63,7 +57,81 @@
             }
         });
 
-        // Escuchar reconexión
+        // ✅ NUEVO - Cierre de subasta
+        SignalRAuction.onAuctionClosed((data) => {
+            console.log('🔒 Subasta cerrada:', data);
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: data.hasBids ? 'success' : 'info',
+                    title: data.hasBids ? '🏆 Auction Ended!' : '📋 Auction Closed',
+                    text: data.message,
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false
+                }).then(() => {
+                    setTimeout(() => location.reload(), 2000);
+                });
+            }
+
+            const bidButton = document.querySelector('a[href*="/Bid/Create"]');
+            if (bidButton) {
+                bidButton.outerHTML = `<button class="btn btn-secondary btn-lg px-5" disabled>
+                    <i class="bi bi-lock-fill me-2"></i>Auction Ended
+                </button>`;
+            }
+
+            updateAuctionStatusBadge(data);
+        });
+
+        // ✅ NUEVO - Activación de subasta
+        SignalRAuction.onAuctionActivated((data) => {
+            console.log('🎯 Subasta activada:', data);
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '🚀 Auction Started!',
+                    text: data.message,
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            }
+
+            showNotificationToast(`🚀 ${data.message}`, 'success');
+        });
+
+        // ✅ NUEVO - Usuario ganó
+        SignalRAuction.onYouWon((data) => {
+            console.log('🏆 ¡Ganaste!:', data);
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '🎉 Congratulations!',
+                    text: data.message,
+                    confirmButtonText: 'Great!',
+                    background: '#d4edda'
+                });
+            }
+
+            showNotificationToast(`🏆 ${data.message}`, 'success');
+        });
+
+        // ✅ NUEVO - Subasta del creador terminó
+        SignalRAuction.onYourAuctionEnded((data) => {
+            console.log('📊 Tu subasta terminó:', data);
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: data.hasBids ? 'success' : 'info',
+                    title: '📋 Your Auction Has Ended',
+                    text: data.message,
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
+        // ✅ DEL ORIGINAL - Reconexión
         SignalRAuction.onReconnected(() => {
             console.log('AuctionDetails: Reconectado a SignalR');
             showNotificationToast('🔄 Conexión restablecida', 'info');
@@ -74,7 +142,7 @@
     }
 })();
 
-// Función para mostrar notificaciones toast
+// ✅ DEL ORIGINAL - Toast con Bootstrap
 function showNotificationToast(message, type = 'success') {
     let toastContainer = document.querySelector('.toast-notification-container');
     if (!toastContainer) {
@@ -118,7 +186,23 @@ function escapeHtml(str) {
     });
 }
 
-// Agregar estilos para animación
+// ✅ NUEVO - Actualizar badge de estado
+function updateAuctionStatusBadge(data) {
+    const statusBadge = document.querySelector('.bg-gradient-primary .badge');
+    if (!statusBadge) return;
+
+    statusBadge.classList.remove('bg-warning', 'bg-success', 'bg-primary', 'bg-danger', 'bg-secondary');
+
+    if (data.finalState === 3) {
+        statusBadge.classList.add('bg-primary');
+        statusBadge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Finished';
+    } else if (data.finalState === 4) {
+        statusBadge.classList.add('bg-danger');
+        statusBadge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Cancelled';
+    }
+}
+
+// ✅ DEL ORIGINAL - Animación highlight
 const style = document.createElement('style');
 style.textContent = `
     .highlight-update {

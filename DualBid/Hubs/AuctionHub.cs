@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DualBid.Hubs
 {
+    [Authorize]
     public class AuctionHub : Hub
     {
         private readonly ILogger<AuctionHub> _logger;
@@ -31,6 +33,18 @@ namespace DualBid.Hubs
             _logger.LogInformation("RegisterUser: connection={ConnectionId} group={Group}", Context.ConnectionId, groupName);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        }
+
+        // NUEVO: Para notificar tiempo restante
+        public async Task NotifyTimeRemaining(string auctionId, string timeRemaining)
+        {
+            var groupName = $"auction-{auctionId}";
+            await Clients.Group(groupName).SendAsync("TimeUpdate", new
+            {
+                auctionId = auctionId,
+                timeRemaining = timeRemaining,
+                isEndingSoon = true
+            });
         }
     }
 }
