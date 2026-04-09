@@ -3,6 +3,8 @@
     ViewData["Title"] = "Bid History";
 }
 
+@using System.Security.Claims
+
 <div class="container py-5">
     <!-- Header with comic title as main heading -->
     <div class="row mb-4">
@@ -87,9 +89,6 @@
                                     </div>
                                     <div>
                                         <h6 class="fw-bold mb-0">@bid.User.CompleteName</h6>
-                                        <small class="text-primary">
-                                            <i class="bi bi-envelope me-1"></i>@bid.User.Email
-                                        </small>
                                     </div>
                                 </div>
                                 
@@ -256,17 +255,25 @@
     }
 </style>
 
+
 @section Scripts {
     <script>
+        window.bidHistoryConfig = {
+            auctionId: @Model.AuctionId,
+            userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)' || '0'
+        };
+    </script>
+
+    <!-- Código de ordenamiento -->
+    <script>
         (() => {
-            // Sorting functionality
             const sortDesc = document.getElementById('sortDesc');
             const sortAsc = document.getElementById('sortAsc');
             const container = document.getElementById('bids-container');
             
             if (!sortDesc || !sortAsc || !container) return;
             
-            const sortBids = (ascending) => {
+            window.sortBids = (ascending) => {
                 const cards = Array.from(container.querySelectorAll('.bid-card'));
                 
                 cards.sort((a, b) => {
@@ -275,10 +282,9 @@
                     return ascending ? dateA - dateB : dateB - dateA;
                 });
                 
-                // Reordering animation
                 cards.forEach((card, index) => {
                     card.style.animation = 'none';
-                    card.offsetHeight; // Trigger reflow
+                    card.offsetHeight;
                     card.style.animation = 'fadeInUp 0.3s ease-out forwards';
                     card.style.animationDelay = (index * 0.05) + 's';
                     container.appendChild(card);
@@ -286,17 +292,20 @@
             };
             
             sortDesc.addEventListener('change', () => {
-                if (sortDesc.checked) sortBids(false);
+                if (sortDesc.checked) window.sortBids(false);
             });
             
             sortAsc.addEventListener('change', () => {
-                if (sortAsc.checked) sortBids(true);
+                if (sortAsc.checked) window.sortBids(true);
             });
             
-            // Animate cards entrance with delay
             document.querySelectorAll('.bid-card').forEach((card, index) => {
                 card.style.animationDelay = (index * 0.05) + 's';
             });
         })();
     </script>
+
+    <!-- SignalR y scripts -->
+    <script src="~/js/signalr-helper.js"></script>
+    <script src="~/js/bidHistory.js"></script>
 }

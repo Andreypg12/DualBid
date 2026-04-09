@@ -73,8 +73,6 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
             _context.Entry(entity).State = EntityState.Modified;
 
-            Console.WriteLine($"entity repository {entity.StateId}");
-
             await _context.SaveChangesAsync();
         }
 

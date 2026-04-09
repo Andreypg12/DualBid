@@ -110,6 +110,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
         public async Task<bool> UpdateAsync(Comic entity, string[] selectedCategorias, List<ImgComic> newImages, int[] imagesToDelete)
         {
+            // Trae el cómic existente con sus relaciones necesarias para la actualización
             var comic = await _context.Comic
                 .Include(x => x.Category)
                 .Include(x => x.ImgComic)
@@ -118,6 +119,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
             if (comic == null)
                 return false;
 
+            // Actualiza las propiedades del cómic con los nuevos valores
             comic.Title = entity.Title;
             comic.Description = entity.Description;
             comic.Isbn = entity.Isbn;
@@ -127,6 +129,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
             comic.PublisherId = entity.PublisherId;
             comic.StateConservationId = entity.StateConservationId;
 
+            // Aplica las categorías seleccionadas al cómic
             await ApplyCategoriasAsync(comic, selectedCategorias);
 
 

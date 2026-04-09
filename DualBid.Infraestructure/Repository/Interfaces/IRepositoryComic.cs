@@ -18,3 +18,4 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<ICollection<Comic>> ListComicsForAuctionByUserAsync(int userId);
     }
 }
+ 

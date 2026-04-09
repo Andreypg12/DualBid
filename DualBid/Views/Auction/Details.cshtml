@@ -191,7 +191,11 @@
                                 <span class="small opacity-75">Current Bid</span>
                                 <i class="bi bi-cash-stack fs-4 opacity-75"></i>
                             </div>
-                            <div class="h2 fw-bold mb-0" id="currentBidLabel">$@Model.CurrentBid.AmountOffered.ToString("N0")</div>
+                            <div class="h2 fw-bold mb-0" id="currentBidLabel">
+                                $@((Model.CurrentBid != null && Model.CurrentBid.AmountOffered > 0 ?
+                                                                Model.CurrentBid.AmountOffered :
+                                                                Model.BasePrice).ToString("N0"))
+                            </div>
                             <small class="opacity-75">USD</small>
                         </div>
                     </div>
@@ -562,9 +566,10 @@
         }
 </style>
 
+
 @section Scripts {
     <script>
-        window.auctionDetailsRealtimeConfig = {
+        window.auctionDetailsConfig = {
             auctionId: "@Model.Id",
             userId: "@(userId ?? "0")"
         };
@@ -595,6 +600,6 @@
         }
     </script>
 
-    <script src="~/js/auctionDetailsRealtime.js"></script>
-
+    <!-- SignalR y scripts -->
+    <script src="~/js/auctionDetails.js"></script>
 }
