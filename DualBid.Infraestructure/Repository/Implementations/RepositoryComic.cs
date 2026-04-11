@@ -13,7 +13,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
 {
     public class RepositoryComic : IRepositoryComic
     {
-
+        //Para acceder a la base de datos
         private readonly DualBidContext _context;
 
         public RepositoryComic(DualBidContext context)

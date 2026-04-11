@@ -19,6 +19,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
             this._context = Context;
         }
 
+
+        // @* Editado por ALE *@
         public async Task<Auction> FindByIdAsync(int id)
         {
             var @object = await _context.Set<Auction>()
@@ -35,6 +37,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                     .ThenInclude(c => c.StateConservation)
                 .Include(a => a.Bid)
                     .ThenInclude(b => b.User)
+                .Include(a => a.WinningBid)
+                .ThenInclude(b => b.User)
                 .FirstOrDefaultAsync();
 
             return @object!;
@@ -124,6 +128,38 @@ namespace DualBid.Infraestructure.Repository.Implementations
             }
         }
 
-        
+
+        // @* Editado por ALE *@
+        //Determinar Ganador de la subasta
+        public async Task<bool> EncontrarGanadorAsync(int auctionId)
+        {
+            var auction = await _context.Auction
+                .Include(a => a.Bid)
+                    .ThenInclude(b => b.User)
+                .FirstOrDefaultAsync(a => a.Id == auctionId);
+
+            if (auction == null)
+                return false;
+
+            auction.ActualEndDate = DateTime.Now;
+            auction.StateId = 3;
+
+            if (auction.Bid == null || !auction.Bid.Any())
+            {
+                auction.WinningBidId = null;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            var winningBid = auction.Bid
+                .OrderByDescending(b => b.AmountOffered)
+                .ThenBy(b => b.Date)
+                .First();
+
+            auction.WinningBidId = winningBid.Id;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

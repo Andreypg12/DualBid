@@ -74,6 +74,13 @@ namespace DualBid.Application.Services.Implementations
             return await _repository.UpdateStateAsync(auctionId, newStateId);
         }
 
-        
+        //@* Editado por ALE *@
+        //Determinar el ganador de la subasta
+        public async Task<bool> EncontrarGanadorAsync(int auctionId)
+        {
+            return await _repository.EncontrarGanadorAsync(auctionId);
+        }
+
+
     }
 }

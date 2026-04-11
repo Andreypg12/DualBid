@@ -15,5 +15,10 @@ namespace DualBid.Application.Services.Interfaces
         Task<int> AddAsync(AuctionDTO dto);
         Task UpdateAsync(int id, AuctionDTO dto);
         Task<bool> UpdateStateAsync(int auctionId, int newStateId);
+
+
+        //@* Editado por ALE *@
+        //Determinar el ganador de la subasta
+        Task<bool> EncontrarGanadorAsync(int auctionId);
     }
 }

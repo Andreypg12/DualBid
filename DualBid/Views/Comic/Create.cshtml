@@ -26,6 +26,8 @@
 
     @* Contenedor Principal *@
     <form asp-action="Create" method="post" enctype="multipart/form-data" id="createComicForm">
+
+        @* IMPORTANTE PARA QUE SE MUESTREN LOS MENSAJES DE ERROR *@
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
         <div class="row g-4">
@@ -125,6 +127,11 @@
 
                                 @* Publisher combo *@
                                 <div class="col-md-6 mb-3">
+
+                                    @* asp-for es para enlazar el valor con el componente *@
+                                    @* asp-items es para llenar el combo con la informacion que se le dio desde el controlador, en este caso es ViewBag.ListPublisher *@
+                                    @* option value es el valor por defecto *@
+                                    @* asp-validation-for es para mostrar el error de validacion en caso de que el usuario no seleccione una opción *@
                                     <label asp-for="PublisherId" class="form-label">Publisher</label>
                                     <select asp-for="PublisherId"
                                             class="form-select"
@@ -193,6 +200,7 @@
                             <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2" style="background-color: rgb(215, 75, 72); color: white;">
                                 <i class="bi bi-x-lg me-2"></i>Cancel
                             </a>
+
                             <button type="submit" class="btn rounded-pill px-5 py-2 shadow-sm" style="background-color: rgb(148, 191, 151); color: white;">
                                 <i class="bi bi-check-lg me-2"></i>Create Comic
                             </button>

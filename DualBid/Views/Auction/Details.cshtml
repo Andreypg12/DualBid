@@ -27,8 +27,12 @@
                     _ => ("bg-secondary", "bi-question-circle-fill")
                 };
             }
-            <span class="badge @stateClass bg-opacity-75 fs-6 px-4 py-3 rounded-pill shadow-sm">
-                <i class="bi @stateIcon me-2"></i>@Model.State.Description
+
+            @* Determinar Ganador de la puja *@
+            @* Editado por ALE *@
+            <span id="auctionStateBadge" class="badge @stateClass bg-opacity-75 fs-6 px-4 py-3 rounded-pill shadow-sm">
+                <i id="auctionStateIcon" class="bi @stateIcon me-2"></i>
+                <span id="auctionStateText">@Model.State.Description</span>
             </span>
         </div>
     </div>
@@ -267,7 +271,7 @@
                                 <span class="text-muted small">Time Remaining</span>
                                 <i class="bi bi-hourglass-split text-danger"></i>
                             </div>
-                            <div class="fw-bold">
+                            <div class="fw-bold" id="timeRemainingLabel">
                                 @if (Model.ActualEndDate == null)
                                 {
                                     var timeLeft = Model.ExpectedEndDate - DateTime.Now;
@@ -413,6 +417,7 @@
                 </button>
             }
 
+
             @* Botones para el creador *@
             @if (isCurrentUserCreator)
             {
@@ -458,6 +463,44 @@
                 }
             }
         </div>
+    </div>
+
+
+    @* Editado por ALE *@
+    @* Esto es para el ganador de la subasta *@
+    <div id="auctionResultContainer">
+        @if (isAuctionClosed)
+        {
+            <div class="alert alert-success mt-4 shadow-sm">
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-trophy-fill me-2"></i>
+                    Auction Result
+                </h5>
+
+                @if (Model.WinningBid != null)
+                {
+                    <p class="mb-1">
+                        <strong>Winner:</strong> @Model.WinningBid.User.CompleteName
+                    </p>
+                    <p class="mb-1">
+                        <strong>Final Price:</strong> $@Model.WinningBid.AmountOffered.ToString("N0")
+                    </p>
+
+                    @if (Model.WinningBid.UserId == currentUserId)
+                    {
+                        <div class="alert alert-primary mt-2 mb-0">
+                            🎉 You have won this auction!
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="mb-0 text-muted">
+                        No bids were placed in this auction.
+                    </p>
+                }
+            </div>
+        }
     </div>
 
     @await Html.PartialAsync("_EditAuctionModal", Model)

@@ -81,6 +81,50 @@
             }
 
             updateAuctionStatusBadge(data);
+
+
+            //@* Editado por ALE * @
+            //Esto es para determinar el ganador y mostrarle un mensaje personalizado
+            const timeRemaining = document.getElementById('timeRemainingLabel');
+            if (timeRemaining) {
+                timeRemaining.innerHTML = '<span class="text-danger">Ended</span>';
+            }
+
+            const resultContainer = document.getElementById('auctionResultContainer');
+            if (resultContainer) {
+                if (data.winnerUserId) {
+                    let html = `
+            <div class="alert alert-success mt-4 shadow-sm">
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-trophy-fill me-2"></i>
+                    Auction Result
+                </h5>
+                <p class="mb-1"><strong>Winner:</strong> ${data.winnerName}</p>
+                <p class="mb-1"><strong>Final Price:</strong> $${Number(data.finalAmount).toLocaleString()}</p>
+        `;
+
+                    if (parseInt(config.userId || "0") === data.winnerUserId) {
+                        html += `
+                <div class="alert alert-primary mt-2 mb-0">
+                    🎉 You have won this auction!
+                </div>
+            `;
+                    }
+
+                    html += `</div>`;
+                    resultContainer.innerHTML = html;
+                } else {
+                    resultContainer.innerHTML = `
+            <div class="alert alert-success mt-4 shadow-sm">
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-trophy-fill me-2"></i>
+                    Auction Result
+                </h5>
+                <p class="mb-0 text-muted">No bids were placed in this auction.</p>
+            </div>
+        `;
+                }
+            }
         });
 
         // ✅ NUEVO - Activación de subasta
