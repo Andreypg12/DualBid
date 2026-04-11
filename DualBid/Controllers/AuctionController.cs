@@ -1,11 +1,13 @@
 ﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
+using DualBid.Hubs;
 using DualBid.ViewModels.Auction;
 using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace DualBid.Controllers
@@ -16,11 +18,17 @@ namespace DualBid.Controllers
         private readonly IServiceComic _serviceComic;
         private readonly IServiceAuctionState _serviceAuctionState;
 
-        public AuctionController(IServiceAuction serviceAuction, IServiceComic serviceComic, IServiceAuctionState serviceAuctionState)
+        //Ganador de subasta
+        //@* Editado por ALE *@
+        private readonly IHubContext<AuctionHub> _hubContext;
+
+        //@* Editado por ALE *@
+        public AuctionController(IServiceAuction serviceAuction, IServiceComic serviceComic, IServiceAuctionState serviceAuctionState, IHubContext<AuctionHub> hubContext)
         {
             _serviceAuction = serviceAuction;
             _serviceComic = serviceComic;
             _serviceAuctionState = serviceAuctionState;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -40,6 +48,7 @@ namespace DualBid.Controllers
             return View(vm);
         }
 
+        //Determinar el ganador de la subasta
         public async Task<ActionResult> Details(int? id)
         {
             try
@@ -55,6 +64,46 @@ namespace DualBid.Controllers
                 {
                     throw new Exception("No comic found with the provided ID");
                 }
+
+                //@* Editado por ALE *@
+                //Esto es para Usuario ganador 
+                // Si la subasta está activa y ya venció, determinar ganador automáticamente
+                if (@object.StateId == 2 && @object.ExpectedEndDate <= DateTime.Now)
+                {
+                    await _serviceAuction.EncontrarGanadorAsync(id.Value);
+
+                    // volver a consultar para traer los datos actualizados
+                    @object = await _serviceAuction.FindByIdAsync(id.Value);
+
+                    if (@object == null)
+                    {
+                        throw new Exception("No comic found with the provided ID");
+                    }
+
+                    // Evento para todos los usuarios de la subasta
+                    await _hubContext.Clients.Group($"auction-{id.Value}")
+                        .SendAsync("AuctionClosed", new
+                        {
+                            auctionId = @object.Id,
+                            winnerUserId = @object.WinningBid?.UserId,
+                            winnerName = @object.WinningBid?.User?.CompleteName,
+                            finalAmount = @object.WinningBid?.AmountOffered,
+                            stateId = @object.StateId
+                        });
+
+                    // Evento solo para el usuario ganador
+                    if (@object.WinningBid != null)
+                    {
+                        await _hubContext.Clients.Group($"user-{@object.WinningBid.UserId}")
+                            .SendAsync("UsuarioGanador", new
+                            {
+                                auctionId = @object.Id,
+                                mensaje = $"You have won the auction!",
+                                montoFinal = @object.WinningBid.AmountOffered
+                            });
+                    }
+                }
+
 
                 return View(@object);
 
@@ -180,7 +229,7 @@ namespace DualBid.Controllers
 
             //Le cambio la disponibilidad al objeto a no disponible
             await _serviceComic.UpdateAvailabilityAsync(pvm.Auction.ComicId, false);
-            
+
             // Si todo está bien, guardar
             await _serviceAuction.AddAsync(pvm.Auction);
 
@@ -243,11 +292,12 @@ namespace DualBid.Controllers
 
                 return RedirectToAction(nameof(Details), new { id });
             }
-                
+
             // Obtener el DTO existente
             var existingDto = await _serviceAuction.FindByIdAsync(id);
 
-            if (existingDto == null) {
+            if (existingDto == null)
+            {
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                     "Auction Not Found",

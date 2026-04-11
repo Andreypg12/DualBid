@@ -69,5 +69,14 @@ namespace DualBid.Application.DTOs
             .FirstOrDefault() ?? new BidDTO();
 
         public int NumberOfBids => Bids?.Count ?? 0;
+
+
+        // @* Editado por ALE *@
+        //Esto es para saber y mostrar en pantalla el ganador de la subasta y quien ganó.
+        public int? WinningBidId { get; set; }
+        public BidDTO? WinningBid { get; set; }
+
+        public int? WinnerUserId => WinningBid?.UserId;
+        public decimal? FinalAmount => WinningBid?.AmountOffered;
     }
 }
