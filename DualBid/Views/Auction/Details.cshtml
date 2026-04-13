@@ -626,11 +626,18 @@
 </style>
 
 
+@* 
+   Reemplaza SOLO la sección @section Scripts { ... } al final de tu Details.cshtml
+   El resto del HTML no cambia en absoluto.
+*@
+
 @section Scripts {
     <script>
         window.auctionDetailsConfig = {
             auctionId: "@Model.Id",
-            userId: "@(userId ?? "0")"
+            userId: "@(userId ?? "0")",
+            @* ✅ CRÍTICO: sin esto el countdown nunca arranca *@
+            endDate: "@Model.ExpectedEndDate.ToUniversalTime().ToString("o")"
         };
     </script>
 
@@ -659,6 +666,7 @@
         }
     </script>
 
-    <!-- SignalR y scripts -->
+    <!-- SignalR y scripts de la página de detalles -->
     <script src="~/js/auctionDetails.js"></script>
 }
+

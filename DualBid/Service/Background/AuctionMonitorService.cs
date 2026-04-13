@@ -1,164 +1,250 @@
 ﻿using DualBid.Application.Services.Interfaces;
-using Microsoft.AspNetCore.SignalR;
 using DualBid.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using DualBid.Application.DTOs;
 
 namespace DualBid.Services.BackgroundServices
 {
     public class AuctionMonitorService : BackgroundService
     {
-        private readonly ILogger<AuctionMonitorService> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<AuctionHub> _hubContext;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(10);
+        private readonly ILogger<AuctionMonitorService> _logger;
+
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _scheduledClosings = new();
+
+        private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan InitialLoadDelay = TimeSpan.FromSeconds(5);
 
         public AuctionMonitorService(
-            ILogger<AuctionMonitorService> logger,
-            IServiceProvider serviceProvider,
-            IHubContext<AuctionHub> hubContext)
+            IServiceScopeFactory scopeFactory,
+            IHubContext<AuctionHub> hubContext,
+            ILogger<AuctionMonitorService> logger)
         {
-            _logger = logger;
-            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
             _hubContext = hubContext;
+            _logger = logger;
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Loop principal — NUNCA debe morir por una excepción
+        // ─────────────────────────────────────────────────────────────────────
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("🚀 Auction Monitor Service started");
+            _logger.LogInformation("AuctionMonitorService iniciado.");
 
+            try
+            {
+                await Task.Delay(InitialLoadDelay, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return; // App cerrándose durante el delay inicial, salir limpiamente
+            }
+
+            await LoadActiveAuctionsAsync();
+
+            // ✅ El loop captura TODAS las excepciones para que nunca muera
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    await CheckAndProcessAuctions();
+                    await CheckAndCloseExpiredAuctionsAsync();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Error processing auctions");
+                    // Loguear pero NUNCA dejar que esto mate el loop
+                    _logger.LogError(ex, "Error inesperado en CheckAndCloseExpiredAuctionsAsync. El monitor continúa.");
                 }
 
-                await Task.Delay(_checkInterval, stoppingToken);
-            }
-        }
-
-        private async Task CheckAndProcessAuctions()
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var auctionService = scope.ServiceProvider.GetRequiredService<IServiceAuction>();
-            var comicService = scope.ServiceProvider.GetRequiredService<IServiceComic>();
-
-            var activeAuctions = await auctionService.ListActiveAsync();
-            var now = DateTime.Now;
-
-            foreach (var auction in activeAuctions)
-            {
                 try
                 {
-                    //await ProcessAuctionActivation(auction, auctionService, now);
-                    await ProcessAuctionClosure(auction, auctionService, comicService, now);
+                    // ✅ Usar Task.Delay SIN stoppingToken para que una cancelación
+                    // no mate el delay con OperationCanceledException no capturada.
+                    // Verificamos el token manualmente después.
+                    await Task.Delay(CheckInterval);
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException)
                 {
-                    _logger.LogError(ex, $"❌ Error processing auction {auction.Id}");
+                    break; // App cerrándose, salir limpiamente
                 }
+            }
+
+            _logger.LogInformation("AuctionMonitorService detenido.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Carga inicial desde BD
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task LoadActiveAuctionsAsync()
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var svc = scope.ServiceProvider.GetRequiredService<IServiceAuction>();
+                var active = await svc.GetActiveAuctionsAsync();
+
+                int count = 0;
+                foreach (var a in active)
+                {
+                    if (a.EndDate.HasValue)
+                    {
+                        // Guardar en hora LOCAL para comparar con DateTime.Now
+                        var localEnd = a.EndDate.Value.Kind == DateTimeKind.Utc
+                            ? a.EndDate.Value.ToLocalTime()
+                            : a.EndDate.Value;
+
+                        _scheduledClosings[a.Id] = localEnd;
+                        count++;
+                        _logger.LogInformation(
+                            "Monitor cargó subasta {Id} → cierre: {End:dd/MM/yyyy HH:mm:ss} (local)",
+                            a.Id, localEnd);
+                    }
+                }
+
+                _logger.LogInformation(
+                    "Carga inicial completa: {Count} subasta(s) activa(s) en el monitor. Hora local servidor: {Now:HH:mm:ss}",
+                    count, DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en LoadActiveAuctionsAsync. El monitor seguirá sin datos iniciales.");
             }
         }
 
-        private async Task ProcessAuctionActivation(AuctionDTO auction, IServiceAuction auctionService, DateTime now)
+        // ─────────────────────────────────────────────────────────────────────
+        // Verificar expiradas — se llama cada 30 segundos
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task CheckAndCloseExpiredAuctionsAsync()
         {
-            // Activar subastas que están en espera y ya llegó su hora de inicio
-            if (auction.State.Id == 1 && auction.StartDate <= now)
+            var now = DateTime.Now; // Hora local, igual que SQL Server
+
+            // Log de heartbeat cada vez que corre — así sabes que el loop vive
+            _logger.LogInformation(
+                "Monitor tick: {Now:HH:mm:ss} | Subastas monitoreadas: {Count} | Pendientes: {Pending}",
+                now,
+                _scheduledClosings.Count,
+                string.Join(", ", _scheduledClosings.Select(kv =>
+                    $"#{kv.Key}→{kv.Value:HH:mm:ss}")));
+
+            var expired = _scheduledClosings
+                .Where(kv => kv.Value <= now)
+                .Select(kv => kv.Key)
+                .ToList();
+
+            foreach (var id in expired)
             {
-                _logger.LogInformation($"🎯 Activando subasta {auction.Id}");
-
-                await auctionService.UpdateStateAsync(auction.Id, 2);
-
-                // Notificar a todos en el grupo de la subasta
-                await _hubContext.Clients.Group($"auction-{auction.Id}")
-                    .SendAsync("AuctionActivated", new
-                    {
-                        auctionId = auction.Id.ToString(),
-                        message = "¡La subasta ha comenzado!",
-                        comicTitle = auction.Comic.Title
-                    });
-
-                // Notificar al creador específicamente
-                await _hubContext.Clients.Group($"user-{auction.CreatorUser.Id}")
-                    .SendAsync("YourAuctionActivated", new
-                    {
-                        auctionId = auction.Id.ToString(),
-                        message = $"Tu subasta de {auction.Comic.Title} ha sido activada automáticamente"
-                    });
+                await CloseAuctionAsync(id);
             }
         }
 
-        private async Task ProcessAuctionClosure(AuctionDTO auction, IServiceAuction auctionService,
-            IServiceComic comicService, DateTime now)
+        // ─────────────────────────────────────────────────────────────────────
+        // Cierre individual
+        // ─────────────────────────────────────────────────────────────────────
+        private async Task CloseAuctionAsync(int auctionId)
         {
-            // Cerrar subastas que ya expiraron
-            if (auction.State.Id == 2 && auction.ExpectedEndDate <= now)
+            if (!_scheduledClosings.TryRemove(auctionId, out _))
+                return;
+
+            _logger.LogInformation("Cerrando subasta {AuctionId}...", auctionId);
+
+            try
             {
-                var hasBids = auction.Bids != null && auction.Bids.Any();
-                var finalState = hasBids ? 3 : 4; // 3 = Finalizada con pujas, 4 = Cancelada sin pujas
+                using var scope = _scopeFactory.CreateScope();
+                var svc = scope.ServiceProvider.GetRequiredService<IServiceAuction>();
 
-                _logger.LogInformation($"🔒 Cerrando subasta {auction.Id}. Estado final: {finalState}");
+                var result = await svc.CloseAuctionAsync(auctionId);
 
-                await auctionService.UpdateStateAsync(auction.Id, finalState);
-
-                // Si no tuvo pujas, liberar el cómic
-                if (!hasBids)
+                if (result == null)
                 {
-                    await comicService.UpdateAvailabilityAsync(auction.Comic.Id, true);
+                    _logger.LogWarning(
+                        "Subasta {AuctionId}: retornó null (ya cerrada previamente o no encontrada).",
+                        auctionId);
+                    return;
                 }
 
-                // Determinar ganador si hay pujas
-                var winningBid = hasBids ?
-                    auction.Bids?.OrderByDescending(b => b.AmountOffered).FirstOrDefault() : null;
+                _logger.LogInformation(
+                    "Subasta {AuctionId} cerrada. Estado={State}, Ganador={Winner}, Monto={Amount}",
+                    auctionId, result.FinalStateId,
+                    result.WinnerName ?? "ninguno", result.FinalAmount);
 
-                // Notificar cierre a todos en el grupo
-                await _hubContext.Clients.Group($"auction-{auction.Id}")
+                // ── Notificar a todos los que ven la subasta ─────────────────
+                await _hubContext.Clients
+                    .Group($"auction-{auctionId}")
                     .SendAsync("AuctionClosed", new
                     {
-                        auctionId = auction.Id.ToString(),
-                        hasBids = hasBids,
-                        finalState = finalState,
-                        winningBid = winningBid?.AmountOffered,
-                        winnerUserId = winningBid?.UserId.ToString(),
-                        winnerName = winningBid?.User?.CompleteName,
-                        message = hasBids ?
-                            $"¡Subasta finalizada! Ganador: {winningBid?.User?.CompleteName}" :
-                            "Subasta finalizada sin pujas"
+                        auctionId = auctionId,
+                        message = result.WinnerName != null
+                                         ? $"Auction ended! Winner: {result.WinnerName} with ${result.FinalAmount:N2}"
+                                         : "Auction ended with no bids.",
+                        hasBids = result.WinnerUserId.HasValue,
+                        winnerUserId = result.WinnerUserId,
+                        winnerName = result.WinnerName,
+                        finalAmount = result.FinalAmount,
+                        finalState = result.FinalStateId
                     });
 
-                // Notificar al ganador específicamente
-                if (winningBid != null)
+                // ── Notificar al ganador ──────────────────────────────────────
+                if (result.WinnerUserId.HasValue)
                 {
-                    await _hubContext.Clients.Group($"user-{winningBid.UserId}")
+                    await _hubContext.Clients
+                        .Group($"user-{result.WinnerUserId}")
                         .SendAsync("YouWonAuction", new
                         {
-                            auctionId = auction.Id.ToString(),
-                            comicTitle = auction.Comic.Title,
-                            winningAmount = winningBid.AmountOffered,
-                            message = $"¡Felicidades! Has ganado la subasta de {auction.Comic.Title}"
+                            auctionId = auctionId,
+                            message = $"Congratulations! You won \"{result.ComicTitle}\" for ${result.FinalAmount:N2}",
+                            finalAmount = result.FinalAmount,
+                            comicTitle = result.ComicTitle
                         });
                 }
 
-                // Notificar al creador
-                await _hubContext.Clients.Group($"user-{auction.CreatorUser.Id}")
-                    .SendAsync("YourAuctionEnded", new
-                    {
-                        auctionId = auction.Id.ToString(),
-                        comicTitle = auction.Comic.Title,
-                        hasBids = hasBids,
-                        finalAmount = winningBid?.AmountOffered,
-                        message = hasBids ?
-                            $"Tu subasta finalizó con una puja ganadora de ${winningBid?.AmountOffered:N0}" :
-                            "Tu subasta finalizó sin pujas"
-                    });
+                // ── Notificar al creador ──────────────────────────────────────
+                if (result.OwnerUserId.HasValue)
+                {
+                    await _hubContext.Clients
+                        .Group($"user-{result.OwnerUserId}")
+                        .SendAsync("YourAuctionEnded", new
+                        {
+                            auctionId = auctionId,
+                            message = result.WinnerName != null
+                                            ? $"Your auction ended. Winner: {result.WinnerName} — ${result.FinalAmount:N2}"
+                                            : "Your auction ended with no bids. The comic is available again.",
+                            hasBids = result.WinnerUserId.HasValue,
+                            finalAmount = result.FinalAmount
+                        });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cerrar subasta {AuctionId}. Reintentando en 2 min.", auctionId);
+                // Re-agendar para reintento
+                _scheduledClosings[auctionId] = DateTime.Now.AddMinutes(2);
             }
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // API pública
+        // ─────────────────────────────────────────────────────────────────────
+        public void ScheduleAuction(int auctionId, DateTime expectedEndDate)
+        {
+            var localEnd = expectedEndDate.Kind == DateTimeKind.Utc
+                ? expectedEndDate.ToLocalTime()
+                : expectedEndDate;
+
+            _scheduledClosings[auctionId] = localEnd;
+            _logger.LogInformation(
+                "Subasta {AuctionId} agregada al monitor. Cierre local: {End:dd/MM/yyyy HH:mm:ss}",
+                auctionId, localEnd);
+        }
+
+        public void UnscheduleAuction(int auctionId)
+        {
+            _scheduledClosings.TryRemove(auctionId, out _);
+            _logger.LogInformation("Subasta {AuctionId} removida del monitor.", auctionId);
+        }
+
+        public IReadOnlyDictionary<int, DateTime> GetScheduledAuctions() => _scheduledClosings;
     }
 }

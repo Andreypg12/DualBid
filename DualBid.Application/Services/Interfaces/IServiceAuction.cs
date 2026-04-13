@@ -20,5 +20,9 @@ namespace DualBid.Application.Services.Interfaces
         //@* Editado por ALE *@
         //Determinar el ganador de la subasta
         Task<bool> EncontrarGanadorAsync(int auctionId);
+
+        Task<IEnumerable<ActiveAuctionDTO>> GetActiveAuctionsAsync();
+
+        Task<AuctionCloseResultDTO?> CloseAuctionAsync(int auctionId);
     }
 }

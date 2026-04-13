@@ -13,6 +13,7 @@ using DualBid.Services.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 //Sin este using no se puede usar Encoding.UTF8 en la configuración de Serilog para los archivos de log.
@@ -160,7 +161,14 @@ builder.Services.AddTransient<IServiceImgComic, ServiceImgComic>();
 
 builder.Services.AddSignalR();
 
-builder.Services.AddHostedService<AuctionMonitorService>();
+//builder.Services.AddHostedService<AuctionMonitorService>();
+//builder.Services.AddScoped<IAuctionMonitorService, AuctionMonitorService>();
+
+// 1. Crear UNA sola instancia Singleton
+builder.Services.AddSingleton<AuctionMonitorService>();
+
+// 2. Registrarla como IHostedService (usa la misma instancia del paso 1)
+builder.Services.AddHostedService(sp => sp.GetRequiredService<AuctionMonitorService>());
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(config =>

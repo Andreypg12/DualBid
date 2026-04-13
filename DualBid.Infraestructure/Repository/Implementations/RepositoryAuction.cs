@@ -131,6 +131,9 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
         // @* Editado por ALE *@
         //Determinar Ganador de la subasta
+        // Reemplaza SOLO el método EncontrarGanadorAsync en tu RepositoryAuction.cs
+        // El resto de la clase no cambia.
+
         public async Task<bool> EncontrarGanadorAsync(int auctionId)
         {
             var auction = await _context.Auction
@@ -142,14 +145,24 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 return false;
 
             auction.ActualEndDate = DateTime.Now;
-            auction.StateId = 3;
 
             if (auction.Bid == null || !auction.Bid.Any())
             {
+                // ✅ Sin pujas: estado 4 (Cancelado) y cómic disponible nuevamente
+                auction.StateId = 4;
                 auction.WinningBidId = null;
+
+                // Restaurar disponibilidad del cómic para que pueda volver a subastarse
+                var comic = await _context.Comic.FindAsync(auction.ComicId);
+                if (comic != null)
+                    comic.Availability = true;
+
                 await _context.SaveChangesAsync();
                 return true;
             }
+
+            // ✅ Con pujas: estado 3 (Finalizado), determinar ganador
+            auction.StateId = 3;
 
             var winningBid = auction.Bid
                 .OrderByDescending(b => b.AmountOffered)
