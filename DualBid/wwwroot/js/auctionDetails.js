@@ -129,16 +129,74 @@
 
         // ── Ganaste ───────────────────────────────────────────────────────
         SignalRAuction.onYouWon(data => {
-            if (typeof Swal !== "undefined") {
-                Swal.fire({
-                    icon: "success",
-                    title: "🎉 Congratulations!",
-                    text: data.message,
-                    confirmButtonText: "Great!",
-                    background: "#d4edda"
-                });
-            }
+            data.comicTitle = data.comicTitle
+                || document.querySelector(".h3.fw-bold.text-primary")?.textContent?.trim()
+                || "Comic";
+            data.finalAmount = data.finalAmount || data.amount || data.nuevoMonto;
+
+            Swal.fire({
+                icon: "success",
+                title: "Congratulations!",
+                html: `<p>${data.message || "You won this auction!"}</p>
+                       <p><strong>Amount: $${Number(data.finalAmount)
+                        .toLocaleString("en-US", { minimumFractionDigits: 2 })}</strong></p>`,
+                confirmButtonText: "Pay now",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                PaymentFlow.openForWinner(data);
+            });
         });
+
+        // Cuando el ganador paga → muestra recibo a todos
+        SignalRAuction.onPaymentCompleted(data => {
+            const container = document.getElementById("auctionResultContainer");
+            if (!container) return;
+            container.innerHTML = `
+                <div class="card border-0 shadow-sm mt-4" style="border-radius:16px;overflow:hidden;background:#fff;">
+                    <div style="height:4px;background:linear-gradient(90deg,#1a7a4a,#2ecc7a);"></div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-1" style="font-size:18px;">Payment receipt</h5>
+                                <p class="mb-0" style="font-size:13px;color:#999;">Payment registered successfully</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-pill fw-semibold"
+                                  style="font-size:12px;background:#e8f5ee;color:#1a7a4a;">Confirmed</span>
+                        </div>
+                        <hr style="border-color:#f0f0f0;">
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Auction</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.comicTitle)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Buyer</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.winnerName)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Amount</span>
+                            <span class="fw-bold" style="font-size:22px;color:#1a7a4a;">
+                                $${Number(data.finalAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3">
+                            <span style="font-size:13px;color:#888;">Date</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.date)}</span>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        // Cuando el ganador libera el cómic → recarga para todos
+        SignalRAuction.onComicReleased(data => {
+            Swal.fire({
+                icon: "info",
+                title: "Comic returned to auction",
+                text: data.message,
+                confirmButtonText: "OK"
+            }).then(() => location.reload());
+        });
+
+        
 
         // ── Tu subasta terminó ────────────────────────────────────────────
         SignalRAuction.onYourAuctionEnded(data => {
@@ -156,6 +214,8 @@
         SignalRAuction.onReconnected(() => {
             showNotificationToast("🔄 Connection restored", "info");
         });
+        
+        PaymentFlow.init(config.auctionId);
 
     } catch (err) {
         console.error("AuctionDetails: Error al inicializar SignalR:", err);
