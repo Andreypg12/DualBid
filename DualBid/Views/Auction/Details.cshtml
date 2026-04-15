@@ -328,12 +328,12 @@
                         </div>
 
                         <div class="d-flex align-items-center">
-                            <div class="timeline-icon-base @(Model.ActualEndDate == null ? "timeline-icon-warning" : "timeline-icon-danger") me-3">
-                                <i class="bi @(Model.ActualEndDate == null ? "bi-pause" : "bi-stop-fill")"></i>
+                            <div id="iconEnded" class="timeline-icon-base @(Model.ActualEndDate == null ? "timeline-icon-warning" : "timeline-icon-danger") me-3">
+                                <i id="iIconEnded" class="bi @(Model.ActualEndDate == null ? "bi-pause" : "bi-stop-fill")"></i>
                             </div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between">
-                                    <span class="fw-semibold">@(Model.ActualEndDate == null ? "Expected End" : "Ended")</span>
+                                    <span id="timeLineEndedDate" class="fw-semibold">@(Model.ActualEndDate == null ? "Expected End" : "Ended")</span>
                                     <small class="text-muted">
                                         @if (Model.ActualEndDate == null)
                                         {
@@ -359,7 +359,7 @@
             Back to Auctions
         </a>
 
-        <div class="d-flex gap-3">
+        <div id="divActionsButtons" class="d-flex gap-3">
             @{
                 var currentUserId = int.Parse(userId ?? "0");
                 bool isAuctionActive = Model.ActualEndDate == null && Model.State.Id == 2;
