@@ -189,10 +189,7 @@
 
         // Cuando el ganador libera el cómic → recarga para todos
         SignalRAuction.onComicReleased(data => {
-
-            // Limpiar el resultado inmediatamente
-            const container = document.getElementById("auctionResultContainer");
-            if (container) container.innerHTML = "";
+            document.getElementById("auctionResultContainer").innerHTML = "";
 
             Swal.fire({
                 icon: "info",
