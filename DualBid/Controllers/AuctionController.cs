@@ -451,5 +451,61 @@ namespace DualBid.Controllers
                     });
             }
         }
+
+        // Cuando el ganador paga: notifica a todos el recibo
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> NotifyPaymentComplete([FromBody] PaymentRequest request)
+        {
+            if (request == null || request.AuctionId <= 0) return BadRequest();
+
+            var auction = await _serviceAuction.FindByIdAsync(request.AuctionId);
+            if (auction == null) return NotFound();
+
+            // ALEJANDRO — Marcar la subasta como Finalizada (3) cuando el pago se completa
+            await _serviceAuction.UpdateStateAsync(request.AuctionId, 3);
+
+            await _hubContext.Clients
+                .Group($"auction-{request.AuctionId}")
+                .SendAsync("PaymentCompleted", new
+                {
+                    auctionId = request.AuctionId,
+                    winnerName = auction.WinningBid?.User?.CompleteName,
+                    finalAmount = auction.WinningBid?.AmountOffered,
+                    comicTitle = auction.Comic?.Title,
+                    date = DateTime.Now.ToString("g")
+                });
+
+            return Ok(new { success = true });
+        }
+
+        // Cuando el ganador libera: cancela la subasta y notifica a todos
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelAfterWin([FromBody] PaymentRequest request)
+        {
+            if (request == null || request.AuctionId <= 0) return BadRequest();
+
+            var auction = await _serviceAuction.FindByIdAsync(request.AuctionId);
+            if (auction == null) return NotFound();
+
+            // Cambiar estado a Cancelada (4) y liberar el cómic
+            await _serviceAuction.UpdateStateAsync(request.AuctionId, 4);
+            await _serviceComic.UpdateAvailabilityAsync(auction.Comic.Id, true);
+
+            // Notificar a todos que el cómic fue liberado
+            await _hubContext.Clients
+                .Group($"auction-{request.AuctionId}")
+                .SendAsync("ComicReleased", new
+                {
+                    auctionId = request.AuctionId,
+                    comicTitle = auction.Comic?.Title,
+                    message = "The winner did not complete the payment. The comic has been returned to auction."
+                });
+
+            return Ok(new { success = true });
+        }
+
+        public class PaymentRequest { public int AuctionId { get; set; } }
     }
 }

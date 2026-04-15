@@ -25,7 +25,9 @@ const SignalRAuction = (() => {
         onAuctionActivated: [],
         onYouWon: [],
         onYourAuctionEnded: [],
-        onCountdownTick: []
+        onCountdownTick: [],
+        onPaymentCompleted: [],
+        onComicReleased: [],
     };
 
     // ─────────────────────────────────────────
@@ -128,6 +130,13 @@ const SignalRAuction = (() => {
         connection.on("YourAuctionActivated", data => {
             callbacks.onAuctionActivated.forEach(cb => cb(data));
         });
+
+        connection.on("PaymentCompleted", data => {
+            callbacks.onPaymentCompleted.forEach(cb => cb(data));
+        });
+        connection.on("ComicReleased", data => {
+            callbacks.onComicReleased.forEach(cb => cb(data));
+        });
     }
 
     async function _joinGroups() {
@@ -199,6 +208,8 @@ const SignalRAuction = (() => {
         onYouWon: cb => _on("onYouWon", cb),
         onYourAuctionEnded: cb => _on("onYourAuctionEnded", cb),
         onCountdownTick: cb => _on("onCountdownTick", cb),
+        onPaymentCompleted: cb => _on("onPaymentCompleted", cb),
+        onComicReleased: cb => _on("onComicReleased", cb),
         getAuctionId: () => currentAuctionId,
         isConnected: () => connection && connection.state === signalR.HubConnectionState.Connected,
         async disconnect() {
