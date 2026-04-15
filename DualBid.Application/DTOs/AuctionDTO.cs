@@ -27,6 +27,12 @@ namespace DualBid.Application.DTOs
 
 
         public DateTime? ActualEndDate { get; set; }
+        public string ActualEndDateFormat
+        {
+            get => ActualEndDate.HasValue
+                ? ActualEndDate.Value.ToString("dd MMM yyyy 'at' HH:mm")
+                : string.Empty;
+        }
 
         [DisplayName("Base Price")]
         [Required(ErrorMessage = "{0} is required")]

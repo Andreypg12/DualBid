@@ -1,13 +1,6 @@
 ﻿"use strict";
 
-/**
- * auctionDetails.js — Lógica de la página de detalles de subasta.
- *
- * CAMBIOS vs versión anterior:
- * - Pasa config.endDate a SignalRAuction.initialize() para arrancar el countdown
- * - onCountdownTick actualiza el label sin recargar la página
- * - onAuctionClosed actualiza el DOM sin location.reload()
- */
+
 (async () => {
     const config = window.auctionDetailsConfig;
 
@@ -19,14 +12,13 @@
     console.log("AuctionDetails: Inicializando para subasta", config.auctionId);
 
     try {
-        // ✅ Pasar endDate para arrancar el countdown local
+        // Pasar endDate para arrancar el countdown local
         await SignalRAuction.initialize(
             config.auctionId,
             config.userId,
-            config.endDate   // ISO string, ej: "2026-04-12T03:00:00Z"
+            config.endDate 
         );
 
-        // ── Countdown local (sin llamadas al servidor) ────────────────────
         SignalRAuction.onCountdownTick(({ display, isEnded, isEndingSoon }) => {
             const label = document.getElementById("timeRemainingLabel");
             if (!label) return;
@@ -62,7 +54,7 @@
             showNotificationToast(`💸 New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
         });
 
-        // ── Usuario superado ──────────────────────────────────────────────
+        // Usuario superado
         SignalRAuction.onUserOutbid(data => {
             if (typeof Swal !== "undefined") {
                 Swal.fire({
@@ -82,11 +74,11 @@
             }
         });
 
-        // ── Subasta cerrada (SIN location.reload()) ───────────────────────
+        // Subasta cerrada 
         SignalRAuction.onAuctionClosed(data => {
-            console.log("🔒 Subasta cerrada:", data);
+            console.log("Auction closed:", data);
 
-            // 1. Deshabilitar botón de puja
+            // Deshabilitar botón de puja
             const bidButton = document.querySelector('a[href*="/Bid/Create"]');
             if (bidButton) {
                 bidButton.outerHTML = `
@@ -95,36 +87,45 @@
                     </button>`;
             }
 
-            // 2. Actualizar badge de estado
+            //  Actualizar badge de estado
             updateAuctionStatusBadge(data);
 
-            // 3. Mostrar resultado en el contenedor dedicado
+
+            // Mostrar resultado en el contenedor dedicado
             renderAuctionResult(data);
 
-            // 4. Alerta (no bloquea, no recarga)
+
+            //  cambiar la linea de tiempo para ponerlo en cerrado
+            updateTimeLineEndedDate(data);
+
+
+            //  quitar los botones para poner que ya la subasta se cerró
+            updateButtonsAtTheEnd(data)
+
+
             if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: data.hasBids ? "success" : "info",
-                    title: data.hasBids ? "🏆 Auction Ended!" : "📋 Auction Closed",
+                    title: data.hasBids ? "Auction Ended" : "Auction Closed",
                     text: data.message,
                     confirmButtonText: "OK",
-                    allowOutsideClick: true   // No bloquear al usuario
+                    allowOutsideClick: true
                 });
             }
         });
 
-        // ── Subasta activada ──────────────────────────────────────────────
+        // Subasta activada
         SignalRAuction.onAuctionActivated(data => {
             if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: "success",
-                    title: "🚀 Auction Started!",
+                    title: "Auction Started",
                     text: data.message,
                     timer: 3000,
                     showConfirmButton: true
                 });
             }
-            showNotificationToast(`🚀 ${data.message}`, "success");
+            showNotificationToast(`${data.message}`, "success");
         });
 
         // ── Ganaste ───────────────────────────────────────────────────────
@@ -208,7 +209,7 @@
             if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: data.hasBids ? "success" : "info",
-                    title: "📋 Your Auction Has Ended",
+                    title: "Your Auction Has Ended",
                     text: data.message,
                     confirmButtonText: "OK"
                 });
@@ -227,14 +228,7 @@
     }
 })();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers de UI
-// ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Renderiza el resultado de la subasta en #auctionResultContainer.
- * No recarga la página — actualiza el DOM directamente.
- */
 function renderAuctionResult(data) {
     const timeLabel = document.getElementById("timeRemainingLabel");
     if (timeLabel) {
@@ -292,18 +286,71 @@ function renderAuctionResult(data) {
 }
 
 function updateAuctionStatusBadge(data) {
-    const badge = document.querySelector(".badge[data-auction-status]");
+    const badge = document.querySelector("#auctionStateBadge");
     if (!badge) return;
 
     badge.classList.remove("bg-warning", "bg-success", "bg-primary", "bg-danger", "bg-secondary");
 
     if (data.finalState === 3) {
         badge.classList.add("bg-primary");
-        badge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Finished';
+        badge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Completed';
     } else if (data.finalState === 4) {
         badge.classList.add("bg-danger");
-        badge.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>Cancelled';
+        badge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Cancelled';
     }
+} 
+
+function updateTimeLineEndedDate(data) {
+    const timeLineEndedDateSpan = document.querySelector("#timeLineEndedDate");
+    if (!timeLineEndedDateSpan) return;
+
+    // Actualizar el texto del span
+    timeLineEndedDateSpan.textContent = "Ended";
+
+    // Actualizar la fecha mostrada con ExpectedEndDate
+    const dateSmall = timeLineEndedDateSpan.closest('.d-flex').querySelector('small.text-muted');
+    if (dateSmall && data.ExpectedEndDate) {
+        const date = new Date(data.ExpectedEndDate);
+        dateSmall.textContent = date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }) + ' at ' + date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    const iconDiv = document.querySelector('#iconEnded');
+    if (iconDiv) {
+        // Cambiar la clase de warning a danger
+        iconDiv.classList.remove('timeline-icon-warning');
+        iconDiv.classList.add('timeline-icon-danger');
+
+        // Cambiar el ícono de pause a stop-fill
+        const icon = iconDiv.querySelector('#iIconEnded');
+        if (icon) {
+            icon.classList.remove('bi-pause');
+            icon.classList.add('bi-stop-fill');
+        }
+    }
+}
+
+function updateButtonsAtTheEnd(data) {
+    const divActionsButtons = document.querySelector("#divActionsButtons");
+    if (!divActionsButtons) return;
+
+    // Limpiar el contenido actual del div de botones
+    divActionsButtons.innerHTML = '';
+
+    // Crear y agregar el botón de "Auction Ended" desactivado
+    const endedButton = document.createElement('button');
+    endedButton.className = 'btn btn-secondary btn-lg px-5';
+    endedButton.disabled = true;
+    endedButton.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Auction Ended';
+
+    divActionsButtons.appendChild(endedButton);
 }
 
 function showNotificationToast(message, type = "success") {
