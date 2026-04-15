@@ -468,9 +468,8 @@
 
     @* Editado por ALE *@
     @* Esto es para el ganador de la subasta *@
-    @* REEMPLAZA POR: *@
     <div id="auctionResultContainer">
-        @if (isAuctionClosed)
+        @if (Model.State.Id == 3)
         {
             <div class="card border-0 shadow-sm mt-4" style="border-radius:16px;overflow:hidden;background:#fff;">
                 <div style="height:4px;background:linear-gradient(90deg,#1a7a4a,#2ecc7a);"></div>

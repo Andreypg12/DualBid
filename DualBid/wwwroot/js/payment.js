@@ -110,6 +110,25 @@ const PaymentFlow = (() => {
 
     // Release: cancela la subasta (estado 4) y notifica a todos
     async function _handleRelease() {
+        _closing = true;
+
+
+        const confirm = await Swal.fire({
+            icon: "warning",
+            title: "Release comic?",
+            text: "Are you sure you want to release this comic? You will lose the auction.",
+            showCancelButton: true,
+            confirmButtonText: "Yes, release",
+            cancelButtonText: "Go back",
+            confirmButtonColor: "#dc3545"
+        });
+
+        if (!confirm.isConfirmed) {
+            _closing = false; 
+            return;
+        }
+
+
         try {
             await fetch("/Auction/CancelAfterWin", {
                 method: "POST",
@@ -121,7 +140,6 @@ const PaymentFlow = (() => {
             });
         } catch { }
 
-        _closing = true;
         _modal?.hide();
 
         await Swal.fire({
