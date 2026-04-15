@@ -42,7 +42,7 @@ const SignalRAuction = (() => {
 
         // Reutilizar la conexión global del layout si existe y está conectada
         if (window.__globalSignalRConnection &&
-            window.__globalSignalRConnection.state === signalR.HubConnectionState.Connected) {
+            window.__globalSignalRConnection.state === signalR.HubConnectiontate.Connected) {
             connection = window.__globalSignalRConnection;
             console.log("SignalR: Reutilizando conexión global");
             _registerHandlers();

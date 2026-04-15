@@ -238,27 +238,29 @@
                                     <span class="text-muted small d-block">Total bids</span>
                                     <div class="fw-bold display-6 mb-0" id="totalBidsLabel">@Model.NumberOfBids</div>
                                 </div>
-                                @if (Model.NumberOfBids == 0)
-                                {
-                                    <div class="d-flex flex-column align-items-center justify-content-center ps-3 ms-3 border-start text-muted"
-                                         style="cursor: not-allowed; opacity: 0.6;"
-                                         title="No bids available yet">
-                                        <i class="bi bi-clock-history fs-4 mb-1"></i>
-                                        <span class="small fw-semibold">History</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <a asp-controller="Bid"
-                                       asp-action="AuctionBiddingHistory"
-                                       asp-route-auctionId="@Model.Id"
-                                       asp-route-comicTitle="@Model.Comic?.Title"
-                                       class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
-                                       title="Go to bid history">
-                                        <i class="bi bi-clock-history fs-4 mb-1"></i>
-                                        <span class="small fw-semibold">History</span>
-                                    </a>
-                                }
+                                <div id="bidHistoryContainer">
+                                    @if (Model.NumberOfBids == 0)
+                                    {
+                                        <div class="d-flex flex-column align-items-center justify-content-center ps-3 ms-3 border-start text-muted"
+                                             style="cursor: not-allowed; opacity: 0.6;"
+                                             title="No bids available yet">
+                                            <i class="bi bi-clock-history fs-4 mb-1"></i>
+                                            <span class="small fw-semibold">History</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Bid"
+                                           asp-action="AuctionBiddingHistory"
+                                           asp-route-auctionId="@Model.Id"
+                                           asp-route-comicTitle="@Model.Comic?.Title"
+                                           class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
+                                           title="Go to bid history">
+                                            <i class="bi bi-clock-history fs-4 mb-1"></i>
+                                            <span class="small fw-semibold">History</span>
+                                        </a>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -427,7 +429,7 @@
                     <form asp-action="CloseAuction" asp-controller="Auction" method="post" style="display: inline;" id="closeAuctionForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id" />
-                        <button type="button"
+                        <button type="button" id="closeAuctionBtn"
                                 class="btn btn-custom-close btn-lg px-5 shadow-sm"
                                 onclick="confirmAction('closeAuctionForm', 'Close Auction', 'Are you sure you want to close this auction?', 'warning')">
                             <i class="bi bi-stop-fill me-2"></i>
@@ -519,7 +521,9 @@
             </div>
         }
     </div>
+
     @await Html.PartialAsync("_PaymentModal")
+
     @await Html.PartialAsync("_EditAuctionModal", Model)
 </section>
 
@@ -650,10 +654,11 @@
 
 @section Scripts {
     <script>
-        window.auctionDetailsConfig = {
+                window.auctionDetailsConfig = {
             auctionId: "@Model.Id",
             userId: "@(userId ?? "0")",
-            @* ✅ CRÍTICO: sin esto el countdown nunca arranca *@
+            isCreator: "@isCurrentUserCreator.ToString().ToLower()",
+            comicTitle: "@Html.Raw(Model.Comic?.Title?.Replace("\"", "\\\""))",
             endDate: "@Model.ExpectedEndDate.ToUniversalTime().ToString("o")"
         };
     </script>

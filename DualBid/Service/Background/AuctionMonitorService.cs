@@ -28,9 +28,6 @@ namespace DualBid.Services.BackgroundServices
             _logger = logger;
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Loop principal — NUNCA debe morir por una excepción
-        // ─────────────────────────────────────────────────────────────────────
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("AuctionMonitorService iniciado.");
@@ -46,7 +43,7 @@ namespace DualBid.Services.BackgroundServices
 
             await LoadActiveAuctionsAsync();
 
-            // ✅ El loop captura TODAS las excepciones para que nunca muera
+            // El loop captura las excepciones para que nunca muera
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -61,7 +58,7 @@ namespace DualBid.Services.BackgroundServices
 
                 try
                 {
-                    // ✅ Usar Task.Delay SIN stoppingToken para que una cancelación
+                    //Usar Task.Delay SIN stoppingToken para que una cancelación
                     // no mate el delay con OperationCanceledException no capturada.
                     // Verificamos el token manualmente después.
                     await Task.Delay(CheckInterval);
@@ -75,9 +72,6 @@ namespace DualBid.Services.BackgroundServices
             _logger.LogInformation("AuctionMonitorService detenido.");
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Carga inicial desde BD
-        // ─────────────────────────────────────────────────────────────────────
         private async Task LoadActiveAuctionsAsync()
         {
             try
@@ -114,9 +108,6 @@ namespace DualBid.Services.BackgroundServices
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Verificar expiradas — se llama cada 30 segundos
-        // ─────────────────────────────────────────────────────────────────────
         private async Task CheckAndCloseExpiredAuctionsAsync()
         {
             var now = DateTime.Now; // Hora local, igual que SQL Server
@@ -140,9 +131,6 @@ namespace DualBid.Services.BackgroundServices
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Cierre individual
-        // ─────────────────────────────────────────────────────────────────────
         private async Task CloseAuctionAsync(int auctionId)
         {
             if (!_scheduledClosings.TryRemove(auctionId, out _))
@@ -224,9 +212,6 @@ namespace DualBid.Services.BackgroundServices
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // API pública
-        // ─────────────────────────────────────────────────────────────────────
         public void ScheduleAuction(int auctionId, DateTime expectedEndDate)
         {
             var localEnd = expectedEndDate.Kind == DateTimeKind.Utc

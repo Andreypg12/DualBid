@@ -35,7 +35,6 @@ namespace DualBid.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
 
-        // NUEVO: Para notificar tiempo restante
         public async Task NotifyTimeRemaining(string auctionId, string timeRemaining)
         {
             var groupName = $"auction-{auctionId}";

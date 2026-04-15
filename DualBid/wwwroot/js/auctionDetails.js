@@ -35,10 +35,11 @@
             label.classList.toggle("text-warning", !isEndingSoon);
         });
 
-        // ── Nueva puja ────────────────────────────────────────────────────
+        //  Nueva puja 
         SignalRAuction.onNewBid(bidData => {
             if (bidData.auctionId != config.auctionId) return;
 
+            // — Actualizar precio actual —
             const currentBidLabel = document.getElementById("currentBidLabel");
             if (currentBidLabel) {
                 currentBidLabel.innerText = `$${bidData.nuevoMonto.toFixed(2)}`;
@@ -48,10 +49,45 @@
 
             const totalBidsLabel = document.getElementById("totalBidsLabel");
             if (totalBidsLabel) {
-                totalBidsLabel.innerText = (parseInt(totalBidsLabel.innerText) || 0) + 1;
+                const prev = parseInt(totalBidsLabel.innerText) || 0;
+                const newTotal = prev + 1;
+                totalBidsLabel.innerText = newTotal;
+
+                // ── Primera puja: actualizar UI ───────────────────────────
+                if (newTotal === 1) {
+
+                    // 1) Mostrar botón "Place Your Bid" a no-creadores que aún ven el mensaje de espera
+                    if (config.isCreator !== "true" && config.userId != bidData.userId) {
+                        const divButtons = document.getElementById("divActionsButtons");
+                        if (divButtons) {
+                            divButtons.innerHTML = "";
+                            const bidLink = document.createElement("a");
+                            bidLink.href = `/Bid/Create?auctionId=${config.auctionId}`;
+                            bidLink.className = "btn btn-primary btn-lg px-5 shadow-sm";
+                            bidLink.innerHTML = '<i class="bi bi-cash-stack me-2"></i>Place Your Bid';
+                            divButtons.appendChild(bidLink);
+                        }
+                    }
+
+                    // 2) Quitar botón "Close Auction" al creador
+                    const closeBtn = document.getElementById("closeAuctionBtn");
+                    if (closeBtn) closeBtn.remove();
+
+                    // 3) Activar link al historial de pujas
+                    const historyContainer = document.getElementById("bidHistoryContainer");
+                    if (historyContainer) {
+                        historyContainer.innerHTML = `
+                    <a href="/Bid/AuctionBiddingHistory?auctionId=${config.auctionId}&comicTitle=${encodeURIComponent(config.comicTitle || '')}"
+                       class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
+                       title="Go to bid history">
+                        <i class="bi bi-clock-history fs-4 mb-1"></i>
+                        <span class="small fw-semibold">History</span>
+                    </a>`;
+                    }
+                }
             }
 
-            showNotificationToast(`💸 New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
+            showNotificationToast(`New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
         });
 
         // Usuario superado
@@ -59,7 +95,7 @@
             if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: "warning",
-                    title: "⚠️ You have been outbid!",
+                    title: "You have been outbid!",
                     text: data.mensaje || `Someone placed a higher bid of $${data.nuevoMonto?.toFixed(2)}`,
                     toast: true,
                     position: "top-end",
@@ -70,7 +106,7 @@
                     iconColor: "#ffc107"
                 });
             } else {
-                showNotificationToast(`⚠️ You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`);
+                showNotificationToast(`You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`);
             }
         });
 
@@ -126,6 +162,41 @@
                 });
             }
             showNotificationToast(`${data.message}`, "success");
+
+            const badge = document.getElementById("auctionStateBadge");
+            if (badge) {
+                badge.className = "badge bg-success bg-opacity-75 fs-6 px-4 py-3 rounded-pill shadow-sm";
+                badge.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Active';
+            }
+
+            // Actualizar botones al activar
+            const cfg = window.auctionDetailsConfig || {};
+            const divButtons = document.getElementById("divActionsButtons");
+            if (!divButtons) return;
+
+            divButtons.innerHTML = "";
+
+            // Botón "Place Your Bid" para no-creadores
+            if (cfg.isCreator !== "true") {
+                const bidLink = document.createElement("a");
+                bidLink.href = `/Bid/Create?auctionId=${cfg.auctionId}`;
+                bidLink.className = "btn btn-primary btn-lg px-5 shadow-sm";
+                bidLink.innerHTML = '<i class="bi bi-cash-stack me-2"></i>Place Your Bid';
+                divButtons.appendChild(bidLink);
+            }
+
+            // Botón "Close Auction" para el creador (solo si no hay pujas aún)
+            if (cfg.isCreator === "true") {
+                const closeBtn = document.createElement("button");
+                closeBtn.type = "button";
+                closeBtn.id = "closeAuctionBtn";
+                closeBtn.className = "btn btn-custom-close btn-lg px-5 shadow-sm";
+                closeBtn.innerHTML = '<i class="bi bi-stop-fill me-2"></i>Close Auction';
+                closeBtn.onclick = () =>
+                    confirmAction("closeAuctionForm", "Close Auction",
+                        "Are you sure you want to close this auction?", "warning");
+                divButtons.appendChild(closeBtn);
+            }
         });
 
         // ── Ganaste ───────────────────────────────────────────────────────
@@ -201,7 +272,7 @@
 
         
 
-        // ── Tu subasta terminó ────────────────────────────────────────────
+        //subasta terminada (para el dueño de la subasta)
         SignalRAuction.onYourAuctionEnded(data => {
             if (typeof Swal !== "undefined") {
                 Swal.fire({
@@ -213,7 +284,7 @@
             }
         });
 
-        // ── Reconexión ────────────────────────────────────────────────────
+        // Reconexión
         SignalRAuction.onReconnected(() => {
             showNotificationToast("🔄 Connection restored", "info");
         });

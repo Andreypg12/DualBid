@@ -53,6 +53,15 @@ namespace DualBid.Controllers
                 return RedirectToAction("Index", "Auction");
             }
 
+            if (auction.State.Id != 2)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction Unavailable",
+                    "This auction is not currently accepting bids.",
+                    SweetAlertMessageType.warning);
+                return RedirectToAction("Details", "Auction", new { id = auctionId });
+            }
+
             var vm = new CreateBidViewModel
             {
                 Auction = auction,
@@ -82,6 +91,24 @@ namespace DualBid.Controllers
                 {
                     TempData["ErrorMessage"] = "Auction not found";
                     return RedirectToAction("Index", "Auction");
+                }
+
+                if (auction.State.Id == 3 || auction.State.Id == 4)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Auction Unavailable",
+                        "This auction has already ended or been cancelled. No more bids can be placed.",
+                        SweetAlertMessageType.warning);
+                    return RedirectToAction("Details", "Auction", new { id = viewModel.AuctionId });
+                }
+
+                if (auction.State.Id != 2)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Auction Not Active",
+                        "This auction is not currently active. Bids can only be placed on active auctions.",
+                        SweetAlertMessageType.warning);
+                    return RedirectToAction("Details", "Auction", new { id = viewModel.AuctionId });
                 }
 
                 viewModel.Auction = auction;
@@ -120,12 +147,12 @@ namespace DualBid.Controllers
                     return View(viewModel);
                 }
 
-                // ── Capturar el usuario superado ANTES de guardar la nueva puja ──
+                // ── Capturar el usuario superado ANTES de guardar la nueva puja 
                 // CurrentBid es la puja más alta actual — su dueño será superado.
                 int? outbidUserId = auction.CurrentBid?.UserId;
                 string? outbidUserName = auction.CurrentBid?.User?.CompleteName;
 
-                // ── Guardar la nueva puja ─────────────────────────────────────────
+                // Guardar la nueva puja
                 var dto = new BidDTO
                 {
                     AuctionId = viewModel.AuctionId,
@@ -155,7 +182,7 @@ namespace DualBid.Controllers
                         date = DateTime.Now.ToString("O")
                     });
 
-                // ── NOTIFICACIÓN 2: Al usuario superado (si existe y es distinto al que puja) ──
+                // Al usuario superado (si existe y es distinto al que puja)
                 // outbidUserId es null si no había pujas previas.
                 // El chequeo != viewModel.UserId evita notificarse a uno mismo.
                 if (outbidUserId.HasValue && outbidUserId.Value != viewModel.UserId)
@@ -171,7 +198,7 @@ namespace DualBid.Controllers
                         });
                 }
 
-                // ── NOTIFICACIÓN 3: Al creador de la subasta (desde cualquier página) ──
+                // Al creador de la subasta (desde cualquier página) ──
                 // auction.CreatorUserId es el dueño — recibe aviso aunque no esté en la página.
                 // Solo si el creador no es el mismo que está pujando.
                 if (auction.CreatorUserId != viewModel.UserId)

@@ -383,11 +383,25 @@ namespace DualBid.Controllers
                 await _serviceComic.UpdateAvailabilityAsync(auction.Comic.Id, true);
                 await _serviceAuction.UpdateStateAsync(id, 4);
 
-                // ✅ NUEVO: Quitar del monitor (fue cancelada manualmente, no debe cerrarse dos veces)
+                //Quitar del monitor (fue cancelada manualmente, no debe cerrarse dos veces)
                 _auctionMonitor.UnscheduleAuction(id);
 
+
+                    await _hubContext.Clients
+                    .Group($"auction-{id}")
+                    .SendAsync("AuctionClosed", new
+                    {
+                        auctionId = id,
+                        message = "The auction has been cancelled by the owner.",
+                        hasBids = false,
+                        winnerUserId = (int?)null,
+                        winnerName = (string?)null,
+                        finalAmount = 0m,
+                        finalState = 4
+                    });
+
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                    "Auction Closed", "The auction has been successfully closed/cancelled", SweetAlertMessageType.success);
+                    "Auction Closed", "The auction has been successfully cancelled", SweetAlertMessageType.success);
 
                 return RedirectToAction(nameof(Details), new { id });
             }
