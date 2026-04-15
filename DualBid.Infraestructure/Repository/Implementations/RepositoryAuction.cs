@@ -19,6 +19,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
             this._context = Context;
         }
 
+
+        // @* Editado por ALE *@
         public async Task<Auction> FindByIdAsync(int id)
         {
             var @object = await _context.Set<Auction>()
@@ -35,6 +37,8 @@ namespace DualBid.Infraestructure.Repository.Implementations
                     .ThenInclude(c => c.StateConservation)
                 .Include(a => a.Bid)
                     .ThenInclude(b => b.User)
+                .Include(a => a.WinningBid)
+                .ThenInclude(b => b.User)
                 .FirstOrDefaultAsync();
 
             return @object!;
@@ -48,6 +52,20 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 .Include(a => a.Comic)
                     .ThenInclude(c => c.ImgComic)
                 .Include(a => a.Bid)
+                .AsNoTracking()
+                .ToListAsync();
+            return collection;
+        }
+
+        public async Task<ICollection<Auction>> ListActiveAsync()
+        {
+            var collection = await _context.Set<Auction>()
+                .Include(a => a.State)
+                .Include(a => a.Comic)
+                    .ThenInclude(c => c.ImgComic)
+                .Include(a => a.CreatorUser)
+                .Include(a => a.Bid)
+                .Where(a=> a.StateId == 1 || a.StateId == 2) // Solo subastas activas
                 .AsNoTracking()
                 .ToListAsync();
             return collection;
@@ -108,6 +126,53 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 Console.WriteLine($"Error cambiando estado: {ex.Message}");
                 return false;
             }
+        }
+
+
+        // @* Editado por ALE *@
+        //Determinar Ganador de la subasta
+        // Reemplaza SOLO el método EncontrarGanadorAsync en tu RepositoryAuction.cs
+        // El resto de la clase no cambia.
+
+        public async Task<bool> EncontrarGanadorAsync(int auctionId)
+        {
+            var auction = await _context.Auction
+                .Include(a => a.Bid)
+                    .ThenInclude(b => b.User)
+                .FirstOrDefaultAsync(a => a.Id == auctionId);
+
+            if (auction == null)
+                return false;
+
+            auction.ActualEndDate = DateTime.Now;
+
+            if (auction.Bid == null || !auction.Bid.Any())
+            {
+                // ✅ Sin pujas: estado 4 (Cancelado) y cómic disponible nuevamente
+                auction.StateId = 4;
+                auction.WinningBidId = null;
+
+                // Restaurar disponibilidad del cómic para que pueda volver a subastarse
+                var comic = await _context.Comic.FindAsync(auction.ComicId);
+                if (comic != null)
+                    comic.Availability = true;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            // ✅ Con pujas: estado 3 (Finalizado), determinar ganador
+            auction.StateId = 3;
+
+            var winningBid = auction.Bid
+                .OrderByDescending(b => b.AmountOffered)
+                .ThenBy(b => b.Date)
+                .First();
+
+            auction.WinningBidId = winningBid.Id;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

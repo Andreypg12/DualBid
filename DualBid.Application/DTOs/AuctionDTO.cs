@@ -27,6 +27,12 @@ namespace DualBid.Application.DTOs
 
 
         public DateTime? ActualEndDate { get; set; }
+        public string ActualEndDateFormat
+        {
+            get => ActualEndDate.HasValue
+                ? ActualEndDate.Value.ToString("dd MMM yyyy 'at' HH:mm")
+                : string.Empty;
+        }
 
         [DisplayName("Base Price")]
         [Required(ErrorMessage = "{0} is required")]
@@ -69,5 +75,14 @@ namespace DualBid.Application.DTOs
             .FirstOrDefault() ?? new BidDTO();
 
         public int NumberOfBids => Bids?.Count ?? 0;
+
+
+        // @* Editado por ALE *@
+        //Esto es para saber y mostrar en pantalla el ganador de la subasta y quien ganó.
+        public int? WinningBidId { get; set; }
+        public BidDTO? WinningBid { get; set; }
+
+        public int? WinnerUserId => WinningBid?.UserId;
+        public decimal? FinalAmount => WinningBid?.AmountOffered;
     }
 }

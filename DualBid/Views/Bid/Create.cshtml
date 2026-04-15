@@ -54,7 +54,15 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <script>
-            alert('@Html.Raw(TempData["ErrorMessage"])' + '\n\n' + '@Html.Raw(TempData["ErrorDetails"])');
+            document.addEventListener("DOMContentLoaded", () => {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Invalid bid",
+                    text: "@Html.Raw(TempData["ErrorMessage"])",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#667eea"
+                });
+            });
         </script>
     }
 

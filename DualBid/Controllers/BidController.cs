@@ -3,7 +3,6 @@ using DualBid.Application.Services.Interfaces;
 using DualBid.Hubs;
 using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
@@ -54,6 +53,15 @@ namespace DualBid.Controllers
                 return RedirectToAction("Index", "Auction");
             }
 
+            if (auction.State.Id != 2)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Auction Unavailable",
+                    "This auction is not currently accepting bids.",
+                    SweetAlertMessageType.warning);
+                return RedirectToAction("Details", "Auction", new { id = auctionId });
+            }
+
             var vm = new CreateBidViewModel
             {
                 Auction = auction,
@@ -71,14 +79,12 @@ namespace DualBid.Controllers
         {
             try
             {
-                // Validar que llegó el AuctionId
                 if (viewModel.AuctionId == 0)
                 {
                     TempData["ErrorMessage"] = "Invalid auction";
                     return RedirectToAction("Index", "Auction");
                 }
 
-                // Recargar la subasta usando AuctionId
                 var auction = await _serviceAuction.FindByIdAsync(viewModel.AuctionId);
 
                 if (auction == null)
@@ -87,7 +93,24 @@ namespace DualBid.Controllers
                     return RedirectToAction("Index", "Auction");
                 }
 
-                // Asignar la subasta al viewModel para la vista
+                if (auction.State.Id == 3 || auction.State.Id == 4)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Auction Unavailable",
+                        "This auction has already ended or been cancelled. No more bids can be placed.",
+                        SweetAlertMessageType.warning);
+                    return RedirectToAction("Details", "Auction", new { id = viewModel.AuctionId });
+                }
+
+                if (auction.State.Id != 2)
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Auction Not Active",
+                        "This auction is not currently active. Bids can only be placed on active auctions.",
+                        SweetAlertMessageType.warning);
+                    return RedirectToAction("Details", "Auction", new { id = viewModel.AuctionId });
+                }
+
                 viewModel.Auction = auction;
 
                 if (!ModelState.IsValid)
@@ -106,48 +129,47 @@ namespace DualBid.Controllers
 
                 if (viewModel.UserId == 0)
                 {
-
                     TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                    "¡You need to log in!",
-                    "You must be logged in to place a bid",
-                    SweetAlertMessageType.error
-                );
-
+                        "¡You need to log in!",
+                        "You must be logged in to place a bid",
+                        SweetAlertMessageType.error);
                     return View(viewModel);
                 }
 
-                // Validar el incremento mínimo
-                var currentBid = auction.CurrentBid?.AmountOffered ?? auction.BasePrice;
-                var minimumRequired = currentBid + auction.MinimunIncrease;
+                // Validar incremento mínimo
+                var currentBidAmount = auction.CurrentBid?.AmountOffered ?? auction.BasePrice;
+                var minimumRequired = currentBidAmount + auction.MinimunIncrease;
 
                 if (viewModel.AmountOffered < minimumRequired)
                 {
-                    ModelState.AddModelError("AmountOffered",
-                        $"The bid must be at least ${minimumRequired:N2}");
-
+                    ModelState.AddModelError("AmountOffered", $"The bid must be at least ${minimumRequired:N2}");
                     TempData["ErrorMessage"] = $"Invalid amount. Minimum required is ${minimumRequired:N2}";
                     return View(viewModel);
                 }
 
-                // Crear el DTO
-                BidDTO dto = new()
+                // ── Capturar el usuario superado ANTES de guardar la nueva puja 
+                // CurrentBid es la puja más alta actual — su dueño será superado.
+                int? outbidUserId = auction.CurrentBid?.UserId;
+                string? outbidUserName = auction.CurrentBid?.User?.CompleteName;
+
+                // Guardar la nueva puja
+                var dto = new BidDTO
                 {
-                    AuctionId = viewModel.AuctionId, // Usar AuctionId
+                    AuctionId = viewModel.AuctionId,
                     UserId = viewModel.UserId,
                     AmountOffered = viewModel.AmountOffered,
                 };
 
                 var bidId = await _serviceBid.AddAsync(dto);
 
-                // SignalR notifications
-
-                var nombreUsuario = User.FindFirstValue(ClaimTypes.Name) ??
-                    User.FindFirstValue("CompleteName") ??
-                    $"Usuario {viewModel.UserId}";
+                // ── Datos del usuario que pujó ────────────────────────────────────
+                var nombreUsuario = User.FindFirstValue(ClaimTypes.Name)
+                    ?? User.FindFirstValue("CompleteName")
+                    ?? $"User {viewModel.UserId}";
 
                 var emailUsuario = User.FindFirstValue(ClaimTypes.Email) ?? "";
 
-                // SignalR notifications
+                // ── NOTIFICACIÓN 1: Nueva puja a todos los que ven la subasta ─────
                 await _hubContext.Clients
                     .Group($"auction-{viewModel.AuctionId}")
                     .SendAsync("NuevaPujaSimulada", new
@@ -160,59 +182,59 @@ namespace DualBid.Controllers
                         date = DateTime.Now.ToString("O")
                     });
 
-                // Enviar al usuario que fue superado
-                if (viewModel.OutBidUserId > 0)
+                // Al usuario superado (si existe y es distinto al que puja)
+                // outbidUserId es null si no había pujas previas.
+                // El chequeo != viewModel.UserId evita notificarse a uno mismo.
+                if (outbidUserId.HasValue && outbidUserId.Value != viewModel.UserId)
                 {
                     await _hubContext.Clients
-                        .Group($"user-{viewModel.OutBidUserId}")
+                        .Group($"user-{outbidUserId.Value}")
                         .SendAsync("UsuarioSuperado", new
                         {
                             auctionId = viewModel.AuctionId,
                             nuevoMonto = viewModel.AmountOffered,
-                            userId = viewModel.OutBidUserId,
-                            mensaje = $"Has sido superado en la subasta {viewModel.TitleComicAuction}. Nueva puja: ${viewModel.AmountOffered:F2}"
+                            userId = outbidUserId.Value,
+                            mensaje = $"You have been outbid on \"{viewModel.TitleComicAuction}\". New bid: ${viewModel.AmountOffered:N2}"
                         });
                 }
 
-                await _hubContext.Clients
-                    .Group($"user-{viewModel.OutBidUserId}")
-                    .SendAsync("UsuarioSuperado", new
-                    {
-                        auctionId = viewModel.Auction.Id,
-                        nuevoMonto = viewModel.AmountOffered,
-                        userId = viewModel.OutBidUserId, // Agrega esto
-                        mensaje = $"Has sido superado en la subasta {viewModel.TitleComicAuction}. Nueva puja: ${viewModel.AmountOffered:F2}"
-                    });
+                // Al creador de la subasta (desde cualquier página) ──
+                // auction.CreatorUserId es el dueño — recibe aviso aunque no esté en la página.
+                // Solo si el creador no es el mismo que está pujando.
+                if (auction.CreatorUserId != viewModel.UserId)
+                {
+                    await _hubContext.Clients
+                        .Group($"user-{auction.CreatorUserId}")
+                        .SendAsync("NuevaPujaEnTuSubasta", new
+                        {
+                            auctionId = viewModel.AuctionId,
+                            nuevoMonto = viewModel.AmountOffered,
+                            userName = nombreUsuario,
+                            comicTitle = viewModel.TitleComicAuction,
+                            mensaje = $"\"{viewModel.TitleComicAuction}\" has a new bid of ${viewModel.AmountOffered:N2} by {nombreUsuario}"
+                        });
+                }
 
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                    "¡Puja registrada!",
-                    $"Tu puja de ${viewModel.AmountOffered:N2} fue registrada exitosamente.",
-                    SweetAlertMessageType.success
-                );
+                    "¡Bid placed!",
+                    $"Your bid of ${viewModel.AmountOffered:N2} was successfully registered.",
+                    SweetAlertMessageType.success);
 
                 return RedirectToAction(
                     "AuctionBiddingHistory",
                     "Bid",
-                    new
-                    {
-                        auctionId = viewModel.AuctionId,
-                        comicTitle = viewModel.TitleComicAuction
-                    });
+                    new { auctionId = viewModel.AuctionId, comicTitle = viewModel.TitleComicAuction });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
 
-                // Recargar la subasta si es posible
                 if (viewModel.AuctionId > 0)
-                {
                     viewModel.Auction = await _serviceAuction.FindByIdAsync(viewModel.AuctionId) ?? new();
-                }
 
                 TempData["ErrorMessage"] = "An error occurred while placing your bid. Please try again.";
                 return View(viewModel);
             }
         }
-
     }
 }

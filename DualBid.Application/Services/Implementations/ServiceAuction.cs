@@ -2,6 +2,7 @@
 using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Infraestructure.Models;
+using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,6 +17,10 @@ namespace DualBid.Application.Services.Implementations
     {
         private readonly IRepositoryAuction _repository;
         private readonly IMapper _mapper;
+
+        private const int StateActive = 2;
+        private const int StateFinished = 3;
+        private const int StateCancelled = 4;
 
         public ServiceAuction(IRepositoryAuction repository, IMapper mapper)
         {
@@ -35,6 +40,13 @@ namespace DualBid.Application.Services.Implementations
             var list = await _repository.ListAsync();
             return _mapper.Map<ICollection<AuctionDTO>>(list);
         }
+
+        public async Task<ICollection<AuctionDTO>> ListActiveAsync()
+        {
+            var list = await _repository.ListActiveAsync();
+            return _mapper.Map<ICollection<AuctionDTO>>(list);
+        }
+
         public async Task<int> AddAsync(AuctionDTO dto)
         {
             try
@@ -66,5 +78,70 @@ namespace DualBid.Application.Services.Implementations
         {
             return await _repository.UpdateStateAsync(auctionId, newStateId);
         }
+
+        //@* Editado por ALE *@
+        //Determinar el ganador de la subasta
+        public async Task<bool> EncontrarGanadorAsync(int auctionId)
+        {
+            return await _repository.EncontrarGanadorAsync(auctionId);
+        }
+
+        public async Task<IEnumerable<ActiveAuctionDTO>> GetActiveAuctionsAsync()
+        {
+            var auctions = await _repository.ListActiveAsync();
+
+            return auctions
+                .Where(a => a.StateId == StateActive)
+                .Select(a => new ActiveAuctionDTO
+                {
+                    Id = a.Id,
+                    // ✅ FIX CRÍTICO: el monitor usa DateTime.UtcNow para comparar.
+                    // Si ExpectedEndDate viene en hora local, hay que convertirla a UTC.
+                    // ToUniversalTime() funciona si el servidor está configurado
+                    // correctamente. Si no, usa DateTimeOffset.
+                    EndDate = a.ExpectedEndDate.ToUniversalTime(),
+                    OwnerUserId = a.CreatorUserId
+                });
+        }
+
+        public async Task<AuctionCloseResultDTO?> CloseAuctionAsync(int auctionId)
+        {
+            var entity = await _repository.FindByIdAsync(auctionId);
+
+            if (entity == null)
+                return null;
+
+            // Mapear para verificar estado actual
+            var auction = _mapper.Map<AuctionDTO>(entity);
+
+            if (auction == null || auction.StateId != StateActive)
+                return null;
+
+            // EncontrarGanadorAsync maneja:
+            //   con pujas  → StateId=3, WinningBidId=X
+            //   sin pujas  → StateId=4, comic.availability=true
+            await _repository.EncontrarGanadorAsync(auctionId);
+
+            // Recargar para obtener el WinningBid con User incluido
+            var updated = await _repository.FindByIdAsync(auctionId);
+
+            var hasBids = updated?.WinningBidId != null;
+            var winnerUserId = updated?.WinningBid?.UserId;
+            var winnerName = updated?.WinningBid?.User?.Name;
+            var finalAmount = updated?.WinningBid?.AmountOffered ?? 0m;
+            var finalStateId = hasBids ? StateFinished : StateCancelled;
+
+            return new AuctionCloseResultDTO
+            {
+                AuctionId = auctionId,
+                ComicTitle = updated?.Comic?.Title,
+                WinnerUserId = winnerUserId,
+                WinnerName = winnerName,
+                FinalAmount = finalAmount,
+                OwnerUserId = updated?.CreatorUserId,
+                FinalStateId = finalStateId
+            };
+        }
+
     }
 }

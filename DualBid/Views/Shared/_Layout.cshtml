@@ -7,10 +7,9 @@
     <script type="importmap"></script>
 
     @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/morph/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/morph/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DualBid.styles.css" asp-append-version="true" />
-
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -19,7 +18,6 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/css/bootstrap-multiselect.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 
     @*Sweetalert *@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -39,7 +37,6 @@
         @RenderBody()
     </main>
 
-
     <footer class="mt-auto">
         @await Html.PartialAsync("_Footer")
     </footer>
@@ -47,35 +44,125 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ! Multi-select JS (DESPUÉS de jQuery) -->
+    <!-- Multi-select JS (DESPUÉS de jQuery) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.2/js/bootstrap-multiselect.min.js"
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-
-    @* Esto es de signalR *@
+    @* SignalR *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 
     <script src="~/js/signalr-helper.js"></script>
+
+    @* ─────────────────────────────────────────────────────────────────────────
+       CONEXIÓN GLOBAL: registra al usuario en su grupo personal user-{id}
+       desde CUALQUIER página de la app, no solo en Details.
+       Esto permite recibir notificaciones (superado, ganaste, nueva puja en
+       tu subasta) estés donde estés.
+    ──────────────────────────────────────────────────────────────────────── *@
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        var globalUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0";
+        <script>
+            (async () => {
+                // Evitar doble inicialización si Details ya conectó
+                if (window.__globalSignalRReady) return;
+                window.__globalSignalRReady = true;
+
+                const conn = new signalR.HubConnectionBuilder()
+                    .withUrl("/auctionHub")
+                    .withAutomaticReconnect([2000, 5000, 10000, 30000])
+                    .build();
+
+                // Re-registrar al reconectar
+                conn.onreconnected(async () => {
+                    try { await conn.invoke("RegisterUser", "@globalUserId"); } catch {}
+                });
+
+                // ── Te superaron en una puja ─────────────────────────────────
+                conn.on("UsuarioSuperado", (data) => {
+                    // Solo mostrar si NO estamos en la página de detalles
+                    // (Details tiene su propio handler más completo)
+                    if (window.auctionDetailsConfig) return;
+                    showGlobalAlert("warning", "⚠️ You've been outbid!",
+                        data.mensaje || `Someone placed a higher bid of $${data.nuevoMonto?.toFixed(2)}`);
+                });
+
+                // ── Nueva puja en tu subasta ─────────────────────────────────
+                conn.on("NuevaPujaEnTuSubasta", (data) => {
+                    showGlobalAlert("info", "💸 New bid on your auction", data.mensaje, 6000);
+                });
+
+                // ── Tu subasta terminó ───────────────────────────────────────
+                conn.on("YourAuctionEnded", (data) => {
+                    if (window.auctionDetailsConfig) return;
+                    showGlobalAlert(
+                        data.hasBids ? "success" : "info",
+                        "📋 Your auction has ended",
+                        data.message,
+                        10000
+                    );
+                });
+
+                // ── Ganaste una subasta ──────────────────────────────────────
+                conn.on("YouWonAuction", (data) => {
+                    if (window.auctionDetailsConfig) return;
+                    Swal.fire({
+                        icon: "success",
+                        title: "🎉 You won!",
+                        text: data.message,
+                        confirmButtonText: "Great!"
+                    });
+                });
+
+                // ── La subasta se cerró (para usuarios viendo otras páginas) ─
+                conn.on("AuctionClosed", (data) => {
+                    // Details lo maneja por su cuenta; aquí solo para otros contextos
+                    if (window.auctionDetailsConfig) return;
+                    if (data.hasBids && data.winnerUserId) return; // YouWonAuction lo cubre
+                    showGlobalAlert("info", "📋 Auction closed", data.message, 6000);
+                });
+
+                try {
+                    await conn.start();
+                    await conn.invoke("RegisterUser", "@globalUserId");
+                    console.log("✅ Global SignalR: usuario @globalUserId registrado");
+
+                    // Exponerla para que signalr-helper la reutilice en Details
+                    window.__globalSignalRConnection = conn;
+                } catch (err) {
+                    console.warn("Global SignalR: no se pudo conectar", err);
+                    window.__globalSignalRReady = false;
+                }
+            })();
+
+            function showGlobalAlert(icon, title, text, timer = 7000) {
+                Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer,
+                    timerProgressBar: true
+                });
+            }
+        </script>
+    }
 
     <!-- Notificaciones SweetAlert -->
     @if (TempData["Notificacion"] != null || ViewBag.Notificacion != null)
     {
         var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
         <script type="text/javascript">
-
             const payload = @Html.Raw(notificacion);
-
-            if (payload) {
-                Swal.fire(payload);
-            }
+            if (payload) { Swal.fire(payload); }
         </script>
     }
 
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
-
 
 </body>
 </html>

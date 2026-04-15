@@ -1,134 +1,470 @@
-﻿// Lógica específica para la página de detalles de subasta
+﻿"use strict";
+
+
 (async () => {
-    // Obtener configuración de la vista
     const config = window.auctionDetailsConfig;
 
     if (!config || !config.auctionId) {
-        console.warn('AuctionDetails: No hay configuración disponible');
+        console.warn("AuctionDetails: No hay configuración disponible");
         return;
     }
 
-    console.log('AuctionDetails: Inicializando para subasta', config.auctionId);
+    console.log("AuctionDetails: Inicializando para subasta", config.auctionId);
 
     try {
-        // Inicializar conexión SignalR
-        await SignalRAuction.initialize(config.auctionId, config.userId);
+        // Pasar endDate para arrancar el countdown local
+        await SignalRAuction.initialize(
+            config.auctionId,
+            config.userId,
+            config.endDate 
+        );
 
-        // Escuchar nuevas pujas
-        SignalRAuction.onNewBid((bidData) => {
-            if (bidData.auctionId != config.auctionId) return;
+        SignalRAuction.onCountdownTick(({ display, isEnded, isEndingSoon }) => {
+            const label = document.getElementById("timeRemainingLabel");
+            if (!label) return;
 
-            console.log('AuctionDetails: Nueva puja recibida', bidData);
-
-            // Actualizar el monto actual
-            const currentBidLabel = document.getElementById('currentBidLabel');
-            if (currentBidLabel) {
-                currentBidLabel.innerText = `$${bidData.nuevoMonto.toFixed(2)}`;
-                // Agregar animación de actualización
-                currentBidLabel.classList.add('highlight-update');
-                setTimeout(() => currentBidLabel.classList.remove('highlight-update'), 500);
+            if (isEnded) {
+                label.innerHTML = '<span class="text-danger fw-bold">Ended</span>';
+                return;
             }
 
-            // Actualizar total de bids
-            const totalBidsLabel = document.getElementById('totalBidsLabel');
-            if (totalBidsLabel) {
-                const currentTotal = parseInt(totalBidsLabel.innerText) || 0;
-                totalBidsLabel.innerText = currentTotal + 1;
-            }
+            label.textContent = display;
 
-            // Mostrar notificación tipo toast
-            showNotificationToast(`💸 New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
+            // Poner rojo en los últimos 5 minutos
+            label.classList.toggle("text-danger", isEndingSoon);
+            label.classList.toggle("text-warning", !isEndingSoon);
         });
 
-        // Escuchar cuando superan al usuario
-        SignalRAuction.onUserOutbid((data) => {
-            console.log('AuctionDetails: Usuario superado', data);
+        //  Nueva puja 
+        SignalRAuction.onNewBid(bidData => {
+            if (bidData.auctionId != config.auctionId) return;
 
-            // Mostrar SweetAlert si está disponible
-            if (typeof Swal !== 'undefined') {
+            // — Actualizar precio actual —
+            const currentBidLabel = document.getElementById("currentBidLabel");
+            if (currentBidLabel) {
+                currentBidLabel.innerText = `$${bidData.nuevoMonto.toFixed(2)}`;
+                currentBidLabel.classList.add("highlight-update");
+                setTimeout(() => currentBidLabel.classList.remove("highlight-update"), 500);
+            }
+
+            const totalBidsLabel = document.getElementById("totalBidsLabel");
+            if (totalBidsLabel) {
+                const prev = parseInt(totalBidsLabel.innerText) || 0;
+                const newTotal = prev + 1;
+                totalBidsLabel.innerText = newTotal;
+
+                // ── Primera puja: actualizar UI ───────────────────────────
+                if (newTotal === 1) {
+
+                    // 1) Mostrar botón "Place Your Bid" a no-creadores que aún ven el mensaje de espera
+                    if (config.isCreator !== "true" && config.userId != bidData.userId) {
+                        const divButtons = document.getElementById("divActionsButtons");
+                        if (divButtons) {
+                            divButtons.innerHTML = "";
+                            const bidLink = document.createElement("a");
+                            bidLink.href = `/Bid/Create?auctionId=${config.auctionId}`;
+                            bidLink.className = "btn btn-primary btn-lg px-5 shadow-sm";
+                            bidLink.innerHTML = '<i class="bi bi-cash-stack me-2"></i>Place Your Bid';
+                            divButtons.appendChild(bidLink);
+                        }
+                    }
+
+                    // 2) Quitar botón "Close Auction" al creador
+                    const closeBtn = document.getElementById("closeAuctionBtn");
+                    if (closeBtn) closeBtn.remove();
+
+                    // 3) Activar link al historial de pujas
+                    const historyContainer = document.getElementById("bidHistoryContainer");
+                    if (historyContainer) {
+                        historyContainer.innerHTML = `
+                    <a href="/Bid/AuctionBiddingHistory?auctionId=${config.auctionId}&comicTitle=${encodeURIComponent(config.comicTitle || '')}"
+                       class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-primary ps-3 ms-3 border-start"
+                       title="Go to bid history">
+                        <i class="bi bi-clock-history fs-4 mb-1"></i>
+                        <span class="small fw-semibold">History</span>
+                    </a>`;
+                    }
+                }
+            }
+
+            showNotificationToast(`New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
+        });
+
+        // Usuario superado
+        SignalRAuction.onUserOutbid(data => {
+            if (typeof Swal !== "undefined") {
                 Swal.fire({
-                    icon: 'warning',
-                    title: '⚠️ You have been outbid!',
-                    text: data.mensaje || `Someone just placed a higher bid of $${data.nuevoMonto?.toFixed(2)}`,
+                    icon: "warning",
+                    title: "You have been outbid!",
+                    text: data.mensaje || `Someone placed a higher bid of $${data.nuevoMonto?.toFixed(2)}`,
                     toast: true,
-                    position: 'top-end',
+                    position: "top-end",
                     showConfirmButton: false,
                     timer: 6000,
                     timerProgressBar: true,
-                    background: '#fff3cd',
-                    iconColor: '#ffc107'
+                    background: "#fff3cd",
+                    iconColor: "#ffc107"
                 });
             } else {
-                showNotificationToast(`⚠️ ${data.mensaje || `You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`}`);
+                showNotificationToast(`You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`);
             }
         });
 
-        // Escuchar reconexión
-        SignalRAuction.onReconnected(() => {
-            console.log('AuctionDetails: Reconectado a SignalR');
-            showNotificationToast('🔄 Conexión restablecida', 'info');
+        // Subasta cerrada 
+        SignalRAuction.onAuctionClosed(data => {
+            console.log("Auction closed:", data);
+
+            // Deshabilitar botón de puja
+            const bidButton = document.querySelector('a[href*="/Bid/Create"]');
+            if (bidButton) {
+                bidButton.outerHTML = `
+                    <button class="btn btn-secondary btn-lg px-5" disabled>
+                        <i class="bi bi-lock-fill me-2"></i>Auction Ended
+                    </button>`;
+            }
+
+            //  Actualizar badge de estado
+            updateAuctionStatusBadge(data);
+
+
+            // Mostrar resultado en el contenedor dedicado
+            renderAuctionResult(data);
+
+
+            //  cambiar la linea de tiempo para ponerlo en cerrado
+            updateTimeLineEndedDate(data);
+
+
+            //  quitar los botones para poner que ya la subasta se cerró
+            updateButtonsAtTheEnd(data)
+
+
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: data.hasBids ? "success" : "info",
+                    title: data.hasBids ? "Auction Ended" : "Auction Closed",
+                    text: data.message,
+                    confirmButtonText: "OK",
+                    allowOutsideClick: true
+                });
+            }
         });
 
+        // Subasta activada
+        SignalRAuction.onAuctionActivated(data => {
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: "success",
+                    title: "Auction Started",
+                    text: data.message,
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            }
+            showNotificationToast(`${data.message}`, "success");
+
+            const badge = document.getElementById("auctionStateBadge");
+            if (badge) {
+                badge.className = "badge bg-success bg-opacity-75 fs-6 px-4 py-3 rounded-pill shadow-sm";
+                badge.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Active';
+            }
+
+            // Actualizar botones al activar
+            const cfg = window.auctionDetailsConfig || {};
+            const divButtons = document.getElementById("divActionsButtons");
+            if (!divButtons) return;
+
+            divButtons.innerHTML = "";
+
+            // Botón "Place Your Bid" para no-creadores
+            if (cfg.isCreator !== "true") {
+                const bidLink = document.createElement("a");
+                bidLink.href = `/Bid/Create?auctionId=${cfg.auctionId}`;
+                bidLink.className = "btn btn-primary btn-lg px-5 shadow-sm";
+                bidLink.innerHTML = '<i class="bi bi-cash-stack me-2"></i>Place Your Bid';
+                divButtons.appendChild(bidLink);
+            }
+
+            // Botón "Close Auction" para el creador (solo si no hay pujas aún)
+            if (cfg.isCreator === "true") {
+                const closeBtn = document.createElement("button");
+                closeBtn.type = "button";
+                closeBtn.id = "closeAuctionBtn";
+                closeBtn.className = "btn btn-custom-close btn-lg px-5 shadow-sm";
+                closeBtn.innerHTML = '<i class="bi bi-stop-fill me-2"></i>Close Auction';
+                closeBtn.onclick = () =>
+                    confirmAction("closeAuctionForm", "Close Auction",
+                        "Are you sure you want to close this auction?", "warning");
+                divButtons.appendChild(closeBtn);
+            }
+        });
+
+        // ── Ganaste ───────────────────────────────────────────────────────
+        SignalRAuction.onYouWon(data => {
+            data.comicTitle = data.comicTitle
+                || document.querySelector(".h3.fw-bold.text-primary")?.textContent?.trim()
+                || "Comic";
+            data.finalAmount = data.finalAmount || data.amount || data.nuevoMonto;
+
+            Swal.fire({
+                icon: "success",
+                title: "Congratulations!",
+                html: `<p>${data.message || "You won this auction!"}</p>
+                       <p><strong>Amount: $${Number(data.finalAmount)
+                        .toLocaleString("en-US", { minimumFractionDigits: 2 })}</strong></p>`,
+                confirmButtonText: "Pay now",
+                confirmButtonColor: "#28a745"
+            }).then(() => {
+                PaymentFlow.openForWinner(data);
+            });
+        });
+
+        // Cuando el ganador paga → muestra recibo a todos
+        SignalRAuction.onPaymentCompleted(data => {
+            const container = document.getElementById("auctionResultContainer");
+            if (!container) return;
+            container.innerHTML = `
+                <div class="card border-0 shadow-sm mt-4" style="border-radius:16px;overflow:hidden;background:#fff;">
+                    <div style="height:4px;background:linear-gradient(90deg,#1a7a4a,#2ecc7a);"></div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-1" style="font-size:18px;">Payment receipt</h5>
+                                <p class="mb-0" style="font-size:13px;color:#999;">Payment registered successfully</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-pill fw-semibold"
+                                  style="font-size:12px;background:#e8f5ee;color:#1a7a4a;">Confirmed</span>
+                        </div>
+                        <hr style="border-color:#f0f0f0;">
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Auction</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.comicTitle)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Buyer</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.winnerName)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f2f2f2;">
+                            <span style="font-size:13px;color:#888;">Amount</span>
+                            <span class="fw-bold" style="font-size:22px;color:#1a7a4a;">
+                                $${Number(data.finalAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3">
+                            <span style="font-size:13px;color:#888;">Date</span>
+                            <span class="fw-bold" style="font-size:14px;">${escapeHtml(data.date)}</span>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        // Cuando el ganador libera el cómic → recarga para todos
+        SignalRAuction.onComicReleased(data => {
+            document.getElementById("auctionResultContainer").innerHTML = "";
+
+            Swal.fire({
+                icon: "info",
+                title: "Comic returned to auction",
+                text: data.message,
+                confirmButtonText: "OK"
+            }).then(() => location.reload());
+        });
+
+        
+
+        //subasta terminada (para el dueño de la subasta)
+        SignalRAuction.onYourAuctionEnded(data => {
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: data.hasBids ? "success" : "info",
+                    title: "Your Auction Has Ended",
+                    text: data.message,
+                    confirmButtonText: "OK"
+                });
+            }
+        });
+
+        // Reconexión
+        SignalRAuction.onReconnected(() => {
+            showNotificationToast("🔄 Connection restored", "info");
+        });
+        
+        PaymentFlow.init(config.auctionId);
+
     } catch (err) {
-        console.error('AuctionDetails: Error al inicializar SignalR:', err);
+        console.error("AuctionDetails: Error al inicializar SignalR:", err);
     }
 })();
 
-// Función para mostrar notificaciones toast
-function showNotificationToast(message, type = 'success') {
-    let toastContainer = document.querySelector('.toast-notification-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-notification-container position-fixed bottom-0 end-0 p-3';
-        toastContainer.style.zIndex = '1100';
-        document.body.appendChild(toastContainer);
+
+function renderAuctionResult(data) {
+    const timeLabel = document.getElementById("timeRemainingLabel");
+    if (timeLabel) {
+        timeLabel.innerHTML = '<span class="text-danger fw-bold">Ended</span>';
     }
 
-    const toastId = 'toast-' + Date.now();
-    const bgClass = type === 'success' ? 'bg-success' : (type === 'warning' ? 'bg-warning' : 'bg-primary');
+    const container = document.getElementById("auctionResultContainer");
+    if (!container) return;
 
-    const toastHtml = `
-        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="4000">
+    const config = window.auctionDetailsConfig || {};
+
+    if (data.winnerUserId) {
+        const isWinner = parseInt(config.userId || "0") === data.winnerUserId;
+        container.innerHTML = `
+    <div class="card border-0 shadow-sm mt-4" style="border-radius:14px;overflow:hidden;background:#fff;border:0.5px solid #e2e4e8;">
+        <div style="height:3px;background:#1a1a2e;"></div>
+        <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9a9aaa;">
+                    Auction result
+                </span>
+                <span style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:#f3f3f6;color:#5a5a7a;">
+                    Pending payment
+                </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-3" style="border-bottom:0.5px solid #f0f0f4;">
+                <span style="font-size:13px;color:#9a9aaa;">Winner</span>
+                <span style="font-size:15px;font-weight:600;color:#1a1a2e;">${escapeHtml(data.winnerName)}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <span style="font-size:13px;color:#9a9aaa;">Final price</span>
+                <span style="font-size:24px;font-weight:600;color:#1a1a2e;">
+                    $${Number(data.finalAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+            ${isWinner ? `
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f8f8fb;border-left:3px solid #7f77dd;margin-top:16px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#7f77dd;flex-shrink:0;"></div>
+                <div>
+                    <p style="font-size:13px;font-weight:600;color:#534ab7;margin:0;">Awaiting payment</p>
+                    <span style="font-size:12px;color:#9a9aaa;">Complete your payment to claim the comic</span>
+                </div>
+            </div>` : ""}
+        </div>
+    </div>`;
+    } else {
+        container.innerHTML = `
+            <div class="alert alert-info mt-4 shadow-sm">
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-info-circle-fill me-2"></i>Auction Result
+                </h5>
+                <p class="mb-0 text-muted">No bids were placed in this auction.</p>
+            </div>`;
+    }
+}
+
+function updateAuctionStatusBadge(data) {
+    const badge = document.querySelector("#auctionStateBadge");
+    if (!badge) return;
+
+    badge.classList.remove("bg-warning", "bg-success", "bg-primary", "bg-danger", "bg-secondary");
+
+    if (data.finalState === 3) {
+        badge.classList.add("bg-primary");
+        badge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Completed';
+    } else if (data.finalState === 4) {
+        badge.classList.add("bg-danger");
+        badge.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Cancelled';
+    }
+} 
+
+function updateTimeLineEndedDate(data) {
+    const timeLineEndedDateSpan = document.querySelector("#timeLineEndedDate");
+    if (!timeLineEndedDateSpan) return;
+
+    // Actualizar el texto del span
+    timeLineEndedDateSpan.textContent = "Ended";
+
+    // Actualizar la fecha mostrada con ExpectedEndDate
+    const dateSmall = timeLineEndedDateSpan.closest('.d-flex').querySelector('small.text-muted');
+    if (dateSmall && data.ExpectedEndDate) {
+        const date = new Date(data.ExpectedEndDate);
+        dateSmall.textContent = date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }) + ' at ' + date.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    const iconDiv = document.querySelector('#iconEnded');
+    if (iconDiv) {
+        // Cambiar la clase de warning a danger
+        iconDiv.classList.remove('timeline-icon-warning');
+        iconDiv.classList.add('timeline-icon-danger');
+
+        // Cambiar el ícono de pause a stop-fill
+        const icon = iconDiv.querySelector('#iIconEnded');
+        if (icon) {
+            icon.classList.remove('bi-pause');
+            icon.classList.add('bi-stop-fill');
+        }
+    }
+}
+
+function updateButtonsAtTheEnd(data) {
+    const divActionsButtons = document.querySelector("#divActionsButtons");
+    if (!divActionsButtons) return;
+
+    // Limpiar el contenido actual del div de botones
+    divActionsButtons.innerHTML = '';
+
+    // Crear y agregar el botón de "Auction Ended" desactivado
+    const endedButton = document.createElement('button');
+    endedButton.className = 'btn btn-secondary btn-lg px-5';
+    endedButton.disabled = true;
+    endedButton.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Auction Ended';
+
+    divActionsButtons.appendChild(endedButton);
+}
+
+function showNotificationToast(message, type = "success") {
+    let container = document.querySelector(".toast-notification-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-notification-container position-fixed bottom-0 end-0 p-3";
+        container.style.zIndex = "1100";
+        document.body.appendChild(container);
+    }
+
+    const id = "toast-" + Date.now();
+    const bgClass = type === "success" ? "bg-success"
+        : type === "warning" ? "bg-warning"
+            : "bg-primary";
+
+    container.insertAdjacentHTML("beforeend", `
+        <div id="${id}" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+             data-bs-autohide="true" data-bs-delay="4000">
             <div class="toast-header ${bgClass} text-white">
                 <i class="bi bi-megaphone-fill me-2"></i>
                 <strong class="me-auto">Auction Update</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
             </div>
-            <div class="toast-body">
-                ${escapeHtml(message)}
-            </div>
-        </div>
-    `;
+            <div class="toast-body">${escapeHtml(message)}</div>
+        </div>`);
 
-    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
-
-    toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+    const el = document.getElementById(id);
+    new bootstrap.Toast(el).show();
+    el.addEventListener("hidden.bs.toast", () => el.remove());
 }
 
 function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function (m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
+    if (!str) return "";
+    return str.replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
 }
 
-// Agregar estilos para animación
-const style = document.createElement('style');
+// Animación highlight para pujas nuevas
+const style = document.createElement("style");
 style.textContent = `
-    .highlight-update {
-        animation: highlightPulse 0.5s ease-in-out;
-    }
-    
+    .highlight-update { animation: highlightPulse 0.5s ease-in-out; }
     @keyframes highlightPulse {
-        0% { transform: scale(1); color: white; }
-        50% { transform: scale(1.05); color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        100% { transform: scale(1); color: white; }
-    }
-`;
+        0%   { transform: scale(1);    color: white; }
+        50%  { transform: scale(1.05); color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,.5); }
+        100% { transform: scale(1);    color: white; }
+    }`;
 document.head.appendChild(style);

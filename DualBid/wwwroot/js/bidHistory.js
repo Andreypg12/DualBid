@@ -34,23 +34,29 @@ function addNewBidToPage(bidData) {
     const existingBids = document.querySelectorAll('.bid-card');
     let exists = false;
     existingBids.forEach(card => {
-        const userEmail = card.querySelector('small')?.innerText?.replace(/[✉️]/g, '').trim();
-        const amount = card.querySelector('.badge.rounded-pill')?.innerText?.replace('$', '').trim();
-        if (userEmail === bidData.userEmail && parseFloat(amount) === bidData.nuevoMonto) {
-            exists = true;
+        const amountElem = card.querySelector('.bid-amount');
+        const nameElem = card.querySelector('.bid-user-name');
+        if (amountElem && nameElem) {
+            const amount = amountElem.innerText.replace('$', '').trim();
+            const userName = nameElem.innerText;
+            if (parseFloat(amount) === bidData.nuevoMonto && userName === bidData.userName) {
+                exists = true;
+            }
         }
     });
 
     if (exists) return;
 
-    const isHighest = checkIfHighest(bidData.nuevoMonto);
+    const formattedDate = formatDate(bidData.date);
+
+    // Crear la nueva tarjeta SIN determinar si es highest todavía
     const bidHtml = `
         <div class="col-12 col-md-6 col-lg-4 bid-card" 
-             data-date="${bidData.date}"
+             data-date="${new Date(bidData.date).toISOString()}"
              data-amount="${bidData.nuevoMonto}">
             <div class="card border-0 h-100 hover-shadow rounded-4 overflow-hidden">
                 <div class="position-relative">
-                    <div class="${isHighest ? 'bg-success' : 'bg-primary'}" style="height: 4px;"></div>
+                    <div class="bg-primary" style="height: 4px;"></div>
                 </div>
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -59,33 +65,30 @@ function addNewBidToPage(bidData) {
                                 <i class="bi bi-person-fill text-primary"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold mb-0">${escapeHtml(bidData.userName)}</h6>
+                                <h6 class="fw-bold mb-0 bid-user-name">${escapeHtml(bidData.userName)}</h6>
                             </div>
                         </div>
-                        <span class="badge ${isHighest ? 'bg-success' : 'bg-primary'} rounded-pill px-3 py-2 fs-6">
+                        <span class="badge bg-primary rounded-pill px-3 py-2 fs-6 bid-amount">
                             $${bidData.nuevoMonto.toFixed(2)}
                         </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light">
                         <span class="badge bg-light text-dark">
-                            <i class="bi bi-stopwatch me-1"></i>${new Date(bidData.date).toLocaleString()}
+                            <i class="bi bi-stopwatch me-1"></i>${formattedDate}
                         </span>
                     </div>
-                    ${isHighest ? `
-                    <div class="mt-3">
-                        <span class="badge bg-warning text-dark">
-                            <i class="bi bi-trophy-fill me-1"></i>Highest bid
-                        </span>
-                    </div>
-                    ` : ''}
                 </div>
             </div>
         </div>
     `;
 
     container.insertAdjacentHTML('afterbegin', bidHtml);
+
+    // IMPORTANTE: Actualizar TODOS los indicadores después de agregar la nueva
+    updateAllHighestBidIndicators();
+
     updateStatistics();
-    showNotificationToast(`💰 New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
+    showNotificationToast(`New bid: $${bidData.nuevoMonto.toFixed(2)} by ${bidData.userName}`);
 
     // Reordenar si es necesario
     const isDescending = document.getElementById('sortDesc')?.checked ?? true;
@@ -94,26 +97,81 @@ function addNewBidToPage(bidData) {
     }
 }
 
-function checkIfHighest(amount) {
-    const allAmounts = Array.from(document.querySelectorAll('.bid-card .badge.rounded-pill'))
-        .map(badge => parseFloat(badge.innerText.replace('$', '').trim()));
-    const maxAmount = Math.max(...allAmounts, amount);
-    return amount === maxAmount;
+function updateAllHighestBidIndicators() {
+    // Obtener todos los montos de todas las tarjetas
+    const allCards = document.querySelectorAll('.bid-card');
+    const amounts = [];
+
+    allCards.forEach(card => {
+        const amountElem = card.querySelector('.bid-amount');
+        if (amountElem) {
+            const amount = parseFloat(amountElem.innerText.replace('$', '').trim());
+            amounts.push({ card, amount });
+        }
+    });
+
+    if (amounts.length === 0) return;
+
+    // Encontrar el monto máximo
+    const maxAmount = Math.max(...amounts.map(item => item.amount));
+
+    // Actualizar cada tarjeta
+    amounts.forEach(item => {
+        const isHighest = item.amount === maxAmount;
+        const topBar = item.card.querySelector('.position-relative > div');
+        const amountBadge = item.card.querySelector('.bid-amount');
+
+        // Actualizar barra superior
+        if (topBar) {
+            topBar.className = isHighest ? 'bg-success' : 'bg-primary';
+        }
+
+        // Actualizar color del badge del monto
+        if (amountBadge) {
+            amountBadge.className = `badge rounded-pill px-3 py-2 fs-6 bid-amount ${isHighest ? 'bg-success' : 'bg-primary'}`;
+        }
+
+        // Eliminar TODOS los indicadores "Highest bid" existentes en esta tarjeta
+        const allIndicators = item.card.querySelectorAll('.highest-bid-indicator');
+        allIndicators.forEach(indicator => indicator.remove());
+
+        // Si es la más alta, agregar el indicador UNA SOLA VEZ
+        if (isHighest) {
+            const cardBody = item.card.querySelector('.card-body');
+            if (cardBody) {
+                const indicatorHtml = `
+                    <div class="mt-3 highest-bid-indicator">
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-trophy-fill me-1"></i>Highest bid
+                        </span>
+                    </div>
+                `;
+                cardBody.insertAdjacentHTML('beforeend', indicatorHtml);
+            }
+        }
+    });
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${year} : ${hours}:${minutes}`;
 }
 
 function updateStatistics() {
-    const allAmounts = Array.from(document.querySelectorAll('.bid-card .badge.rounded-pill'))
+    const allAmounts = Array.from(document.querySelectorAll('.bid-amount'))
         .map(badge => parseFloat(badge.innerText.replace('$', '').trim()));
-
-    const allEmails = Array.from(document.querySelectorAll('.bid-card small'))
-        .map(small => small.innerText.replace(/[✉️]/g, '').trim());
 
     if (allAmounts.length === 0) return;
 
     const max = Math.max(...allAmounts);
     const min = Math.min(...allAmounts);
     const total = allAmounts.length;
-    const uniqueBidders = new Set(allEmails).size;
 
     const statsContainer = document.querySelector('.bg-gradient');
     if (statsContainer) {
@@ -121,7 +179,6 @@ function updateStatistics() {
         if (statValues[0]) statValues[0].innerText = `$${max.toFixed(2)}`;
         if (statValues[1]) statValues[1].innerText = `$${min.toFixed(2)}`;
         if (statValues[2]) statValues[2].innerText = total;
-        if (statValues[3]) statValues[3].innerText = uniqueBidders;
     }
 }
 
@@ -168,7 +225,7 @@ function showOutbidNotification(data) {
             timerProgressBar: true
         });
     } else {
-        showNotificationToast(`⚠️ ${data.mensaje || `You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`}`);
+        showNotificationToast(`You've been outbid! New bid: $${data.nuevoMonto?.toFixed(2)}`);
     }
 }
 

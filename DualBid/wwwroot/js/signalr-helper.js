@@ -1,40 +1,63 @@
 ﻿"use strict";
 
-// Configuración global de SignalR para subastas
+/**
+ * SignalRAuction — Helper para páginas de subasta.
+ *
+ * Si ya existe una conexión global (window.__globalSignalRConnection),
+ * la reutiliza en lugar de crear una nueva — así no hay dos WebSockets abiertos.
+ */
 const SignalRAuction = (() => {
-
     let connection = null;
     let currentAuctionId = null;
     let currentUserId = null;
     let isConnecting = false;
-    let callbacks = {
+
+    let _countdownInterval = null;
+    let _endDate = null;
+
+    const callbacks = {
         onNewBid: [],
         onUserOutbid: [],
         onConnected: [],
         onReconnected: [],
-        onDisconnected: []
+        onDisconnected: [],
+        onAuctionClosed: [],
+        onAuctionActivated: [],
+        onYouWon: [],
+        onYourAuctionEnded: [],
+        onCountdownTick: [],
+        onPaymentCompleted: [],
+        onComicReleased: [],
     };
 
-    // Función para inicializar la conexión
-    async function initialize(auctionId, userId) {
+    // ─────────────────────────────────────────
+    // Inicialización
+    // ─────────────────────────────────────────
+
+    async function initialize(auctionId, userId, endDateIso = null) {
         currentAuctionId = auctionId;
         currentUserId = userId;
 
+        if (endDateIso) startCountdown(new Date(endDateIso));
+
+        // Reutilizar la conexión global del layout si existe y está conectada
+        if (window.__globalSignalRConnection &&
+            window.__globalSignalRConnection.state === signalR.HubConnectiontate.Connected) {
+            connection = window.__globalSignalRConnection;
+            console.log("SignalR: Reutilizando conexión global");
+            _registerHandlers();
+            await _joinGroups();
+            callbacks.onConnected.forEach(cb => cb());
+            return connection;
+        }
+
         if (connection && connection.state === signalR.HubConnectionState.Connected) {
-            console.log("SignalR: Conexión ya existente y conectada");
             return connection;
         }
 
         if (isConnecting) {
-            console.log("SignalR: Ya hay una conexión en proceso, esperando...");
-            // Esperar a que termine la conexión actual
             await new Promise(resolve => {
-                const checkInterval = setInterval(() => {
-                    if (!isConnecting) {
-                        clearInterval(checkInterval);
-                        resolve();
-                    }
-                }, 100);
+                const t = setInterval(() => { if (!isConnecting) { clearInterval(t); resolve(); } }, 100);
             });
             return connection;
         }
@@ -43,75 +66,28 @@ const SignalRAuction = (() => {
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl("/auctionHub")
-            .withAutomaticReconnect({
-                nextRetryDelayInMilliseconds: retryContext => {
-                    // Reintentar después de 2, 5, 10 segundos
-                    if (retryContext.previousRetryCount === 0) return 2000;
-                    if (retryContext.previousRetryCount === 1) return 5000;
-                    if (retryContext.previousRetryCount === 2) return 10000;
-                    return null; // Dejar de reintentar después de 3 intentos
-                }
-            })
+            .withAutomaticReconnect([2000, 5000, 10000, 30000])
             .build();
 
-        // Registrar eventos del hub
-        connection.on("NuevaPujaSimulada", function (data) {
-            console.log("SignalR: NuevaPujaSimulada recibida:", data);
-            callbacks.onNewBid.forEach(cb => {
-                try {
-                    cb(data);
-                } catch (err) {
-                    console.error("Error en callback onNewBid:", err);
-                }
-            });
-        });
+        _registerHandlers();
 
-        connection.on("UsuarioSuperado", function (data) {
-            console.log("SignalR: UsuarioSuperado recibido:", data);
-            callbacks.onUserOutbid.forEach(cb => {
-                try {
-                    cb(data);
-                } catch (err) {
-                    console.error("Error en callback onUserOutbid:", err);
-                }
-            });
-        });
-
-        // Manejar conexión exitosa
-        connection.onreconnected((connectionId) => {
-            console.log("SignalR: Reconectado, ID:", connectionId);
+        connection.onreconnected(async () => {
+            console.log("SignalR: Reconectado");
+            await _joinGroups();
             callbacks.onReconnected.forEach(cb => cb());
         });
 
-        connection.onreconnecting((error) => {
-            console.log("SignalR: Reconectando...", error);
-        });
-
-        connection.onclose((error) => {
-            console.log("SignalR: Conexión cerrada", error);
+        connection.onclose(error => {
             callbacks.onDisconnected.forEach(cb => cb(error));
         });
 
         try {
             await connection.start();
-            console.log("SignalR: Conectado exitosamente");
-
-            // Unirse al grupo de la subasta
-            if (currentAuctionId) {
-                await connection.invoke("JoinAuctionGroup", currentAuctionId.toString());
-                console.log(`SignalR: Unido al grupo auction-${currentAuctionId}`);
-            }
-
-            // Registrar usuario
-            if (currentUserId && currentUserId !== "0") {
-                await connection.invoke("RegisterUser", currentUserId.toString());
-                console.log(`SignalR: Usuario ${currentUserId} registrado`);
-            }
-
+            console.log("✅ SignalR conectado (auctionDetails)");
+            await _joinGroups();
             callbacks.onConnected.forEach(cb => cb());
-
         } catch (err) {
-            console.error("SignalR: Error de conexión:", err.toString());
+            console.error("❌ Error de conexión SignalR:", err);
             connection = null;
         } finally {
             isConnecting = false;
@@ -120,66 +96,128 @@ const SignalRAuction = (() => {
         return connection;
     }
 
-    // Función para suscribirse a nuevas pujas
-    function onNewBid(callback) {
-        if (typeof callback === 'function') {
-            callbacks.onNewBid.push(callback);
-        }
+    function _registerHandlers() {
+        // Evitar registrar handlers duplicados si se reutiliza la conexión global
+        if (connection._auctionHandlersRegistered) return;
+        connection._auctionHandlersRegistered = true;
+
+        connection.on("NuevaPujaSimulada", data => {
+            callbacks.onNewBid.forEach(cb => cb(data));
+        });
+
+        connection.on("UsuarioSuperado", data => {
+            callbacks.onUserOutbid.forEach(cb => cb(data));
+        });
+
+        connection.on("AuctionClosed", data => {
+            stopCountdown();
+            callbacks.onAuctionClosed.forEach(cb => cb(data));
+        });
+
+        connection.on("AuctionActivated", data => {
+            if (data.endDate) startCountdown(new Date(data.endDate));
+            callbacks.onAuctionActivated.forEach(cb => cb(data));
+        });
+
+        connection.on("YouWonAuction", data => {
+            callbacks.onYouWon.forEach(cb => cb(data));
+        });
+
+        connection.on("YourAuctionEnded", data => {
+            callbacks.onYourAuctionEnded.forEach(cb => cb(data));
+        });
+
+        connection.on("YourAuctionActivated", data => {
+            callbacks.onAuctionActivated.forEach(cb => cb(data));
+        });
+
+        connection.on("PaymentCompleted", data => {
+            callbacks.onPaymentCompleted.forEach(cb => cb(data));
+        });
+        connection.on("ComicReleased", data => {
+            callbacks.onComicReleased.forEach(cb => cb(data));
+        });
     }
 
-    // Función para suscribirse a cuando superan al usuario
-    function onUserOutbid(callback) {
-        if (typeof callback === 'function') {
-            callbacks.onUserOutbid.push(callback);
-        }
-    }
-
-    // Función para suscribirse a conexión
-    function onConnected(callback) {
-        if (typeof callback === 'function') {
-            callbacks.onConnected.push(callback);
-        }
-    }
-
-    // Función para suscribirse a reconexión
-    function onReconnected(callback) {
-        if (typeof callback === 'function') {
-            callbacks.onReconnected.push(callback);
-        }
-    }
-
-    // Función para obtener el auction ID actual
-    function getAuctionId() {
-        return currentAuctionId;
-    }
-
-    // Función para verificar si está conectado
-    function isConnected() {
-        return connection && connection.state === signalR.HubConnectionState.Connected;
-    }
-
-    // Función para desconectar
-    async function disconnect() {
-        if (connection) {
-            try {
-                await connection.stop();
-                connection = null;
-                console.log("SignalR: Desconectado exitosamente");
-            } catch (err) {
-                console.error("SignalR: Error al desconectar:", err);
+    async function _joinGroups() {
+        try {
+            if (currentAuctionId) {
+                await connection.invoke("JoinAuctionGroup", currentAuctionId.toString());
+                console.log(`📌 Unido a auction-${currentAuctionId}`);
             }
+            if (currentUserId && currentUserId !== "0") {
+                await connection.invoke("RegisterUser", currentUserId.toString());
+                console.log(`👤 Usuario ${currentUserId} registrado`);
+            }
+        } catch (err) {
+            console.error("SignalR: Error al unirse a grupos:", err);
         }
     }
 
-    // API pública
+    // ─────────────────────────────────────────
+    // Countdown local
+    // ─────────────────────────────────────────
+
+    function startCountdown(endDate) {
+        stopCountdown();
+        _endDate = endDate;
+
+        _countdownInterval = setInterval(() => {
+            const diffSeconds = Math.floor((_endDate - new Date()) / 1000);
+
+            if (diffSeconds <= 0) {
+                stopCountdown();
+                callbacks.onCountdownTick.forEach(cb => cb({ seconds: 0, display: "00:00:00", isEnded: true }));
+                return;
+            }
+
+            const h = Math.floor(diffSeconds / 3600);
+            const m = Math.floor((diffSeconds % 3600) / 60);
+            const s = diffSeconds % 60;
+
+            callbacks.onCountdownTick.forEach(cb => cb({
+                seconds: diffSeconds,
+                display: `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+                isEnded: false,
+                isEndingSoon: diffSeconds <= 300
+            }));
+        }, 1000);
+    }
+
+    function stopCountdown() {
+        if (_countdownInterval) { clearInterval(_countdownInterval); _countdownInterval = null; }
+    }
+
+    // ─────────────────────────────────────────
+    // Callbacks
+    // ─────────────────────────────────────────
+
+    const _on = (key, cb) => { if (typeof cb === "function") callbacks[key].push(cb); };
+
     return {
         initialize,
-        onNewBid,
-        onUserOutbid,
-        onConnected,
-        onReconnected,
-        getAuctionId,
-        isConnected,
-        disconnect
+        startCountdown,
+        stopCountdown,
+        onNewBid: cb => _on("onNewBid", cb),
+        onUserOutbid: cb => _on("onUserOutbid", cb),
+        onConnected: cb => _on("onConnected", cb),
+        onReconnected: cb => _on("onReconnected", cb),
+        onDisconnected: cb => _on("onDisconnected", cb),
+        onAuctionClosed: cb => _on("onAuctionClosed", cb),
+        onAuctionActivated: cb => _on("onAuctionActivated", cb),
+        onYouWon: cb => _on("onYouWon", cb),
+        onYourAuctionEnded: cb => _on("onYourAuctionEnded", cb),
+        onCountdownTick: cb => _on("onCountdownTick", cb),
+        onPaymentCompleted: cb => _on("onPaymentCompleted", cb),
+        onComicReleased: cb => _on("onComicReleased", cb),
+        getAuctionId: () => currentAuctionId,
+        isConnected: () => connection && connection.state === signalR.HubConnectionState.Connected,
+        async disconnect() {
+            stopCountdown();
+            // No cerrar si es la conexión global compartida
+            if (connection && connection !== window.__globalSignalRConnection) {
+                try { await connection.stop(); connection = null; } catch { }
+            }
+        }
     };
 })();

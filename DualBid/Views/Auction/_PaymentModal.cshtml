@@ -1,0 +1,75 @@
+@* Views/Auction/_PaymentModal.cshtml *@
+@* Incluir en Details.cshtml antes de </section>:
+   @await Html.PartialAsync("_PaymentModal") *@
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <div class="modal-header border-0 py-3 px-4"
+                 style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)">
+                <div class="text-white">
+                    <h5 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-credit-card-fill me-2"></i>Complete Your Payment
+                    </h5>
+                    <p class="mb-0 small opacity-75 mt-1">
+                        <i class="bi bi-trophy-fill me-1"></i>
+                        <span id="paymentComicTitle">--</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-body p-4">
+
+                <div class="p-3 rounded-3 border bg-light text-center mb-4">
+                    <div class="small text-muted mb-1">Amount due</div>
+                    <div class="fw-bold fs-3 text-success" id="paymentAmountDisplay">$0.00</div>
+                </div>
+
+                <h6 class="fw-semibold mb-3">
+                    <i class="bi bi-credit-card me-2 text-primary"></i>Card details
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Cardholder name</label>
+                        <input type="text" class="form-control" id="cardName"
+                               placeholder="Name on card" autocomplete="off">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Card number</label>
+                        <input type="text" class="form-control" id="cardNumber"
+                               placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">Expiry</label>
+                        <input type="text" class="form-control" id="cardExpiry"
+                               placeholder="MM/YY" maxlength="5" autocomplete="off">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">CVV</label>
+                        <input type="text" class="form-control" id="cardCvv"
+                               placeholder="000" maxlength="4" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-3 d-flex align-items-center gap-2 border-start border-3 border-success"
+                     style="background:#f0f9f4;">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <span class="small text-muted">Simulated payment — no real transaction will be processed</span>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 gap-3">
+                <button type="button" class="btn btn-outline-danger rounded-3 px-4" id="releaseComicBtn">
+                    <i class="bi bi-x-circle me-2"></i>Release comic
+                </button>
+                <button type="button" class="btn btn-success btn-lg rounded-3 px-4 fw-semibold flex-grow-1"
+                        id="confirmPaymentBtn">
+                    <i class="bi bi-lock-fill me-2"></i>Pay now — <span id="payBtnAmount">$0.00</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
