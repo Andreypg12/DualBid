@@ -413,10 +413,7 @@ namespace DualBid.Controllers
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Helper privado: centraliza las notificaciones SignalR de cierre
-        // para no repetir el mismo bloque en Details y en el monitor.
-        // ─────────────────────────────────────────────────────────────────────
+      
         private async Task NotifyAuctionClosedAsync(AuctionCloseResultDTO result)
         {
             // 1. Todos los espectadores de la subasta
@@ -476,7 +473,7 @@ namespace DualBid.Controllers
             var auction = await _serviceAuction.FindByIdAsync(request.AuctionId);
             if (auction == null) return NotFound();
 
-            // ALEJANDRO — Marcar la subasta como Finalizada (3) cuando el pago se completa
+            
             await _serviceAuction.UpdateStateAsync(request.AuctionId, 3);
 
             await _hubContext.Clients
@@ -492,6 +489,7 @@ namespace DualBid.Controllers
 
             return Ok(new { success = true });
         }
+
 
         // Cuando el ganador libera: cancela la subasta y notifica a todos
         [HttpPost]

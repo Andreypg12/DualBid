@@ -1,7 +1,6 @@
 "use strict";
 
-// ALEJANDRO — Flujo de pago para el ganador.
-// Pay now: muestra recibo. Release comic: cancela la subasta.
+
 const PaymentFlow = (() => {
     let _auctionId = null, _amount = 0, _comicTitle = "";
     let _modal = null;
@@ -18,7 +17,7 @@ const PaymentFlow = (() => {
         document.getElementById("releaseComicBtn")
             ?.addEventListener("click", _handleRelease);
 
-        // Intercepta ESC y clic fuera del modal — misma lógica que Release
+     
         const modalEl = document.getElementById("paymentModal");
         if (modalEl) {
             modalEl.addEventListener("hide.bs.modal", async (e) => {
@@ -48,7 +47,7 @@ const PaymentFlow = (() => {
         _modal.show();
     }
 
-    // Pay now: notifica al servidor → SignalR muestra recibo a todos
+   
     async function _handlePay() {
         if (!_validateForm()) return;
 
@@ -108,7 +107,7 @@ const PaymentFlow = (() => {
         });
     }
 
-    // Release: cancela la subasta (estado 4) y notifica a todos
+    
     async function _handleRelease() {
         _closing = true;
 
