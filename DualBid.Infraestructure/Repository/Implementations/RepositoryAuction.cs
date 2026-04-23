@@ -171,5 +171,32 @@ namespace DualBid.Infraestructure.Repository.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+
+        //Reportes
+        
+        public async Task<ICollection<Auction>> ListCategoryHistoryAsync(int? categoryId, DateTime? from, DateTime? to)
+        {
+            var query = _context.Set<Auction>()
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(a => a.Comic)
+                    .ThenInclude(c => c.Category)
+                .Include(a => a.Bid)
+                .Include(a => a.WinningBid)
+                .AsQueryable();
+
+            if (categoryId.HasValue)
+                query = query.Where(a => a.Comic.Category.Any(c => c.Id == categoryId.Value));
+
+            if (from.HasValue)
+                query = query.Where(a => a.StartDate >= from.Value);
+
+            if (to.HasValue)
+                query = query.Where(a => a.StartDate <= to.Value);
+
+            return await query.ToListAsync();
+        }
+
     }
 }

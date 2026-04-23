@@ -8,6 +8,7 @@ using DualBid.Infraestructure.Data;
 using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
+using DualBid.Infraestructure.Services.Implementations;
 using DualBid.Middleware;
 using DualBid.Services.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -160,6 +161,10 @@ builder.Services.AddTransient<IServiceStateConservation, ServiceStateConservatio
 builder.Services.AddTransient<IServiceImgComic, ServiceImgComic>();
 
 builder.Services.AddSignalR();
+
+//Reportes
+// DualBid/Program.cs
+builder.Services.AddScoped<IComicReporteService, ComicReportService>();
 
 //builder.Services.AddHostedService<AuctionMonitorService>();
 //builder.Services.AddScoped<IAuctionMonitorService, AuctionMonitorService>();

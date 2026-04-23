@@ -1,0 +1,101 @@
+﻿<!-- Views/Shared/_ModalReporte.cshtml -->
+<div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+
+            <div class="modal-header border-0 pb-0" style="background: #2b1e3e;">
+                <div>
+                    <span class="badge mb-1" style="background:#e040fb; color:#2b1e3e; font-size:10px;">★ COMIC AUCTIONS</span>
+                    <h5 class="modal-title text-white mb-0">Generate Report</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Decorative stripe -->
+            <div class="d-flex" style="height:4px;">
+                <div style="flex:3; background:#e040fb;"></div>
+                <div style="flex:2; background:#4a4e8f;"></div>
+                <div style="flex:1; background:#a490c2;"></div>
+            </div>
+
+            <div class="modal-body p-4">
+
+                <!-- Description -->
+                <p class="text-muted small mb-3">
+                    Select a category, a date range, or both to generate the report.
+                </p>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Category <span class="text-muted fw-normal small">(optional)</span></label>
+                    <select id="hist-categoria" class="form-select">
+                        <option value="">All categories</option>
+                        @foreach (var cat in ViewBag.Categorias ?? new List<DualBid.Infraestructure.Models.Category>())
+                        {
+                            <option value="@cat.Id">@cat.Description</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Date range -->
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-medium">From <span class="text-muted fw-normal small">(optional)</span></label>
+                        <input type="date" id="hist-from" class="form-control" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-medium">To <span class="text-muted fw-normal small">(optional)</span></label>
+                        <input type="date" id="hist-to" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- Error -->
+                <div id="err-historial" class="alert alert-danger py-2 small d-none"></div>
+
+                <!-- Button -->
+                <button class="btn w-100 text-white fw-bold"
+                        style="background:#2b1e3e; border:none;"
+                        onclick="generarHistorialCategoria()">
+                    <i class="bi bi-file-earmark-bar-graph me-2"></i>View Report
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generarHistorialCategoria() {
+        const cat  = document.getElementById('hist-categoria').value;
+        const from = document.getElementById('hist-from').value;
+        const to   = document.getElementById('hist-to').value;
+        const err  = document.getElementById('err-historial');
+
+        // At least one must be filled
+        if (!cat && (!from || !to)) {
+            err.textContent = 'Please select a category or a date range.';
+            err.classList.remove('d-none'); return;
+        }
+
+        // If one date is filled, both are required
+        if ((from && !to) || (!from && to)) {
+            err.textContent = 'Please complete both date fields.';
+            err.classList.remove('d-none'); return;
+        }
+
+        // Validate range
+        if (from && to && new Date(from) > new Date(to)) {
+            err.textContent = 'The start date cannot be greater than the end date.';
+            err.classList.remove('d-none'); return;
+        }
+
+        err.classList.add('d-none');
+
+        let url = '/api/reports/category-history?';
+        if (cat)  url += `categoryId=${cat}&`;
+        if (from) url += `from=${from}&`;
+        if (to)   url += `to=${to}`;
+
+        window.open(url, '_blank');
+    }
+</script>

@@ -22,12 +22,15 @@ namespace DualBid.Controllers
         private readonly AuctionMonitorService _auctionMonitor;
         private readonly IHubContext<AuctionHub> _hubContext;
 
+        private readonly IServiceCategory _serviceCategory;
+
         public AuctionController(
             IServiceAuction serviceAuction,
             IServiceComic serviceComic,
             IServiceAuctionState serviceAuctionState,
             IHubContext<AuctionHub> hubContext,
-            AuctionMonitorService auctionMonitor/*IAuctionMonitorService auctionMonitor*/
+            AuctionMonitorService auctionMonitor,
+             IServiceCategory serviceCategory
             )
         {
             _serviceAuction = serviceAuction;
@@ -35,6 +38,7 @@ namespace DualBid.Controllers
             _serviceAuctionState = serviceAuctionState;
             _hubContext = hubContext;
             _auctionMonitor = auctionMonitor;
+            _serviceCategory = serviceCategory;
         }
 
         [HttpGet]
@@ -52,6 +56,8 @@ namespace DualBid.Controllers
                 SelectedState = showActive ? "active" : "inactive",
                 Auctions = filtered
             };
+
+            ViewBag.Categorias = await _serviceCategory.ListAsync();
 
             return View(vm);
         }
