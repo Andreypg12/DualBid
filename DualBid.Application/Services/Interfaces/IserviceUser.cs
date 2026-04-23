@@ -14,5 +14,7 @@ namespace DualBid.Application.Services.Interfaces
         Task<UserDTO?> FindByIdAsync(int id);
         Task UpdateAsync(int id, UserDTO dto);
         Task<UserDTO> LoginAsync(string id, string password);
+        Task<bool> RegisterAsync(string name, string lastNames, string email, string password, int roleId);
+        Task<bool> EmailExistsAsync(string email);
     }
 }

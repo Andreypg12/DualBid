@@ -13,5 +13,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<User> FindByIdAsync(int id);
         Task UpdateAsync(User entity);
         Task<User> LoginAsync(string id, string password);
+        Task<User> RegisterAsync(User user);
+        Task<bool> EmailExistsAsync(string email);
     }
 }

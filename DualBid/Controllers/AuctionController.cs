@@ -18,7 +18,6 @@ namespace DualBid.Controllers
         private readonly IServiceAuction _serviceAuction;
         private readonly IServiceComic _serviceComic;
         private readonly IServiceAuctionState _serviceAuctionState;
-        //private readonly IAuctionMonitorService _auctionMonitor;
         private readonly AuctionMonitorService _auctionMonitor;
         private readonly IHubContext<AuctionHub> _hubContext;
 
@@ -309,10 +308,10 @@ namespace DualBid.Controllers
 
                 await _serviceAuction.UpdateStateAsync(id, 2);
 
-                // ✅ NUEVO: Registrar en el monitor para cierre automático
+                // Registrar en el monitor para cierre automático
                 _auctionMonitor.ScheduleAuction(id, auction.ExpectedEndDate);
 
-                // ✅ NUEVO: Notificar via SignalR que la subasta ya está activa
+                // Notificar via SignalR que la subasta ya está activa
                 await _hubContext.Clients
                     .Group($"auction-{id}")
                     .SendAsync("AuctionActivated", new

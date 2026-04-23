@@ -70,5 +70,42 @@ namespace DualBid.Application.Services.Implementations
 
             return usuarioDTO;
         }
+
+        public async Task<bool> RegisterAsync(string name, string lastNames, string email, string password, int roleId)
+        {
+            try
+            {
+                // Verificar si el email ya existe
+                if (await EmailExistsAsync(email))
+                {
+                    return false;
+                }
+
+                string secret = _options.Value.Crypto.Secret;
+                string passwordEncrypted = Cryptography.Encrypt(password, secret);
+
+                var user = new User
+                {
+                    Name = name,
+                    LastNames = lastNames,
+                    Email = email,
+                    Password = passwordEncrypted,
+                    RoleId = roleId,
+                    StateId = 1 // Estado activo por defecto
+                };
+
+                await _repository.RegisterAsync(user);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _repository.EmailExistsAsync(email);
+        }
     }
 }

@@ -38,12 +38,6 @@ namespace DualBid.Controllers
                         ? "Unspecified validation error"
                         : e.ErrorMessage));
 
-                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Validation errors",
-                    $"The form contains the following errors: {errores}",
-                    SweetAlertMessageType.warning
-                );
-
                 _logger.LogWarning("Login validation error for user {User}. Details: {Errors}",
                     viewModelLogin.User, errores);
 
