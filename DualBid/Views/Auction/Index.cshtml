@@ -86,7 +86,15 @@ else
                                     <span class="badge text-bg-light border">
                                         <i class="bi bi-cash-coin me-1"></i>
                                         @(Model.SelectedState == "inactive" ? "Last bid" : "Current Bid")<br />
-                                        $@item.CurrentBid.AmountOffered
+                                        @if (item.CurrentBid.AmountOffered == 0)
+                                        {
+                                            <span>$@item.BasePrice</span>
+                                            <small class="text-muted"> (Base price)</small>
+                                        }
+                                        else
+                                        {
+                                            <span>$@item.CurrentBid.AmountOffered</span>
+                                        }
                                     </span>
 
                                     <span class="badge text-bg-light border">
@@ -110,4 +118,11 @@ else
             }
         </div>
     </section>
+
+
+}
+    
+
+@section Scripts {
+    <script src="~/js/auctionIndex.js"></script>
 }

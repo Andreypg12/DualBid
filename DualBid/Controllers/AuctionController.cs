@@ -144,7 +144,10 @@ namespace DualBid.Controllers
                 ModelState.Remove(key);
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            pvm.Auction.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
+
+            int creatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
+
+            pvm.Auction.CreatorUserId = creatorUserId;
             pvm.Auction.StateId = 1;
 
             if (pvm.Auction.CreatorUserId == 0)
@@ -170,12 +173,31 @@ namespace DualBid.Controllers
             }
 
             await _serviceComic.UpdateAvailabilityAsync(pvm.Auction.ComicId, false);
-            await _serviceAuction.AddAsync(pvm.Auction);
+            int result = await _serviceAuction.AddAsync(pvm.Auction);
+
+
+            string imagenBase64 = "";
+            if (comic.ImgComic != null && comic.ImgComic.Any())
+            {
+                var imagen = comic.ImgComic[0];
+                imagenBase64 = Convert.ToBase64String(imagen.Img);
+            }
+
+            await _hubContext.Clients.All.SendAsync("NewAuctionCreated", new
+            {
+                Id = result,
+                Title = comic.Title,
+                CurrentBid = pvm.Auction.BasePrice,
+                ExpectedEndDate = pvm.Auction.ExpectedEndDate,
+                NumberOfBids = 0,
+                ImageBase64 = imagenBase64
+            });
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                 "Auction created successfully",
                 "The auction was registered successfully.",
                 SweetAlertMessageType.success);
+
 
             return RedirectToAction(nameof(Index));
         }
