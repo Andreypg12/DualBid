@@ -38,7 +38,7 @@ namespace DualBid.Services.BackgroundServices
             }
             catch (OperationCanceledException)
             {
-                return; // App cerrándose durante el delay inicial, salir limpiamente
+                return; 
             }
 
             await LoadActiveAuctionsAsync();
@@ -52,15 +52,12 @@ namespace DualBid.Services.BackgroundServices
                 }
                 catch (Exception ex)
                 {
-                    // Loguear pero NUNCA dejar que esto mate el loop
+                    // Loguear pero nunca dejar que esto mate el loop
                     _logger.LogError(ex, "Error inesperado en CheckAndCloseExpiredAuctionsAsync. El monitor continúa.");
                 }
 
                 try
                 {
-                    //Usar Task.Delay SIN stoppingToken para que una cancelación
-                    // no mate el delay con OperationCanceledException no capturada.
-                    // Verificamos el token manualmente después.
                     await Task.Delay(CheckInterval);
                 }
                 catch (OperationCanceledException)
@@ -158,7 +155,7 @@ namespace DualBid.Services.BackgroundServices
                     auctionId, result.FinalStateId,
                     result.WinnerName ?? "ninguno", result.FinalAmount);
 
-                // ── Notificar a todos los que ven la subasta ─────────────────
+                // Notificar a todos los que ven la subasta 
                 await _hubContext.Clients
                     .Group($"auction-{auctionId}")
                     .SendAsync("AuctionClosed", new
@@ -174,7 +171,7 @@ namespace DualBid.Services.BackgroundServices
                         finalState = result.FinalStateId
                     });
 
-                // ── Notificar al ganador ──────────────────────────────────────
+                // Notificar al ganador
                 if (result.WinnerUserId.HasValue)
                 {
                     await _hubContext.Clients
@@ -188,7 +185,7 @@ namespace DualBid.Services.BackgroundServices
                         });
                 }
 
-                // ── Notificar al creador ──────────────────────────────────────
+                // Notificar al creador
                 if (result.OwnerUserId.HasValue)
                 {
                     await _hubContext.Clients

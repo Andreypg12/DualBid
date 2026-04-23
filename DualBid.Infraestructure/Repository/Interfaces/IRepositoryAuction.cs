@@ -15,9 +15,10 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<int> AddAsync(Auction entity);
         Task UpdateAsync(Auction entity);
         Task<bool> UpdateStateAsync(int auctionId, int newStateId);
-
-        // @* Editado por ALE *@
-        //Determinar el ganador de la subasta
         Task<bool> EncontrarGanadorAsync(int auctionId);
+
+        //Reportes
+
+        Task<ICollection<Auction>> ListCategoryHistoryAsync(int? categoryId, DateTime? from, DateTime? to);
     }
 }
