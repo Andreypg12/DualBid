@@ -71,5 +71,17 @@ namespace DualBid.Infraestructure.Repository.Implementations
                                         .FirstOrDefaultAsync();
             return @object!;
         }
+
+        public async Task<User> RegisterAsync(User user)
+        {
+            await _context.User.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _context.User.AnyAsync(u => u.Email == email);
+        }
     }
 }

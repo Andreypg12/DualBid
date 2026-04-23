@@ -105,6 +105,15 @@
                                     Please verify that your username and password are correct.
                                 </small>
                             </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    Don´t you have an account?
+                                    <a asp-controller="Register" asp-action="Index" class="text-decoration-none">
+                                        Create an account here
+                                    </a>
+                                </small>
+                            </div>
                         </form>
                     </div>
 
@@ -121,10 +130,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <!-- SweetAlert -->
-    <script src="~/lib/sweetalert2/dist/sweetalert2.all.js"></script>
-
-
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.getElementById("loginForm").addEventListener("submit", function () {
@@ -159,12 +165,8 @@
     {
         var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
         <script type="text/javascript">
-
             const payload = @Html.Raw(notificacion);
-
-            if (payload) {
-                Swal.fire(payload);
-            }
+            if (payload) { Swal.fire(payload); }
         </script>
     }
 </body>

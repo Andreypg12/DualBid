@@ -11,10 +11,10 @@ namespace DualBid.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly IserviceUser _serviceUsuario;
+        private readonly IServiceUser _serviceUsuario;
         private readonly ILogger<LoginController> _logger;
 
-        public LoginController(IserviceUser serviceUsuario, ILogger<LoginController> logger)
+        public LoginController(IServiceUser serviceUsuario, ILogger<LoginController> logger)
         {
             _serviceUsuario = serviceUsuario;
             _logger = logger;
@@ -37,12 +37,6 @@ namespace DualBid.Controllers
                     .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)
                         ? "Unspecified validation error"
                         : e.ErrorMessage));
-
-                ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
-                    "Validation errors",
-                    $"The form contains the following errors: {errores}",
-                    SweetAlertMessageType.warning
-                );
 
                 _logger.LogWarning("Login validation error for user {User}. Details: {Errors}",
                     viewModelLogin.User, errores);

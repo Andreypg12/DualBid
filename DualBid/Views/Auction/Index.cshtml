@@ -28,6 +28,12 @@
             <i class="bi bi-bar-chart-fill me-1"></i> Reports
         </button>
 
+        <button class="btn btn-outline-secondary shadow-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#modalReportFinished">
+            <i class="bi bi-bar-chart-fill me-1"></i> Reports auctions
+        </button>
+
 
         <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
             <i class="bi bi-person-plus"></i> Create Auction
@@ -93,7 +99,15 @@ else
                                     <span class="badge text-bg-light border">
                                         <i class="bi bi-cash-coin me-1"></i>
                                         @(Model.SelectedState == "inactive" ? "Last bid" : "Current Bid")<br />
-                                        $@item.CurrentBid.AmountOffered
+                                        @if (item.CurrentBid.AmountOffered == 0)
+                                        {
+                                            <span>$@item.BasePrice</span>
+                                            <small class="text-muted"> (Base price)</small>
+                                        }
+                                        else
+                                        {
+                                            <span>$@item.CurrentBid.AmountOffered</span>
+                                        }
                                     </span>
 
                                     <span class="badge text-bg-light border">
@@ -119,4 +133,12 @@ else
     </section>
    
 }
+
+@await Html.PartialAsync("_ModalReportFinishedAuctions")
+
 @await Html.PartialAsync("_ModalReporte")
+
+
+@section Scripts {
+    <script src="~/js/auctionIndex.js"></script>
+}

@@ -7,10 +7,10 @@ namespace DualBid.Controllers;
 [Route("api/[controller]")]
 public class ReportsController : ControllerBase
 {
-    private readonly IComicReporteService _reportService;
+    private readonly IServiceReports _reportService;
     private readonly IServiceCategory _serviceCategory;
 
-    public ReportsController(IComicReporteService reportService, IServiceCategory serviceCategory)
+    public ReportsController(IServiceReports reportService, IServiceCategory serviceCategory)
     {
         _reportService = reportService;
         _serviceCategory = serviceCategory;
@@ -39,6 +39,19 @@ public class ReportsController : ControllerBase
 
         var pdf = await _reportService.GenerateReportCategoryHistoryAsync(categoryId, from, to);
         Response.Headers.Add("Content-Disposition", "inline; filename=reporte.pdf");
+        return File(pdf, "application/pdf");
+    }
+
+    [HttpGet("finished-auctions")]
+    public async Task<IActionResult> FinishedAuctions(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to)
+    {
+        if (from.HasValue && to.HasValue && from > to)
+            return BadRequest("La fecha de inicio no puede ser mayor a la fecha de fin.");
+
+        var pdf = await _reportService.GenerateFinishedAuctionsReportAsync(from, to);
+        Response.Headers.Add("Content-Disposition", "inline; filename=reporte-subastas-finalizadas.pdf");
         return File(pdf, "application/pdf");
     }
 }

@@ -138,7 +138,7 @@ builder.Services.AddTransient<IRepositoryImgComic, RepositoryImgComic>();
 
 
 //*** Services
-builder.Services.AddTransient<IserviceUser, ServiceUser>();
+builder.Services.AddTransient<IServiceUser, ServiceUser>();
 
 builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
 
@@ -164,7 +164,7 @@ builder.Services.AddSignalR();
 
 //Reportes
 // DualBid/Program.cs
-builder.Services.AddScoped<IComicReporteService, ComicReportService>();
+builder.Services.AddScoped<IServiceReports, ServiceReports>();
 
 //builder.Services.AddHostedService<AuctionMonitorService>();
 //builder.Services.AddScoped<IAuctionMonitorService, AuctionMonitorService>();
