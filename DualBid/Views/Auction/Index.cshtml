@@ -22,6 +22,13 @@
             </select>
         </form>
 
+        <button class="btn btn-outline-secondary shadow-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#modalReporte">
+            <i class="bi bi-bar-chart-fill me-1"></i> Reports
+        </button>
+
+
         <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
             <i class="bi bi-person-plus"></i> Create Auction
         </a>
@@ -118,6 +125,9 @@ else
             }
         </div>
     </section>
+   
+}
+@await Html.PartialAsync("_ModalReporte")
 
 
 }

@@ -53,7 +53,7 @@
                 const newTotal = prev + 1;
                 totalBidsLabel.innerText = newTotal;
 
-                // ── Primera puja: actualizar UI ───────────────────────────
+                // ── Primera puja: actualizar UI 
                 if (newTotal === 1) {
 
                     // 1) Mostrar botón "Place Your Bid" a no-creadores que aún ven el mensaje de espera
@@ -199,7 +199,7 @@
             }
         });
 
-        // ── Ganaste ───────────────────────────────────────────────────────
+        // Ganaste
         SignalRAuction.onYouWon(data => {
             data.comicTitle = data.comicTitle
                 || document.querySelector(".h3.fw-bold.text-primary")?.textContent?.trim()
