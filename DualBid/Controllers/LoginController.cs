@@ -11,10 +11,10 @@ namespace DualBid.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly IserviceUser _serviceUsuario;
+        private readonly IServiceUser _serviceUsuario;
         private readonly ILogger<LoginController> _logger;
 
-        public LoginController(IserviceUser serviceUsuario, ILogger<LoginController> logger)
+        public LoginController(IServiceUser serviceUsuario, ILogger<LoginController> logger)
         {
             _serviceUsuario = serviceUsuario;
             _logger = logger;

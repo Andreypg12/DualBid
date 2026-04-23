@@ -8,10 +8,10 @@ namespace DualBid.Controllers
 {
     public class RegisterController : Controller
     {
-        private readonly IserviceUser _serviceUser;
+        private readonly IServiceUser _serviceUser;
         private readonly ILogger<RegisterController> _logger;
 
-        public RegisterController(IserviceUser serviceUser, ILogger<RegisterController> logger)
+        public RegisterController(IServiceUser serviceUser, ILogger<RegisterController> logger)
         {
             _serviceUser = serviceUser;
             _logger = logger;

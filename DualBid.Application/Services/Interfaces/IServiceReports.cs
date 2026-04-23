@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.Services.Interfaces
 {
-    public interface IComicReporteService
+    public interface IServiceReports
     {
         Task<byte[]> GenerateReportCategoryHistoryAsync(int? categoryId, DateTime? from, DateTime? to);
+        Task<byte[]> GenerateFinishedAuctionsReportAsync(DateTime? from, DateTime? to);
     }
 }

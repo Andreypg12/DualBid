@@ -20,5 +20,6 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         //Reportes
 
         Task<ICollection<Auction>> ListCategoryHistoryAsync(int? categoryId, DateTime? from, DateTime? to);
+        Task<List<Auction>> GetFinishedAuctionsForReportAsync(DateTime? from, DateTime? to);
     }
 }

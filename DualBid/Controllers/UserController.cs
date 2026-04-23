@@ -8,10 +8,10 @@ namespace Libreria.Web.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IserviceUser _serviceUser;
+        private readonly IServiceUser _serviceUser;
         private readonly IServiceUserStatus _serviceUserStatus;
 
-        public UserController(IserviceUser serviceAutor, IServiceUserStatus serviceUserStatus)
+        public UserController(IServiceUser serviceAutor, IServiceUserStatus serviceUserStatus)
         {
             _serviceUser = serviceAutor;
             _serviceUserStatus = serviceUserStatus;

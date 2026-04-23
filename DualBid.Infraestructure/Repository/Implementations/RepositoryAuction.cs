@@ -198,5 +198,30 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return await query.ToListAsync();
         }
 
+        public async Task<List<Auction>> GetFinishedAuctionsForReportAsync(DateTime? from, DateTime? to)
+        {
+            var query = _context.Auction
+                .Include(a => a.Comic)
+                .Include(a => a.State)
+                .Include(a => a.CreatorUser)
+                .Include(a => a.Bid)
+                    .ThenInclude(b => b.User)
+                .Where(a => a.StateId == 3 || a.StateId == 4)
+                .AsQueryable();
+
+            if (from.HasValue)
+            {
+                query = query.Where(a => (a.ActualEndDate ?? a.ExpectedEndDate) >= from.Value);
+            }
+            if (to.HasValue)
+            {
+                var toDate = to.Value.AddDays(1);
+                query = query.Where(a => (a.ActualEndDate ?? a.ExpectedEndDate) <= toDate);
+            }
+
+            return await query
+                .OrderByDescending(a => a.ActualEndDate ?? a.ExpectedEndDate)
+                .ToListAsync();
+        }
     }
 }
