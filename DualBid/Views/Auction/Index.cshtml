@@ -22,22 +22,12 @@
             </select>
         </form>
 
-        <button class="btn btn-outline-secondary shadow-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#modalReporte">
-            <i class="bi bi-bar-chart-fill me-1"></i> Reports
-        </button>
-
-        <button class="btn btn-outline-secondary shadow-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#modalReportFinished">
-            <i class="bi bi-bar-chart-fill me-1"></i> Reports auctions
-        </button>
-
-
-        <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
-            <i class="bi bi-person-plus"></i> Create Auction
-        </a>
+        @if (User.IsInRole("Seller") || User.IsInRole("Administrator"))
+        {
+            <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-person-plus"></i> Create Auction
+            </a>
+        }
     </div>
 </div>
 
@@ -133,10 +123,6 @@ else
     </section>
    
 }
-
-@await Html.PartialAsync("_ModalReportFinishedAuctions")
-
-@await Html.PartialAsync("_ModalReporte")
 
 
 @section Scripts {

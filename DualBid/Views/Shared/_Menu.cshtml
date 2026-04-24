@@ -3,12 +3,10 @@
         <a class="navbar-brand fw-semibold d-flex align-items-center"
            asp-action="Index"
            asp-controller="Home">
-
             <img src="~/images/Logo_DualBid.png"
                  alt="DualBid Logo"
                  height="35"
                  class="rounded-circle me-2" />
-
             DualBid
         </a>
 
@@ -21,83 +19,122 @@
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                <li class="nav-item">
+                
+                @* <li class="nav-item">
                     <a class="nav-link">
                         <i class="bi bi-collection me-1"></i>Catalog
                     </a>
-                </li>
+                </li> *@
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-wrench me-1"></i>Maintenance
-                    </a>
-                    <ul class="dropdown-menu">
+               
 
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="Category">
-                                Categories
-                            </a>
-                        </li>
+                
+                @if (User.IsInRole("Administrator"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-wrench me-1"></i>Maintenance
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Category">Categories</a></li>
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="User">Users</a></li>
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Role">Roles</a></li>
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Comic">Comics</a></li>
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Auction">Auctions</a></li>
+                        </ul>
+                    </li>
+                }
 
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="User">
-                                Users
-                            </a>
-                        </li>
+                @if (User.IsInRole("Seller"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-wrench me-1"></i>Maintenance
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Comic">Comics</a></li>
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Auction">Auctions</a></li>
+                        </ul>
+                    </li>
+                }
 
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="Role">
-                                Roles
-                            </a>
-                        </li>
+                
+                @* @if (User.IsInRole("Administrator") || User.IsInRole("Seller"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear-fill me-1"></i>Process
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item">Auctions actives</a></li>
+                        </ul>
+                    </li>
+                } *@
 
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="Comic">
-                                Comics
-                            </a>
-                        </li>
+                
+                @* Reportes *@
+                @if (User.IsInRole("Administrator"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bar-chart-fill me-1"></i>Reports
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item"
+                                   style="cursor:pointer;"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modalReporte">
+                                    <i class="bi bi-book-half me-1"></i>By Category
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   style="cursor:pointer;"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modalReportFinished">
+                                    <i class="bi bi-flag-fill me-1"></i>Finished Auctions
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                }
 
-                        <li>
-                            <a class="dropdown-item" asp-action="Index" asp-controller="Auction">
-                                Auctions
-                            </a>
-                        </li>
+                
+                @* @if (User.IsInRole("Administrator"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people me-1"></i>Security
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item">Users</a></li>
+                        </ul>
+                    </li>
+                } *@
 
-                    </ul>
-                </li>
+               
+                @if (User.IsInRole("Buyer"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-hammer me-1"></i>Auctions
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="Index" asp-controller="Auction">View Auctions</a></li>
+                        </ul>
+                    </li>
+                }
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-gear-fill me-1"></i>Process
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Auctions actives</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bar-chart-fill me-1"></i>Reports
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Sales Chart</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-people me-1"></i>Security
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item">Users</a></li>
-                    </ul>
-                </li>
             </ul>
 
+           
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
@@ -126,4 +163,3 @@
         </div>
     </div>
 </nav>
-

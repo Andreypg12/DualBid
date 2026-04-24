@@ -112,6 +112,9 @@ builder.Services.AddSession(options =>
 // Configurar Dependency Injection
 //****************
 
+
+
+
 //*** Repositories
 builder.Services.AddTransient<IRepositoryUser, ReposiroryUser>();
 
@@ -204,13 +207,17 @@ builder.Services.AddAutoMapper(config =>
 
 });
 
-//Seguridad
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => {
         options.LoginPath = "/Login/Index";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
         options.AccessDeniedPath = "/Login/Forbidden";
     });
+
+
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddControllersWithViews(options => {
     options.Filters.Add(
@@ -276,6 +283,7 @@ app.UseSession();
 //Activar soporte a la solicitud de registro con Serilog (recomienda usarlo después de UseRouting y antes de UseEndpoints / MapControllerRoute)
 app.UseSerilogRequestLogging();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 

@@ -383,7 +383,7 @@
             }
 
             @* Botón para pujar *@
-            @if (canPlaceBid)
+            @if (canPlaceBid && (User.IsInRole("Buyer") || User.IsInRole("Administrator")))
             {
                 <a asp-controller="Bid"
                    asp-action="Create"

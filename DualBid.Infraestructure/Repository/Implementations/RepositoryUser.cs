@@ -67,6 +67,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
         {
             var @object = await _context.Set<User>()
                                         .Include(b => b.Role)
+                                        .Include(b => b.State)
                                         .Where(p => p.Email == id && p.Password == password)
                                         .FirstOrDefaultAsync();
             return @object!;
