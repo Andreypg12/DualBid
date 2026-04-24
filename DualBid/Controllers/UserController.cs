@@ -1,11 +1,15 @@
 ﻿using DualBid.Application.DTOs;
 using DualBid.Application.Services.Interfaces;
+using Humanizer;
 using Libreria.Web.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using X.PagedList.Extensions;
 
 namespace Libreria.Web.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class UserController : Controller
     {
         private readonly IServiceUser _serviceUser;
@@ -162,6 +166,152 @@ namespace Libreria.Web.Controllers
                 ViewBag.States = await _serviceUserStatus.ListAsync();
                 return View("Details", dto);
             }
+        }
+
+        public async Task<IActionResult> MyProfile(bool edit = false)
+        {
+            var userId = GetCurrentUserId();
+
+            if (userId == 0)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Access Denied",
+                    "You must be logged in to view your profile",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction("Login", "Account");
+            }
+
+            var profile = await _serviceUser.GetUserProfileAsync(userId);
+
+            if (profile == null)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Profile Not Found",
+                    "Unable to load your profile information",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.IsEditing = edit;
+            return View(profile);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(UserProfileEditDTO dto)
+        {
+            var userId = GetCurrentUserId();
+
+            if (userId == 0)
+            {
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Access Denied",
+                    "You must be logged in to update your profile",
+                    SweetAlertMessageType.error
+                );
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var profile = await _serviceUser.GetUserProfileAsync(userId);
+                dto.RoleDescription = profile?.RoleDescription ?? "";
+                dto.RoleId = profile?.RoleId ?? 3;
+                dto.StateDescription = profile?.StateDescription ?? "";
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Validation Error",
+                    "Please correct the errors in the form",
+                    SweetAlertMessageType.warning
+                );
+                return View("MyProfile", dto);
+            }
+
+            try
+            {
+                // Verificar si el email ya existe para otro usuario
+                var emailExists = await _serviceUser.EmailExistsForOtherUserAsync(userId, dto.Email);
+
+                if (emailExists)
+                {
+                    var profile = await _serviceUser.GetUserProfileAsync(userId);
+                    dto.RoleDescription = profile?.RoleDescription ?? "";
+                    dto.RoleId = profile?.RoleId ?? 3;
+                    dto.StateDescription = profile?.StateDescription ?? "";
+
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Email already in use",
+                        $"The email '{dto.Email}' is already registered to another account",
+                        SweetAlertMessageType.error
+                    );
+                    return View("MyProfile", dto);
+                }
+
+                // Actualizar datos básicos
+                await _serviceUser.UpdateUserProfileAsync(userId, dto);
+
+                // Cambiar contraseña si se proporcionó
+                if (!string.IsNullOrWhiteSpace(dto.NewPassword))
+                {
+                    var isValidCurrent = await _serviceUser.ValidateCurrentPasswordAsync(userId, dto.CurrentPassword ?? "");
+
+                    if (!isValidCurrent)
+                    {
+                        var profile = await _serviceUser.GetUserProfileAsync(userId);
+                        dto.RoleDescription = profile?.RoleDescription ?? "";
+                        dto.RoleId = profile?.RoleId ?? 3;
+                        dto.StateDescription = profile?.StateDescription ?? "";
+
+                        TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                            "Incorrect Password",
+                            "The current password you entered is incorrect",
+                            SweetAlertMessageType.error
+                        );
+                        return View("MyProfile", dto);
+                    }
+
+                    await _serviceUser.ChangePasswordAsync(userId, dto.CurrentPassword!, dto.NewPassword);
+
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Profile & Password Updated",
+                        "Your profile information and password have been updated successfully",
+                        SweetAlertMessageType.success
+                    );
+                }
+                else
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Profile Updated",
+                        "Your profile information has been updated successfully",
+                        SweetAlertMessageType.success
+                    );
+                }
+
+                return RedirectToAction("MyProfile");
+            }
+            catch (Exception ex)
+            {
+                var profile = await _serviceUser.GetUserProfileAsync(userId);
+                dto.RoleDescription = profile?.RoleDescription ?? "";
+                dto.RoleId = profile?.RoleId ?? 3;
+                dto.StateDescription = profile?.StateDescription ?? "";
+
+                TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                    "Update Failed",
+                    $"An error occurred: {ex.Message}",
+                    SweetAlertMessageType.error
+                );
+                return View("MyProfile", dto);
+            }
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return userIdClaim != null ? int.Parse(userIdClaim) : 0;
         }
     }
 }

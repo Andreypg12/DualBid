@@ -82,7 +82,16 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
         public async Task<bool> EmailExistsAsync(string email)
         {
-            return await _context.User.AnyAsync(u => u.Email == email);
+            return await _context.User.AnyAsync(u => u.Email == email.ToString().ToLower());
+        }
+
+        public async Task<bool> ValidateCurrentPasswordAsync(int userId, string password)
+        {
+ 
+            var @object = await _context.Set<User>()
+                                        .Where(p => p.Id == userId && p.Password == password)
+                                        .FirstOrDefaultAsync();
+            return @object != null;
         }
     }
 }

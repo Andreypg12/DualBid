@@ -37,6 +37,12 @@ namespace DualBid.Application.Services.Implementations
             return objetoMapeado;
         }
 
+        public async Task<ICollection<ComicDTO>> ListByUserAsync(int userId)
+        {
+            var list = await _repositoryComic.ListByUserAsync(userId);
+            return _mapper.Map<ICollection<ComicDTO>>(list);
+        }
+
         public async Task<int> AddAsync(ComicDTO dto, string[] selectedCategorias)
         {
             try

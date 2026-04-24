@@ -107,5 +107,76 @@ namespace DualBid.Application.Services.Implementations
         {
             return await _repository.EmailExistsAsync(email);
         }
+
+        public async Task<UserProfileEditDTO> GetUserProfileAsync(int userId)
+        {
+            var user = await _repository.FindByIdAsync(userId);
+
+            if (user == null)
+                return null!;
+
+            return new UserProfileEditDTO
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastNames = user.LastNames,
+                Email = user.Email,
+                RoleDescription = user.Role?.Description ?? "User",
+                RoleId = user.Role?.Id ?? 3,
+                StateDescription = user.State?.Description ?? "Active"
+            };
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UserProfileEditDTO dto)
+        {
+            var user = await _repository.FindByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            user.Name = dto.Name;
+            user.LastNames = dto.LastNames;
+            user.Email = dto.Email;
+
+            await _repository.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _repository.FindByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            string secret = _options.Value.Crypto.Secret;
+
+            // Encriptar la contraseña que el usuario ingresó como "actual"
+            string currentPasswordEncrypted = Cryptography.Encrypt(currentPassword, secret);
+
+            // Comparar con la contraseña almacenada (ya encriptada)
+            if (user.Password != currentPasswordEncrypted)
+                return false;
+
+            // Encriptar nueva contraseña
+            string newPasswordEncrypted = Cryptography.Encrypt(newPassword, secret);
+            user.Password = newPasswordEncrypted;
+
+            await _repository.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<bool> ValidateCurrentPasswordAsync(int userId, string password)
+        {
+
+            string secret = _options.Value.Crypto.Secret;
+            string passwordEncrypted = Cryptography.Encrypt(password.Trim(), secret);
+
+            return await _repository.ValidateCurrentPasswordAsync(userId, passwordEncrypted);
+        }
+
+        public async Task<bool> EmailExistsForOtherUserAsync(int userId, string email)
+        {
+            var users = await _repository.ListAsync();
+            return users.Any(u => u.Email == email && u.Id != userId);
+        }
     }
 }

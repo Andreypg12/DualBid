@@ -15,5 +15,7 @@ namespace DualBid.Infraestructure.Repository.Interfaces
         Task<User> LoginAsync(string id, string password);
         Task<User> RegisterAsync(User user);
         Task<bool> EmailExistsAsync(string email);
+        Task<bool> ValidateCurrentPasswordAsync(int userId, string password);
+
     }
 }

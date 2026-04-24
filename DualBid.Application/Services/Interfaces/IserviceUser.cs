@@ -16,5 +16,11 @@ namespace DualBid.Application.Services.Interfaces
         Task<UserDTO> LoginAsync(string id, string password);
         Task<bool> RegisterAsync(string name, string lastNames, string email, string password, int roleId);
         Task<bool> EmailExistsAsync(string email);
+
+        Task<UserProfileEditDTO> GetUserProfileAsync(int userId);
+        Task<bool> UpdateUserProfileAsync(int userId, UserProfileEditDTO dto);
+        Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
+        Task<bool> ValidateCurrentPasswordAsync(int userId, string password);
+        Task<bool> EmailExistsForOtherUserAsync(int userId, string email);
     }
 }

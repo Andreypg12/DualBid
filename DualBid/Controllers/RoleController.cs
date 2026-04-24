@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DualBid.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DualBid.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class RoleController : Controller
     {
         private readonly IServiceRole _serviceRole;
