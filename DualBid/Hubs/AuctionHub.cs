@@ -45,5 +45,10 @@ namespace DualBid.Hubs
                 isEndingSoon = true
             });
         }
+
+        public async Task NotifyNewAuction(object auctionData)
+        {
+            await Clients.All.SendAsync("NewAuctionCreated", auctionData);
+        }
     }
 }

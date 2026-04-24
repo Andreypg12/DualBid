@@ -21,12 +21,15 @@ namespace DualBid.Controllers
         private readonly AuctionMonitorService _auctionMonitor;
         private readonly IHubContext<AuctionHub> _hubContext;
 
+        private readonly IServiceCategory _serviceCategory;
+
         public AuctionController(
             IServiceAuction serviceAuction,
             IServiceComic serviceComic,
             IServiceAuctionState serviceAuctionState,
             IHubContext<AuctionHub> hubContext,
-            AuctionMonitorService auctionMonitor/*IAuctionMonitorService auctionMonitor*/
+            AuctionMonitorService auctionMonitor,
+             IServiceCategory serviceCategory
             )
         {
             _serviceAuction = serviceAuction;
@@ -34,6 +37,7 @@ namespace DualBid.Controllers
             _serviceAuctionState = serviceAuctionState;
             _hubContext = hubContext;
             _auctionMonitor = auctionMonitor;
+            _serviceCategory = serviceCategory;
         }
 
         [HttpGet]
@@ -51,6 +55,8 @@ namespace DualBid.Controllers
                 SelectedState = showActive ? "active" : "inactive",
                 Auctions = filtered
             };
+
+            ViewBag.Categorias = await _serviceCategory.ListAsync();
 
             return View(vm);
         }
@@ -144,7 +150,10 @@ namespace DualBid.Controllers
                 ModelState.Remove(key);
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            pvm.Auction.CreatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
+
+            int creatorUserId = userIdClaim != null ? int.Parse(userIdClaim) : 0;
+
+            pvm.Auction.CreatorUserId = creatorUserId;
             pvm.Auction.StateId = 1;
 
             if (pvm.Auction.CreatorUserId == 0)
@@ -170,12 +179,31 @@ namespace DualBid.Controllers
             }
 
             await _serviceComic.UpdateAvailabilityAsync(pvm.Auction.ComicId, false);
-            await _serviceAuction.AddAsync(pvm.Auction);
+            int result = await _serviceAuction.AddAsync(pvm.Auction);
+
+
+            string imagenBase64 = "";
+            if (comic.ImgComic != null && comic.ImgComic.Any())
+            {
+                var imagen = comic.ImgComic[0];
+                imagenBase64 = Convert.ToBase64String(imagen.Img);
+            }
+
+            await _hubContext.Clients.All.SendAsync("NewAuctionCreated", new
+            {
+                Id = result,
+                Title = comic.Title,
+                CurrentBid = pvm.Auction.BasePrice,
+                ExpectedEndDate = pvm.Auction.ExpectedEndDate,
+                NumberOfBids = 0,
+                ImageBase64 = imagenBase64
+            });
 
             TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                 "Auction created successfully",
                 "The auction was registered successfully.",
                 SweetAlertMessageType.success);
+
 
             return RedirectToAction(nameof(Index));
         }
@@ -412,10 +440,7 @@ namespace DualBid.Controllers
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Helper privado: centraliza las notificaciones SignalR de cierre
-        // para no repetir el mismo bloque en Details y en el monitor.
-        // ─────────────────────────────────────────────────────────────────────
+      
         private async Task NotifyAuctionClosedAsync(AuctionCloseResultDTO result)
         {
             // 1. Todos los espectadores de la subasta
@@ -475,7 +500,7 @@ namespace DualBid.Controllers
             var auction = await _serviceAuction.FindByIdAsync(request.AuctionId);
             if (auction == null) return NotFound();
 
-            // ALEJANDRO — Marcar la subasta como Finalizada (3) cuando el pago se completa
+            
             await _serviceAuction.UpdateStateAsync(request.AuctionId, 3);
 
             await _hubContext.Clients
@@ -491,6 +516,7 @@ namespace DualBid.Controllers
 
             return Ok(new { success = true });
         }
+
 
         // Cuando el ganador libera: cancela la subasta y notifica a todos
         [HttpPost]

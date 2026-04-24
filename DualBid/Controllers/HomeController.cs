@@ -19,10 +19,6 @@ namespace DualBid.Controllers
             _context = context;
         }
 
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
 
         public IActionResult Privacy()
         {
@@ -42,13 +38,13 @@ namespace DualBid.Controllers
                 .OrderBy(c => c.Description)
                 .ToListAsync();
 
+            ViewBag.Categorias = categorias;
+
             return View(categorias);
         }
 
 
-        // ============================================================ 
-        //            MÉTODO MANEJO DE ERRORES 
-        // ============================================================ 
+     
         [HttpGet]
         public IActionResult ErrorHandler(string? messagesJson)
         {

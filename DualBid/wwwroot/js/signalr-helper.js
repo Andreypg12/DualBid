@@ -1,11 +1,6 @@
 ﻿"use strict";
 
-/**
- * SignalRAuction — Helper para páginas de subasta.
- *
- * Si ya existe una conexión global (window.__globalSignalRConnection),
- * la reutiliza en lugar de crear una nueva — así no hay dos WebSockets abiertos.
- */
+
 const SignalRAuction = (() => {
     let connection = null;
     let currentAuctionId = null;
@@ -30,9 +25,7 @@ const SignalRAuction = (() => {
         onComicReleased: [],
     };
 
-    // ─────────────────────────────────────────
-    // Inicialización
-    // ─────────────────────────────────────────
+   
 
     async function initialize(auctionId, userId, endDateIso = null) {
         currentAuctionId = auctionId;
@@ -83,11 +76,11 @@ const SignalRAuction = (() => {
 
         try {
             await connection.start();
-            console.log("✅ SignalR conectado (auctionDetails)");
+            console.log("SignalR conectado (auctionDetails)");
             await _joinGroups();
             callbacks.onConnected.forEach(cb => cb());
         } catch (err) {
-            console.error("❌ Error de conexión SignalR:", err);
+            console.error("Error de conexión SignalR:", err);
             connection = null;
         } finally {
             isConnecting = false;
@@ -154,9 +147,7 @@ const SignalRAuction = (() => {
         }
     }
 
-    // ─────────────────────────────────────────
-    // Countdown local
-    // ─────────────────────────────────────────
+   
 
     function startCountdown(endDate) {
         stopCountdown();
@@ -188,9 +179,7 @@ const SignalRAuction = (() => {
         if (_countdownInterval) { clearInterval(_countdownInterval); _countdownInterval = null; }
     }
 
-    // ─────────────────────────────────────────
-    // Callbacks
-    // ─────────────────────────────────────────
+ 
 
     const _on = (key, cb) => { if (typeof cb === "function") callbacks[key].push(cb); };
 

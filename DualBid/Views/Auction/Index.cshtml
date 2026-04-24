@@ -22,9 +22,12 @@
             </select>
         </form>
 
-        <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
-            <i class="bi bi-person-plus"></i> Create Auction
-        </a>
+        @if (User.IsInRole("Seller") || User.IsInRole("Administrator"))
+        {
+            <a asp-controller="Auction" asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-person-plus"></i> Create Auction
+            </a>
+        }
     </div>
 </div>
 
@@ -86,7 +89,15 @@ else
                                     <span class="badge text-bg-light border">
                                         <i class="bi bi-cash-coin me-1"></i>
                                         @(Model.SelectedState == "inactive" ? "Last bid" : "Current Bid")<br />
-                                        $@item.CurrentBid.AmountOffered
+                                        @if (item.CurrentBid.AmountOffered == 0)
+                                        {
+                                            <span>$@item.BasePrice</span>
+                                            <small class="text-muted"> (Base price)</small>
+                                        }
+                                        else
+                                        {
+                                            <span>$@item.CurrentBid.AmountOffered</span>
+                                        }
                                     </span>
 
                                     <span class="badge text-bg-light border">
@@ -110,4 +121,10 @@ else
             }
         </div>
     </section>
+   
+}
+
+
+@section Scripts {
+    <script src="~/js/auctionIndex.js"></script>
 }

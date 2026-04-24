@@ -11,10 +11,10 @@ namespace DualBid.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly IserviceUser _serviceUsuario;
+        private readonly IServiceUser _serviceUsuario;
         private readonly ILogger<LoginController> _logger;
 
-        public LoginController(IserviceUser serviceUsuario, ILogger<LoginController> logger)
+        public LoginController(IServiceUser serviceUsuario, ILogger<LoginController> logger)
         {
             _serviceUsuario = serviceUsuario;
             _logger = logger;
@@ -40,9 +40,11 @@ namespace DualBid.Controllers
 
                 _logger.LogWarning("Login validation error for user {User}. Details: {Errors}",
                     viewModelLogin.User, errores);
-
                 return View("Index", viewModelLogin);
             }
+
+
+
 
             var usuarioLog = await _serviceUsuario.LoginAsync(viewModelLogin.User, viewModelLogin.Password);
 
@@ -58,6 +60,22 @@ namespace DualBid.Controllers
 
                 return View("Index", viewModelLogin);
             }
+
+
+            // Compara el estado del usuario con "Blocked" (según tu tabla States).
+            // Si está bloqueado, se le niega el acceso y se muestra un mensaje de error.
+            if (usuarioLog.State.Description == "Blocked")
+                    {
+                        ViewBag.Notificacion = SweetAlertHelper.CrearNotificacion(
+                            "Access denied",
+                            "Your account has been blocked. Please contact an administrator.",
+                            SweetAlertMessageType.error
+                        );
+                        _logger.LogWarning("Blocked user attempted login: {User}", viewModelLogin.User);
+                        return View("Index", viewModelLogin); // Regresa al login, NO crea sesión
+                    }
+
+
 
             List<Claim> claims = new List<Claim>()
             {

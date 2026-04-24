@@ -79,8 +79,7 @@ namespace DualBid.Application.Services.Implementations
             return await _repository.UpdateStateAsync(auctionId, newStateId);
         }
 
-        //@* Editado por ALE *@
-        //Determinar el ganador de la subasta
+
         public async Task<bool> EncontrarGanadorAsync(int auctionId)
         {
             return await _repository.EncontrarGanadorAsync(auctionId);
@@ -95,10 +94,6 @@ namespace DualBid.Application.Services.Implementations
                 .Select(a => new ActiveAuctionDTO
                 {
                     Id = a.Id,
-                    // ✅ FIX CRÍTICO: el monitor usa DateTime.UtcNow para comparar.
-                    // Si ExpectedEndDate viene en hora local, hay que convertirla a UTC.
-                    // ToUniversalTime() funciona si el servidor está configurado
-                    // correctamente. Si no, usa DateTimeOffset.
                     EndDate = a.ExpectedEndDate.ToUniversalTime(),
                     OwnerUserId = a.CreatorUserId
                 });
@@ -118,8 +113,8 @@ namespace DualBid.Application.Services.Implementations
                 return null;
 
             // EncontrarGanadorAsync maneja:
-            //   con pujas  → StateId=3, WinningBidId=X
-            //   sin pujas  → StateId=4, comic.availability=true
+            //   con pujas   StateId=3, WinningBidId=X
+            //   sin pujas   StateId=4, comic.availability=true
             await _repository.EncontrarGanadorAsync(auctionId);
 
             // Recargar para obtener el WinningBid con User incluido

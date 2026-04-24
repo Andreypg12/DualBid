@@ -8,6 +8,7 @@ using DualBid.Infraestructure.Data;
 using DualBid.Infraestructure.Models;
 using DualBid.Infraestructure.Repository.Implementations;
 using DualBid.Infraestructure.Repository.Interfaces;
+using DualBid.Infraestructure.Services.Implementations;
 using DualBid.Middleware;
 using DualBid.Services.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -111,6 +112,9 @@ builder.Services.AddSession(options =>
 // Configurar Dependency Injection
 //****************
 
+
+
+
 //*** Repositories
 builder.Services.AddTransient<IRepositoryUser, ReposiroryUser>();
 
@@ -137,7 +141,7 @@ builder.Services.AddTransient<IRepositoryImgComic, RepositoryImgComic>();
 
 
 //*** Services
-builder.Services.AddTransient<IserviceUser, ServiceUser>();
+builder.Services.AddTransient<IServiceUser, ServiceUser>();
 
 builder.Services.AddTransient<IServiceCategory, ServiceCategory>();
 
@@ -160,6 +164,10 @@ builder.Services.AddTransient<IServiceStateConservation, ServiceStateConservatio
 builder.Services.AddTransient<IServiceImgComic, ServiceImgComic>();
 
 builder.Services.AddSignalR();
+
+//Reportes
+// DualBid/Program.cs
+builder.Services.AddScoped<IServiceReports, ServiceReports>();
 
 //builder.Services.AddHostedService<AuctionMonitorService>();
 //builder.Services.AddScoped<IAuctionMonitorService, AuctionMonitorService>();
@@ -199,13 +207,17 @@ builder.Services.AddAutoMapper(config =>
 
 });
 
-//Seguridad
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => {
         options.LoginPath = "/Login/Index";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
         options.AccessDeniedPath = "/Login/Forbidden";
     });
+
+
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddControllersWithViews(options => {
     options.Filters.Add(
@@ -271,6 +283,7 @@ app.UseSession();
 //Activar soporte a la solicitud de registro con Serilog (recomienda usarlo después de UseRouting y antes de UseEndpoints / MapControllerRoute)
 app.UseSerilogRequestLogging();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 

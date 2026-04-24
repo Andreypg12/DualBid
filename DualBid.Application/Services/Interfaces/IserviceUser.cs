@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.Services.Interfaces
 {
-     public interface IserviceUser
+     public interface IServiceUser
     {
         Task<ICollection<UserDTO>> ListAsync();
         Task<UserDTO?> FindByIdAsync(int id);

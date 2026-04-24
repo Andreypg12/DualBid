@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace DualBid.Application.Services.Implementations
 {
-    public class ServiceUser : IserviceUser
+    public class ServiceUser : IServiceUser
     {
         private readonly IRepositoryUser _repository;
         private readonly IMapper _mapper;
