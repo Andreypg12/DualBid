@@ -64,6 +64,7 @@ namespace DualBid.Controllers
             return View(vm);
         }
 
+
         public async Task<ActionResult> Details(int? id)
         {
             try
@@ -96,20 +97,6 @@ namespace DualBid.Controllers
                     }
                 }
 
-                
-                if (!User.IsInRole("Administrator"))
-                {
-                    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
-
-                    if (auction.CreatorUser.Id != userId) 
-                    {
-                        TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
-                            "Unauthorized",
-                            "You are not authorized to view this auction.",
-                            SweetAlertMessageType.error);
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
 
                 return View(auction);
             }

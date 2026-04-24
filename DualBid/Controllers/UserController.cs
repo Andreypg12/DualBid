@@ -48,6 +48,7 @@ namespace Libreria.Web.Controllers
             return View(filtered.ToPagedList(pageNumber, pageSize));
         }
 
+
         public async Task<ActionResult> Details(int? id)
         {
             try
@@ -168,6 +169,7 @@ namespace Libreria.Web.Controllers
             }
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> MyProfile(bool edit = false)
         {
             var userId = GetCurrentUserId();
