@@ -4,6 +4,7 @@ using DualBid.Application.Services.Interfaces;
 using DualBid.Infraestructure.Models;
 using Humanizer;
 using Libreria.Web.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
+
+    [Authorize (Roles = "Administrator,Seller")]
     public class ComicController : Controller
     {
         /*Son a todas las tablas a las cuales debo acceder*/
@@ -29,16 +32,26 @@ namespace DualBid.Controllers
 
         //Esta por decirlo asi es la página principal donde mustran la lista de comics
         [HttpGet]
-        public async Task<IActionResult> Index(string availability = "available")
+        public async Task<IActionResult> Index(string availability = "available") 
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = int.Parse(userIdClaim!);
 
-            var collection = await _serviceComic.ListAsync();
+            ICollection<ComicDTO> comics;
 
-            bool showAvailable = availability != "unavailable";
-            var filtered = collection.Where(c => showAvailable ? c.availability : !c.availability).ToList();
+            if (User.IsInRole("Administrator"))
+                comics = await _serviceComic.ListAsync();
+            else
+                comics = await _serviceComic.ListByUserAsync(userId);
+
+            // Como availability ya tiene default "available", siempre filtra
+            if (availability == "available")
+                comics = comics.Where(c => c.availability).ToList();
+            else if (availability == "unavailable")
+                comics = comics.Where(c => !c.availability).ToList();
 
             ViewBag.SelectedAvailability = availability;
-            return View(filtered);
+            return View(comics);
         }
 
         //Esto es para mostrar el detalle de un comic
@@ -47,6 +60,20 @@ namespace DualBid.Controllers
         {
             var comic = await _serviceComic.FindByIdAsync(id);
             if (comic == null) return NotFound();
+
+
+            // Verificar que el comic pertenece al usuario logueado
+            // Administrator puede ver cualquiera
+            if (!User.IsInRole("Administrator"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                int userId = int.Parse(userIdClaim!);
+
+                if (comic.SellerId != userId)
+                    return RedirectToAction("Forbidden", "Login"); // ← no es suyo
+            }
+
+
 
             return View(comic);
         }
@@ -91,6 +118,8 @@ namespace DualBid.Controllers
 
         // POST: LibroController/Create
         // Cuando se aplica el POST llena el Dto con los datos del formulario y hace validaciones en base a las validaciones del DTO y guarda los errores en ModelState
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ComicDTO dto, List<IFormFile> newImages, string[] selectedCategorias, bool availability)
@@ -237,6 +266,15 @@ namespace DualBid.Controllers
             var selected = dto.Category
                 .Select(c => c.Id.ToString())
                 .ToList();
+
+            if (!User.IsInRole("Administrator"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                int userId = int.Parse(userIdClaim!);
+
+                if (dto.SellerId != userId)
+                    return RedirectToAction("Forbidden", "Login"); // ← no es suyo
+            }
 
             await LoadCombosAsync(selected);
 

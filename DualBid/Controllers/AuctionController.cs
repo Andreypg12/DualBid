@@ -2,10 +2,12 @@
 using DualBid.Application.Services.Implementations;
 using DualBid.Application.Services.Interfaces;
 using DualBid.Hubs;
+using DualBid.Infraestructure.Models;
 using DualBid.Services.BackgroundServices;
 using DualBid.ViewModels.Auction;
 using DualBid.ViewModels.Bid;
 using Libreria.Web.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
@@ -13,6 +15,7 @@ using System.Security.Claims;
 
 namespace DualBid.Controllers
 {
+    [Authorize(Roles = "Administrator,Seller,Buyer")]
     public class AuctionController : Controller
     {
         private readonly IServiceAuction _serviceAuction;
@@ -73,24 +76,38 @@ namespace DualBid.Controllers
                 if (auction == null)
                     throw new Exception("No auction found with the provided ID");
 
-                // Si la subasta está activa y ya venció, el monitor debería haberla cerrado.
-                // Este bloque es un fallback por si el monitor aún no corrió (ej: reinicio reciente).
+                
                 if (auction.StateId == 2 && auction.ExpectedEndDate <= DateTime.Now)
                 {
                     var result = await _serviceAuction.CloseAuctionAsync(id.Value);
 
                     if (result != null)
                     {
-                        // Quitar del monitor por si acaso aún estaba pendiente
+                        
                         _auctionMonitor.UnscheduleAuction(id.Value);
 
                         await NotifyAuctionClosedAsync(result);
 
-                        // Recargar con datos actualizados
+                        
                         auction = await _serviceAuction.FindByIdAsync(id.Value);
 
                         if (auction == null)
                             throw new Exception("No auction found after closing");
+                    }
+                }
+
+                
+                if (!User.IsInRole("Administrator"))
+                {
+                    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+                    if (auction.CreatorUser.Id != userId) 
+                    {
+                        TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                            "Unauthorized",
+                            "You are not authorized to view this auction.",
+                            SweetAlertMessageType.error);
+                        return RedirectToAction(nameof(Index));
                     }
                 }
 
@@ -102,13 +119,18 @@ namespace DualBid.Controllers
             }
         }
 
+
+        [Authorize(Roles = "Administrator,Seller")]
         [HttpGet]
         public async Task<ActionResult> Create()
         {
             CreateAuctionViewModel vm = await CreateAuctionCreateVM();
+
             return View(vm);
         }
 
+
+        [Authorize(Roles = "Administrator,Seller")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CreateAuctionViewModel pvm)
@@ -123,6 +145,7 @@ namespace DualBid.Controllers
                     SweetAlertMessageType.error);
                 return View(await CreateAuctionCreateVM());
             }
+
 
             bool hasActiveAuction = comic.Auction.Any(a => a.State.Id == 1 || a.State.Id == 2);
             if (hasActiveAuction)
@@ -247,6 +270,20 @@ namespace DualBid.Controllers
                 TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
                     "Auction Not Found", "The Auction does not exist or has been deleted.", SweetAlertMessageType.error);
                 return RedirectToAction(nameof(Index));
+            }
+
+            if (!User.IsInRole("Administrator"))
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+                if (existingDto.CreatorUser.Id != userId) 
+                {
+                    TempData["Notificacion"] = SweetAlertHelper.CrearNotificacion(
+                        "Unauthorized",
+                        "You are not authorized to view this auction.",
+                        SweetAlertMessageType.error);
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             if (existingDto.State.Id != 1)

@@ -132,8 +132,9 @@ public class CategoryHistoryDocument : IDocument
                     .Bold().FontSize(13).FontColor(TextDark);
 
                 //SUMA DE TODAS LAS SUBASTAS
-                var totalShown = byCategory.Sum(x => x.TotalAuctions);
-                var totalFinished = byCategory.Sum(x => x.AuctionsFinished);
+                // Contar subastas únicas, no la suma de categorías
+                var totalShown = _auctions.Select(a => a.Id).Distinct().Count();
+                var totalFinished = _auctions.Where(a => a.StateId == 3).Select(a => a.Id).Distinct().Count();
 
 
                 //SUMA DE TODAS LAS SUBASTAS
@@ -143,18 +144,6 @@ public class CategoryHistoryDocument : IDocument
                     {
                         c.Item().Text("Total Auctions").FontSize(7).FontColor("#95D1DC");
                         c.Item().Text(totalShown.ToString()).Bold().FontSize(16).FontColor(Silver);
-                    });
-                    row.ConstantItem(8);
-                    row.AutoItem().Background(Accent1).Padding(6).PaddingHorizontal(12).Column(c =>
-                    {
-                        c.Item().Text("Finished").FontSize(7).FontColor(HeaderBg);
-                        c.Item().Text(totalFinished.ToString()).Bold().FontSize(16).FontColor(HeaderBg);
-                    });
-                    row.ConstantItem(8);
-                    row.AutoItem().Background(RowAlt).Padding(6).PaddingHorizontal(12).Column(c =>
-                    {
-                        c.Item().Text("In Progress").FontSize(7).FontColor(TextDark);
-                        c.Item().Text((totalShown - totalFinished).ToString()).Bold().FontSize(16).FontColor(TextDark);
                     });
                 });
 
