@@ -53,12 +53,7 @@
 
     <script src="~/js/signalr-helper.js"></script>
 
-    @* ─────────────────────────────────────────────────────────────────────────
-       CONEXIÓN GLOBAL: registra al usuario en su grupo personal user-{id}
-       desde CUALQUIER página de la app, no solo en Details.
-       Esto permite recibir notificaciones (superado, ganaste, nueva puja en
-       tu subasta) estés donde estés.
-    ──────────────────────────────────────────────────────────────────────── *@
+    
     @if (User.Identity?.IsAuthenticated == true)
     {
         var globalUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0";

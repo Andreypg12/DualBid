@@ -2,12 +2,14 @@
 using DualBid.Application.Services.Interfaces;
 using Humanizer;
 using Libreria.Web.Util;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using X.PagedList.Extensions;
 
 namespace Libreria.Web.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class UserController : Controller
     {
         private readonly IServiceUser _serviceUser;

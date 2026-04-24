@@ -52,6 +52,21 @@ namespace DualBid.Infraestructure.Repository.Implementations
             return @object!;
         }
 
+        public async Task<ICollection<Comic>> ListByUserAsync(int userId)
+        {
+            return await _context.Set<Comic>()
+                .AsNoTracking()
+                .Include(x => x.Category)
+                .Include(x => x.StateConservation)
+                .Include(x => x.ImgComic)
+                .Include(x => x.Seller)
+                .Include(x => x.Auction)
+                    .ThenInclude(a => a.State)
+                .Where(x => x.SellerId == userId)
+                .OrderBy(x => x.Id)
+                .ToListAsync();
+        }
+
         public async Task<int> AddAsync(Comic entity, string[] selectedCategorias)
         {
 

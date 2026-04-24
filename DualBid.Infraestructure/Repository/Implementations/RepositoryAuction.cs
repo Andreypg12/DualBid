@@ -174,7 +174,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
 
 
         //Reportes
-        
+
         public async Task<ICollection<Auction>> ListCategoryHistoryAsync(int? categoryId, DateTime? from, DateTime? to)
         {
             var query = _context.Set<Auction>()
@@ -193,7 +193,7 @@ namespace DualBid.Infraestructure.Repository.Implementations
                 query = query.Where(a => a.StartDate >= from.Value);
 
             if (to.HasValue)
-                query = query.Where(a => a.StartDate <= to.Value);
+                query = query.Where(a => a.StartDate <= to.Value.AddDays(1)); // ← mismo patrón
 
             return await query.ToListAsync();
         }

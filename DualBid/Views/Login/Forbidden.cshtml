@@ -1,95 +1,185 @@
 ﻿@{
     Layout = null;
-    ViewData["Title"] = "Acceso denegado";
+    ViewData["Title"] = "Access Denied";
 }
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Libreria.Web</title>
-    <!-- Bootstrap 5.3.8 -->
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/css/bootstrap.min.css"
-          crossorigin="anonymous">
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
-    <!-- SweetAlert2 (LibMan) -->
-    <link rel="stylesheet" href="~/lib/sweetalert2/dist/sweetalert2.min.css" />
-
-    <!-- Estilos propios -->
+    <title>@ViewData["Title"] - DualBid</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Libreria.Web.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .forbidden-card {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 480px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .forbidden-header {
+            background: #1e3c72;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .forbidden-icon-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .forbidden-body {
+            padding: 2rem;
+        }
+
+        .forbidden-alert {
+            background: #faeeda;
+            border-left: 3px solid #BA7517;
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-regresar {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+            .btn-regresar:hover {
+                background: #e9e9e9;
+                color: #333;
+            }
+
+        .btn-inicio {
+            background: #1e3c72;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+            .btn-inicio:hover {
+                background: #16305e;
+                color: #fff;
+            }
+
+        .btn-logout {
+            background: #fcebeb;
+            border: 1px solid #F09595;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            color: #A32D2D;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+            .btn-logout:hover {
+                background: #f7c1c1;
+                color: #A32D2D;
+            }
+    </style>
 </head>
 <body>
-    <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
-        <div class="row justify-content-center w-100">
-            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                <div class="card shadow-lg border-0 rounded-4 text-center overflow-hidden">
-                    <div class="card-header border-0 py-4">
-                        <div class="mb-3">
-                            <i class="bi bi-shield-lock-fill display-1 text-warning"></i>
-                        </div>
-                        <h1 class="h3 mb-2">Acceso denegado</h1>
-                        <p class="text-light-emphasis mb-0">
-                            No cuenta con permisos suficientes para ingresar a esta sección.
-                        </p>
-                    </div>
+    <div class="forbidden-card shadow">
 
-                    <div class="card-body p-4 p-md-5">
-                        <div class="alert alert-warning d-flex align-items-start text-start" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
-                            <div>
-                                <strong>Acción restringida.</strong><br />
-                                Su usuario ha iniciado sesión correctamente, pero su rol no tiene autorización para acceder a este recurso.
-                            </div>
-                        </div>
-
-                        <p class="mb-4 text-muted">
-                            Puede regresar a la página anterior, ir al inicio del sistema o cerrar sesión si desea ingresar con otra cuenta.
-                        </p>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="javascript:history.back()" class="btn btn-outline-light">
-                                <i class="bi bi-arrow-left-circle me-2"></i>Regresar
-                            </a>
-                            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-                                <i class="bi bi-house-door-fill me-2"></i>Ir al inicio
-                            </a>
-                            <a asp-controller="Login" asp-action="LogOff" class="btn btn-danger">
-                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="card-footer border-0 py-3">
-                        <small class="text-muted">Seguridad del sistema Librería Web</small>
-                    </div>
-                </div>
+        <div class="forbidden-header">
+            <div class="forbidden-icon-circle">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+                     stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
             </div>
+            <p style="color:rgba(255,255,255,0.6); font-size:13px; letter-spacing:2px; text-transform:uppercase; margin:0 0 4px;">DualBid</p>
+            <h1 style="color:#fff; font-size:22px; font-weight:600; margin:0;">Access Denied</h1>
+        </div>
+
+        <div class="forbidden-body">
+            <div class="forbidden-alert">
+                <p style="color:#633806; font-size:14px; font-weight:600; margin:0 0 4px;">Restricted action</p>
+                <p style="color:#854F0B; font-size:13px; margin:0; line-height:1.6;">
+                    Your account is logged in correctly, but your role is not
+                    authorized to access this resource.
+                </p>
+            </div>
+
+            <p style="color:#666; font-size:14px; text-align:center; margin:0 0 1.5rem; line-height:1.6;">
+                You can go back, return to the home page, or sign out to log in with another account.
+            </p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <a href="javascript:history.back()" class="btn-regresar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    Go back
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn-inicio">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    Home
+                </a>
+                <a asp-controller="Login" asp-action="LogOff" class="btn-logout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Sign out
+                </a>
+            </div>
+        </div>
+
+        <div style="border-top:1px solid #f0f0f0; padding:1rem; text-align:center;">
+            <small style="color:#aaa;">DualBid Security System</small>
         </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <!-- SweetAlert -->
-    <script src="~/lib/sweetalert2/dist/sweetalert2.all.js"></script>
-    @if (TempData["Notificacion"] != null || ViewBag.Notificacion != null)
-    {
-        var notificacion = TempData["Notificacion"] ?? ViewBag.Notificacion;
-        <script type="text/javascript">
-
-            const payload = @Html.Raw(notificacion);
-
-            if (payload) {
-                Swal.fire(payload);
-            }
-        </script>
-    }
 </body>
 </html>
